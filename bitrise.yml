@@ -1,0 +1,117 @@
+format_version: 1.2.0
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+title: Build script for Android
+
+app:
+  envs:
+  - branch_to_build: "develop"
+  - emulator_name: "Nexus_5_API_22"
+
+workflows:
+  test:
+    steps:
+      #- ensure-clean-git@:
+
+  devices:
+    steps:
+    - script:
+        title: available-devices
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+            set -v
+
+            adb devices
+
+  emulator:
+    steps:
+    - script:
+        title: start-emulator
+        is_skippable: false
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            #set -e
+            set -v
+
+            # TODO : Create an emulator if one doesn't exist
+            # - adb shell input keyevent 82
+            # - ./gradlew connectedCheck
+
+            # adb shell getprop init.svc.bootanim
+
+            # Check if a process which calls itself the emulator is running
+            OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
+            # If 0 processes are called emulator, it means we need to load up one
+            if [ "$OUTPUT" == "0" ]; then
+              EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulator_name} 2>emulator.log 1>emulator.log &)
+              # This is a big #HACK, only errors are returned in the first two seconds, I suck
+              sleep 2
+              EMULATOR_RESULTS=$(<emulator.log)
+              
+              if [ $(echo $EMULATOR_RESULTS | grep "PANIC" | wc -l) == "1" ]; then
+                echo $EMULATOR_RESULTS | grep "PANIC"
+                exit 1
+              else 
+                if [ $(echo $EMULATOR_RESULTS | grep "ERROR" | wc -l) == "1" ]; then
+                  echo $EMULATOR_RESULTS | grep "ERROR"
+                  exit 1
+                else
+                  echo Loading the emulator
+                  adb wait-for-device
+                  SCREEN_LOADING=$(adb shell getprop sys.boot_completed | tr -d '\r')
+                  while [ "$SCREEN_LOADING" != "1" ]; do
+                    sleep 2
+                    SCREEN_LOADING=$(adb shell getprop sys.boot_completed | tr -d '\r')
+                  done
+                  adb shell input keyevent 82
+                fi
+              fi
+            else
+              echo The emulator is already running
+            fi
+
+  git-pull-latest:
+    setps:
+    - script:
+        title: pull-latest
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+            set -v
+
+            git pull origin $branch_to_build
+
+  assemble:
+    steps:
+    - script:
+        title: assemble
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+            set -v
+
+            ./gradlew assemble --stacktrace
+
+  install:
+    steps:
+    - script:
+        title: install on simulator
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+            set -v
+
+            ./gradlew installDebug
+
+
