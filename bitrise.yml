@@ -8,9 +8,9 @@ app:
   - branch_to_build: "develop"
   - emulator_name: "Nexus_5_API_22"
   #- package: ""
-  - mainActivity: ""
+  #- mainActivity: ""
   - package: "com.leftshift.clipboardapp"
-  #- mainActivity: "activities.CardActivity"
+  - mainActivity: "activities.CardActivity"
 
 workflows:
 
