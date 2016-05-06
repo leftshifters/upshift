@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -v
+ set -v
 # set -e
 
 # AF=$(date +%Y%m%d)
@@ -84,9 +84,13 @@
 
 # echo "1234561" | tr "1" "3" // Returns 3234563
 
+# http://linux.die.net/abs-guide/x15683.html
+
 
 #OUTPUT=$(adb devices | grep -v "List of devices attached")
 #echo $OUTPUT
+
+#   line=$(grep "revision" <<< "$packages")
 
 			
 #			emulator_name=$1
@@ -116,3 +120,25 @@
 #            DEVICES_FOUND=$(adb devices | grep -v "List of devices attached" | grep -v emulator -c)
 #            let devices=DEVICES_FOUND-1;
 #            echo $devices
+
+
+#function getLastedSupportLibraryRevision {
+#  packages=$(android list sdk)
+#  echo $packages
+#  #line=$(grep "Local Maven repository for Support Libraries, revision" <<< "$packages")
+#  line=$(grep "revision" <<< "$packages")
+#  echo $line;
+#  line=$(echo $packages | grep "revision")
+#  echo $line;
+#  echo ${line: -2}
+#}
+#
+#getLastedSupportLibraryRevision
+
+
+
+find . | grep -v "build" | grep AndroidManifest.xml | grep "app/src"
+
+
+
+
