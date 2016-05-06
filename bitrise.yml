@@ -90,7 +90,7 @@ workflows:
 
             git pull origin $branch_to_build
 
-  assemble:
+  assemble-fast:
     steps:
     - script:
         title: assemble
@@ -103,10 +103,36 @@ workflows:
 
             ./gradlew assemble --stacktrace
 
+  assemble:
+    steps:
+    - script:
+        title: assemble
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+            set -v
+
+            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+            # TODO : Add the project name to the logfile and move it to a common location on the server
+            # TODO : Use the logs to show details on a screen somewhere
+            ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log 
+            ./gradlew assemble --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
+
+            BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
+            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+            echo $BUILD_SUCCESSFUL;
+
+            if [ $BUILD_SUCCESSFUL != "1" ]; then
+              exit 1
+            fi
+
   install:
     steps:
     - script:
-        title: install on simulator
+        title: install on emulator
         inputs:
         - content: |-
             #!/bin/bash
