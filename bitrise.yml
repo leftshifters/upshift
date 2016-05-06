@@ -42,6 +42,7 @@ workflows:
             # - adb shell input keyevent 82
             # - ./gradlew connectedCheck
 
+            # https://devmaze.wordpress.com/2011/12/12/starting-and-stopping-android-emulators/
             # adb shell getprop init.svc.bootanim
 
             # Check if a process which calls itself the emulator is running
