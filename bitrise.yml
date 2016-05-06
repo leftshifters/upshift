@@ -9,14 +9,11 @@ app:
   - emulator_name: "Nexus_5_API_22"
 
 workflows:
-  test:
-    steps:
-      #- ensure-clean-git@:
 
   devices:
     steps:
     - script:
-        title: available-devices
+        title: devices-connected-to-machine
         inputs:
         - content: |-
             #!/bin/bash
@@ -24,7 +21,10 @@ workflows:
             set -e
             set -v
 
-            adb devices
+            adb -d shell input keyevent 82 # Used to unlock the device
+            DEVICES_FOUND=$(adb devices | grep -v "List of devices attached" | grep -v emulator -c)
+            let DEVICES_FOUND=DEVICES_FOUND-1;
+            echo Number of devices available : $DEVICES_FOUND
 
   emulator:
     steps:
@@ -45,6 +45,7 @@ workflows:
             # adb shell getprop init.svc.bootanim
 
             # Check if a process which calls itself the emulator is running
+            # TODO : may check this using ADB Devices
             OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
             # If 0 processes are called emulator, it means we need to load up one
             if [ "$OUTPUT" == "0" ]; then
@@ -68,7 +69,7 @@ workflows:
                     sleep 2
                     SCREEN_LOADING=$(adb shell getprop sys.boot_completed | tr -d '\r')
                   done
-                  adb shell input keyevent 82
+                  adb shell input keyevent 82 # Used to unlock the device
                 fi
               fi
             else
@@ -113,5 +114,3 @@ workflows:
             set -v
 
             ./gradlew installDebug
-
-

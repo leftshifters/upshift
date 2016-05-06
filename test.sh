@@ -89,26 +89,30 @@
 #echo $OUTPUT
 
 			
-			emulator_name=$1
+#			emulator_name=$1
+#
+#            OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
+#            if [ "$OUTPUT" == "0" ]; then
+#              EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulator_name} 2>emulator.log 1>emulator.log &)
+#              # This is a big #HACK, only errors are returned in the first two seconds, I suck
+#              sleep 2
+#              EMULATOR_RESULTS=$(<emulator.log)
+#              
+#              if [ $(echo $EMULATOR_RESULTS | grep "PANIC" | wc -l) == "1" ]; then
+#                echo $EMULATOR_RESULTS | grep "PANIC"
+#                exit 1
+#              else 
+#                if [ $(echo $EMULATOR_RESULTS | grep "ERROR" | wc -l) == "1" ]; then
+#                  echo $EMULATOR_RESULTS | grep "ERROR"
+#                  exit 1
+#              	else
+#                	echo Loading the emulator
+#                fi
+#              fi
+#            else
+#              echo The emulator is already running
+#            fi
 
-            OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
-            if [ "$OUTPUT" == "0" ]; then
-              EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulator_name} 2>emulator.log 1>emulator.log &)
-              # This is a big #HACK, only errors are returned in the first two seconds, I suck
-              sleep 2
-              EMULATOR_RESULTS=$(<emulator.log)
-              
-              if [ $(echo $EMULATOR_RESULTS | grep "PANIC" | wc -l) == "1" ]; then
-                echo $EMULATOR_RESULTS | grep "PANIC"
-                exit 1
-              else 
-                if [ $(echo $EMULATOR_RESULTS | grep "ERROR" | wc -l) == "1" ]; then
-                  echo $EMULATOR_RESULTS | grep "ERROR"
-                  exit 1
-              	else
-                	echo Loading the emulator
-                fi
-              fi
-            else
-              echo The emulator is already running
-            fi
+#            DEVICES_FOUND=$(adb devices | grep -v "List of devices attached" | grep -v emulator -c)
+#            let devices=DEVICES_FOUND-1;
+#            echo $devices
