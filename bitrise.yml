@@ -7,8 +7,10 @@ app:
   envs:
   - branch_to_build: "develop"
   - emulator_name: "Nexus_5_API_22"
+  #- package: ""
+  - mainActivity: ""
   - package: "com.leftshift.clipboardapp"
-  - mainActivity: "activities.CardActivity"
+  #- mainActivity: "activities.CardActivity"
 
 workflows:
 
@@ -166,5 +168,16 @@ workflows:
             if [ $BUILD_SUCCESSFUL != "1" ]; then
               exit 1
             else
-              adb shell am start -n ${package}/${package}.${mainActivity}
+              # TODO : Someday figure out how to get these automatically
+              if [ "${package}" != "" ];then
+                echo Package name found ${package}
+                if [ "${mainActivity}" != "" ]; then
+                  echo Main activity found ${mainActivity}
+                  adb shell am start -n ${package}/${package}.${mainActivity}
+                else
+                  echo Main Activity not found
+                fi
+              else
+                echo Package name not found
+              fi
             fi
