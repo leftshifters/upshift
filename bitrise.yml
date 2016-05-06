@@ -5,13 +5,12 @@ title: Build script for Android
 
 app:
   envs:
-  #- branch_to_build: "develop"
-  - emulator_name: "Nexus_5_API_22"
+  #- branch_to_build: ""
   #- package: ""
   #- mainActivity: ""
-  #- package: "com.leftshift.clipboardapp"
-  #- mainActivity: "activities.CardActivity"
-
+  - debug: "1"
+  - emulator_name: "Nexus_5_API_22"
+  
 workflows:
 
   devices:
@@ -23,7 +22,10 @@ workflows:
             #!/bin/bash
 
             set -e
-            set -v
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
 
             adb -d shell input keyevent 82 # Used to unlock the device
             DEVICES_FOUND=$(adb devices | grep -v "List of devices attached" | grep -v emulator -c)
@@ -40,7 +42,10 @@ workflows:
             #!/bin/bash
 
             #set -e
-            set -v
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
 
             # TODO : Create an emulator if one doesn't exist
             # - adb shell input keyevent 82
@@ -51,6 +56,7 @@ workflows:
 
             # Check if a process which calls itself the emulator is running
             # TODO : may check this using ADB Devices
+            # TODO : Gets fucked up when adb fucks up, keeps ranting multiple devices found (not the exact message)
             OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
             # If 0 processes are called emulator, it means we need to load up one
             if [ "$OUTPUT" == "0" ]; then
@@ -92,6 +98,7 @@ workflows:
             set -e
             set -v
 
+            echo Pulling branch ${branch_to_build}
             git pull origin $branch_to_build
 
   assemble-fast:
@@ -103,7 +110,10 @@ workflows:
             #!/bin/bash
 
             set -e
-            set -v
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
 
             TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
@@ -126,7 +136,10 @@ workflows:
             #!/bin/bash
 
             set -e
-            set -v
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
 
             TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
@@ -152,7 +165,10 @@ workflows:
             #!/bin/bash
 
             set -e
-            #set -v
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
 
             TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
