@@ -101,7 +101,17 @@ workflows:
             set -e
             set -v
 
-            ./gradlew assemble --stacktrace
+            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+            ./gradlew assemble --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
+
+            BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
+            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+            echo $BUILD_SUCCESSFUL;
+
+            if [ $BUILD_SUCCESSFUL != "1" ]; then
+              exit 1
+            fi
 
   assemble:
     steps:
