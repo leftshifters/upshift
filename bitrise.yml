@@ -5,12 +5,12 @@ title: Build script for Android
 
 app:
   envs:
-  - branch_to_build: "develop"
+  #- branch_to_build: "develop"
   - emulator_name: "Nexus_5_API_22"
   #- package: ""
   #- mainActivity: ""
-  - package: "com.leftshift.clipboardapp"
-  - mainActivity: "activities.CardActivity"
+  #- package: "com.leftshift.clipboardapp"
+  #- mainActivity: "activities.CardActivity"
 
 workflows:
 
@@ -82,7 +82,7 @@ workflows:
             fi
 
   git-pull-latest:
-    setps:
+    steps:
     - script:
         title: pull-latest
         inputs:
