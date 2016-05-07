@@ -9,9 +9,9 @@ app:
   #- package: ""
   #- mainActivity: ""
   #- emailForSSHKey: ""
-  - debug: "1"
+  - debug: "0"
   - emulator_name: "Nexus_5_API_22"
-  - emailForSSHKey: "sudhanshu@leftshift.io"
+  #- emailForSSHKey: "sudhanshu@leftshift.io"
   
 workflows:
 
@@ -22,6 +22,13 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
+
+            RED='\033[0;31m'
+            GREEN='\033[0;32m'
+            BLUE='\033[0;34m'
+            NOCOLOR='\033[0m'
+            BOLD=$(tput bold)
+            NORMAL=$(tput sgr0)
 
             set -e
 
@@ -34,24 +41,24 @@ workflows:
               # TODO : Allow the user to add the keys to a non default place
               # Check if an id_rsa already exists at the defualt location
               if [ ! -f ~/.ssh/id_rsa ]; then
-                echo File does not exist at ~/.ssh/id_rsa
+                printf "File does not exist at ~/.ssh/id_rsa"
                 echo -ne '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
 
                 # Show the created keys on the screen
                 ID_RSA=$(<~/.ssh/id_rsa)
                 ID_RSA_PUB=$(<~/.ssh/id_rsa.pub)
 
-                printf "id_rsa\n"
-                printf "%s" "${ID_RSA}"
-                printf "\n\nid_rsa.pub\n"
-                printf "%s" "${ID_RSA_PUB}"
+                printf "${BOLD}id_rsa${NORMAL}\n"
+                printf "${ID_RSA}"
+                printf "\n\n${BOLD}id_rsa.pub${NORMAL}\n"
+                printf "${ID_RSA_PUB}"
 
               else
-                echo Looks like an id_rsa already exists at ~/.ssh/id_rsa
+                printf "${BOLD}Error!${NORMAL} Looks like an id_rsa already exists at ~/.ssh/id_rsa \n\n"
                 exit 1
               fi
             else
-              echo Parameter "emailForSSHKey" not found
+              printf "${BOLD}Error!${NORMAL} Parameter ${RED}emailForSSHKey${NOCOLOR} not found \n\n"
               exit 1
             fi
 
