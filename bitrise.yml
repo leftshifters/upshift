@@ -102,6 +102,8 @@ workflows:
             git pull origin $branch_to_build
 
   assemble-fast:
+    before_run:
+    - git-pull-latest
     steps:
     - script:
         title: assemble
@@ -128,6 +130,8 @@ workflows:
             fi
 
   assemble:
+    before_run:
+    - git-pull-latest
     steps:
     - script:
         title: assemble
@@ -157,6 +161,9 @@ workflows:
             fi
 
   install:
+    before_run:
+    - emulator
+    - git-pull-latest    
     steps:
     - script:
         title: install on emulator
