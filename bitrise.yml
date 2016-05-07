@@ -5,13 +5,14 @@ title: Build script for Android
 
 app:
   envs:
-  #- branch_to_build: ""
   #- package: ""
   #- mainActivity: ""
   #- emailForSSHKey: ""
   - debug: "0"
   - emulator_name: "Nexus_5_API_22"
   #- emailForSSHKey: "sudhanshu@leftshift.io"
+  - gitRepositoryURL: ""
+  - gitRepositoryBranch: ""
   
 workflows:
 
@@ -22,6 +23,8 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
+
+            # https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/
 
             RED='\033[0;31m'
             GREEN='\033[0;32m'
@@ -136,6 +139,22 @@ workflows:
               echo The emulator is already running
             fi
 
+  git-clone:
+    steps:
+    - script:
+        title: Close the correct branch of the repository
+        inputs:
+        - content: |-
+            #!/bin/bash
+
+            set -e
+
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
+
+
+
   git-pull:
     steps:
     - script:
@@ -145,10 +164,13 @@ workflows:
             #!/bin/bash
 
             set -e
-            set -v
 
-            echo Pulling branch ${branch_to_build}
-            git pull origin $branch_to_build
+            if [ ${debug} == "1" ];then
+              set -v
+            fi
+
+            echo Pulling branch ${gitRepositoryBranch}
+            git pull origin ${gitRepositoryBranch}
 
   assemble-fast:
     before_run:
