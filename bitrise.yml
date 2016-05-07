@@ -284,7 +284,7 @@ workflows:
 
   assemble-fast:
     before_run:
-    - git-pull
+    #- git-pull
     steps:
     - script:
         title: Assemble the Android project quickly
@@ -292,22 +292,44 @@ workflows:
         - content: |-
             #!/bin/bash
 
-            set -e
+            # Turning this off, because this ends the script if 0 get returned anywhere
+            # set -e
 
+            # This is for font color and style adjustment
+            RED='\033[0;31m'
+            GREEN='\033[0;32m'
+            BLUE='\033[0;34m'
+            NOCOLOR='\033[0m'
+            BOLD=$(tput bold)
+            NORMAL=$(tput sgr0)            
+
+            # An empty space to separate from the preceeding block
             if [ ${debug} == "1" ];then
               set -v
             fi
 
+            # An empty space to separate from the preceeding block
+            printf "\n"
+
+            # Make a TIMESHTAMP for log file
             TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
+            # Alright, time to run assembleDebug
             ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
 
+            # Get the logged results and try to make some sense out of it
             BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
-            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
-            echo $BUILD_SUCCESSFUL;
 
+            # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL is the results
+            # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
+            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+
+            # If the build was successful, let 'em know
             if [ $BUILD_SUCCESSFUL != "1" ]; then
+              printf "\nDamn, it looks like something went ${RED}wrong${NOCOLOR}. You should check this up.\n\n"
               exit 1
+            else
+              printf "\nAlright, the build was ${GREEN}successful${NOCOLOR} 🍺\n\n"
             fi
 
   assemble:
