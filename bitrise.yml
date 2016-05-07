@@ -136,7 +136,7 @@ workflows:
               echo The emulator is already running
             fi
 
-  git-pull-latest:
+  git-pull:
     steps:
     - script:
         title: pull-latest
@@ -152,7 +152,7 @@ workflows:
 
   assemble-fast:
     before_run:
-    - git-pull-latest
+    - git-pull
     steps:
     - script:
         title: assemble
@@ -180,7 +180,7 @@ workflows:
 
   assemble:
     before_run:
-    - git-pull-latest
+    - git-pull
     steps:
     - script:
         title: assemble
@@ -212,7 +212,7 @@ workflows:
   install:
     before_run:
     - emulator
-    - git-pull-latest    
+    - git-pull  
     steps:
     - script:
         title: install on emulator
