@@ -62,6 +62,8 @@ workflows:
                 printf "\n\n${BOLD}id_rsa.pub${NORMAL}\n"
                 printf "${ID_RSA_PUB}"
 
+                printf "All done 🍺\n\n"
+
               else
                 printf "${BOLD}Error!${NORMAL} Looks like an id_rsa already exists at ~/.ssh/id_rsa \n\n"
                 exit 1
@@ -109,7 +111,7 @@ workflows:
 
             # Show appropriate error message
             if [ "${DEVICES_FOUND}" -gt 0 ]; then
-              printf "${DEVICES_FOUND} physical device(s) were found\n\n"
+              printf "${DEVICES_FOUND} physical device(s) were found 🍺\n\n"
             else
               printf "${BOLD}Error!${NORMAL} No physical devices were found\n\n"
               exit 1
@@ -199,7 +201,7 @@ workflows:
                   # Alright, everything is now done. This is just used to unlock the device.
                   printf "Almost ${GREEN}done${NOCOLOR}, touch the device once\n"
                   adb shell input keyevent 82
-                  printf "${GREEN}Super!${NOCOLOR} The emulator is now running. You're one lucky person\n"
+                  printf "${GREEN}Super!${NOCOLOR} The emulator is now running. You're one lucky person 🍺\n"
                 fi
               fi
             else
@@ -220,6 +222,8 @@ workflows:
             if [ ${debug} == "1" ];then
               set -v
             fi
+
+            printf "\nNothing has been setup here yet 🍺"
 
   git-pull:
     steps:
@@ -260,17 +264,20 @@ workflows:
               # Alright, let's pull
               git pull origin ${gitRepositoryBranch} 2>&1 | tee git-pull-$TIMESHTAMP.log
 
+              # Load up the results to see if there were any errors
               PULL_RESULTS=$(<git-pull-$TIMESHTAMP.log)
+              # If there was a fatal error, tell the user there's something wrong
               if [ "$(printf "${PULL_RESULTS}" | grep "fatal" -c)" -gt "0" ]; then
                 printf "\n${BOLD}Error!${NORMAL} Something went wrong with the pull, you should look this up\n\n"
                 exit 1
               else
                 # All done
-                printf "\nAll done ${GREEN}baby!${NOCOLOR}.\n\n"
+                printf "\nAll done ${GREEN}baby${NOCOLOR}! 🍺.\n\n"
                 exit 0
               fi
 
             else
+              # The user hasn't added the required keys
               printf "${BOLD}Error!${NORMAL} Dude, you need to add the ${BLUE}gitRepositoryBranch${NOCOLOR} for this to work\n\n"
               exit 1
             fi
