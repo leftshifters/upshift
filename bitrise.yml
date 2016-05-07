@@ -13,6 +13,7 @@ app:
   #- emailForSSHKey: "sudhanshu@leftshift.io"
   - gitRepositoryURL: ""
   - gitRepositoryBranch: "develop"
+  - alwaysCleanBeforeBuild: "0"
   
 workflows:
 
@@ -282,12 +283,12 @@ workflows:
               exit 1
             fi
 
-  assemble-fast:
+  assemble:
     before_run:
-    #- git-pull
+    - git-pull
     steps:
     - script:
-        title: Assemble the Android project quickly
+        title: Assemble the Android project
         inputs:
         - content: |-
             #!/bin/bash
@@ -314,13 +315,25 @@ workflows:
             # Make a TIMESHTAMP for log file
             TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
-            # Alright, time to run assembleDebug
+            # TODO : Add the project name to the logfile and move it to a common location on the server
+            # TODO : Use the logs to show details on a screen somewhere
+
+            # If alwaysCleanBeforeBuild then run clean
+            if [ "${alwaysCleanBeforeBuild}" == 1 ]; then
+              printf "Time to ${GREEN}clean up${NOCOLOR}\n\n"
+              ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
+            else
+              printf "Skipping :clean:, you have ${BLUE}alwaysCleanBeforeBuild${NOCOLOR} turned off\n"
+            fi
+
+            # Now time to build again
+            printf "\nTime to run ${GREEN}assembleDebug${NOCOLOR} on this thing\n\n"
             ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
 
             # Get the logged results and try to make some sense out of it
             BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
 
-            # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL is the results
+            # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
             # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
             BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
 
@@ -332,36 +345,6 @@ workflows:
               printf "\nAlright, the build was ${GREEN}successful${NOCOLOR} 🍺\n\n"
             fi
 
-  assemble:
-    before_run:
-    - git-pull
-    steps:
-    - script:
-        title: Assemble the Android project
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            set -e
-
-            if [ ${debug} == "1" ];then
-              set -v
-            fi
-
-            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-            # TODO : Add the project name to the logfile and move it to a common location on the server
-            # TODO : Use the logs to show details on a screen somewhere
-            ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log 
-            ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
-
-            BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
-            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
-            echo $BUILD_SUCCESSFUL;
-
-            if [ $BUILD_SUCCESSFUL != "1" ]; then
-              exit 1
-            fi
 
   install:
     before_run:
