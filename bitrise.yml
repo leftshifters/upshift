@@ -19,7 +19,7 @@ workflows:
   setup-ssh:
     steps:
     - script:
-        title: setup ssh keys
+        title: Setup SSH keys
         inputs:
         - content: |-
             #!/bin/bash
@@ -74,7 +74,7 @@ workflows:
   devices:
     steps:
     - script:
-        title: Physical android devices connected to server
+        title: Find Physical Android devices connected to Server
         inputs:
         - content: |-
             #!/bin/bash
@@ -210,7 +210,7 @@ workflows:
   git-clone:
     steps:
     - script:
-        title: Close the correct branch of the repository
+        title: Clone the git Repository
         inputs:
         - content: |-
             #!/bin/bash
@@ -224,7 +224,7 @@ workflows:
   git-pull:
     steps:
     - script:
-        title: pull-latest
+        title: Pull the latest code
         inputs:
         - content: |-
             #!/bin/bash
@@ -243,7 +243,7 @@ workflows:
     - git-pull
     steps:
     - script:
-        title: assemble
+        title: Assemble the Android project quickly
         inputs:
         - content: |-
             #!/bin/bash
@@ -271,7 +271,7 @@ workflows:
     - git-pull
     steps:
     - script:
-        title: assemble
+        title: Assemble the Android project
         inputs:
         - content: |-
             #!/bin/bash
@@ -303,7 +303,7 @@ workflows:
     - git-pull  
     steps:
     - script:
-        title: install on emulator
+        title: Install the build on a device
         inputs:
         - content: |-
             #!/bin/bash
