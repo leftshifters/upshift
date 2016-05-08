@@ -33,6 +33,8 @@ normalStyle=$(tput sgr0)
 
 # 6. Setup Global Variables
 next=true
+platform=$1
+job=$2
 
 
 
@@ -53,6 +55,10 @@ function ShowError {
 }
 
 StartScript
+
+
+
+
 
 # Setup Actions
 
@@ -395,7 +401,6 @@ function AssembleAndroid {
   else
     printf "\nAlright, the build was ${greenColour}successful${noColour} 🍺\n\n"
   fi
-
 }
 
 #SetupSSH
@@ -406,5 +411,52 @@ function AssembleAndroid {
 #AndroidDevices
 #AssembleAndroid
 
+
+
+
+# Setup Jobs
+
+jobQueue=()
+
+function RunJobs {
+  for action in ${jobQueue[@]}
+    do
+      :
+      ${action}
+  done
+}
+
+function FindJobQueue {
+
+  if [ "${platform}" == "android" ]; then
+    if [ "${job}" == "build" ]; then
+      jobQueue=("AssembleAndroid")
+    else
+      if [ "${job}" == "emulator" ]; then
+        jobQueue=("StartEmulator" "GitPull" "InstallOnAndroid")
+      else
+        ShowError
+        printf "Yo! We only support two commands for Android right now, build and emulator\n"
+      fi
+    fi
+  else
+    if [ "${platform}" == "ios" ]; then
+      printf "No iOS related JOB queues have been defined yet."
+    else
+      ShowError
+      printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
+      next=false
+    fi
+  fi
+
+}
+
+FindJobQueue
+RunJobs
+
+
+
+
+# Ending
 
 EndScript
