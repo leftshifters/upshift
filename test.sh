@@ -161,13 +161,128 @@
 # /Users/sudhanshuraheja/.stepman/step_collections/1462621641/collection 
 
 
-stepman share start -c git@github.com:leftshifters/bitrise-steplib.git
+# stepman share start -c git@github.com:leftshifters/bitrise-steplib.git
 
 # Go to repo and git tag -a 0.5.0 -m "messsage"
-stepman share create --tag 0.5.0 --git https://github.com/sudhanshuraheja/bitrise-install-android-build.git --stepid android-install
+#stepman share create --tag 0.5.0 --git https://github.com/sudhanshuraheja/bitrise-install-android-build.git --stepid android-install
 
-stepman audit
+#stepman audit
 
-stepman share finish
+#stepman share finish
 
 # create a Pull Request
+
+
+
+# Find where is XCode Installed
+#XCODE_PATH=$(xcode-select --print-path)
+#printf "$XCODE_PATH\n"
+
+# Install the latest command line tools
+#xcode-select --install
+# If already installed # xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+
+# Switching to a different XCode
+#sudo xcode-select -switch <path/to/>Xcode.app
+
+
+# xcodebuild -list -project Deezeno.xcodeproj/
+# xcodebuild -list -workspace Deezeno.xcworkspace/
+# xcodebuild -scheme Deezeno build
+# xcodebuild -scheme Deezeno clean
+# xcodebuild -scheme Deezeno analyze
+
+
+# echo "${machinePassword}" | sudo xcode-select -switch /Applications/Xcode.app
+
+
+
+# Check .gitmodules if it exists and number of files greater than 0
+#git submodule init
+#git submodule update
+#xcodebuild -scheme Deezeno build
+# Catch errors and warnings
+
+# Change bundle identifier
+#/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "${info_plist_file}")"
+#/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${bundle_identifier}" "${info_plist_file}"
+# Info Plist is at /Deezeno/Info.plist
+
+# Change bundle version
+#/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "${CONFIG_project_info_plist_path}"
+#/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${CONFIG_new_bundle_version}" "${CONFIG_project_info_plist_path}"
+
+# Change bundle version code
+# ---- Current Bundle Short Version String:
+#/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "${CONFIG_project_info_plist_path}"
+#/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${CONFIG_new_build_short_version_string}" "${CONFIG_project_info_plist_path}"
+
+# Get XCode Version
+#xcodebuild -version
+
+#xcodebuild -showsdks
+#OS X SDKs:
+#	OS X 10.11                    	-sdk macosx10.11
+#
+#iOS SDKs:
+#	iOS 9.3                       	-sdk iphoneos9.3
+#
+#iOS Simulator SDKs:
+#	Simulator - iOS 9.3           	-sdk iphonesimulator9.3
+#
+#tvOS SDKs:
+#	tvOS 9.2                      	-sdk appletvos9.2
+#
+#tvOS Simulator SDKs:
+#	Simulator - tvOS 9.2          	-sdk appletvsimulator9.2
+#
+#watchOS SDKs:
+#	watchOS 2.2                   	-sdk watchos2.2
+#
+#watchOS Simulator SDKs:
+#	Simulator - watchOS 2.2       	-sdk watchsimulator2.2
+
+# xcodebuild -showBuildSettings
+#    AVAILABLE_PLATFORMS = appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator
+#    BUILD_DIR = /Users/sudhanshuraheja/Library/Developer/Xcode/DerivedData/Deezeno-fpdbioebihpiyrbfohmfktdwgmgf/Build/Products
+#    CODE_SIGNING_ALLOWED = YES
+#    CODE_SIGNING_REQUIRED = YES
+#    CODE_SIGN_ENTITLEMENTS = GoJek/GO-JEK.entitlements
+#    CODE_SIGN_IDENTITY = iPhone Developer
+#    CORRESPONDING_SIMULATOR_SDK_NAME = iphonesimulator9.3
+#    FULL_PRODUCT_NAME = Deezeno.app / GO-JEK.app
+#    INFOPLIST_FILE = Deezeno/Info.plist
+#    PRODUCT_BUNDLE_IDENTIFIER = com.leftshift.deezeno
+#    PRODUCT_NAME = Deezeno
+#    PRODUCT_SETTINGS_PATH = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios/Deezeno/Info.plist
+#    PROJECT_FILE_PATH = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios/Deezeno.xcodeproj
+#    SOURCE_ROOT = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios
+#    TARGETNAME = Deezeno
+#    TARGET_NAME = Deezeno
+
+#    FACEBOOK_APP_ID = 830829963645099
+#    FLURRY_API_KEY = WC229WJF2BF6FFK767B3
+#    GOOGLE_MAPS_API_KEY = AIzaSyBOaKFEQG3Tumx-WD4NAEZBSZd8unhPHBc
+
+#xcodebuild -list
+#Information about project "Deezeno":
+#    Targets:
+#        Deezeno
+#        DeezenoTests
+#        DeezenoUITests
+#
+#    Build Configurations:
+#        Debug
+#        Release
+#
+#    If no build configuration is specified and -scheme is not passed then "Release" is used.
+#
+#    Schemes:
+#        Deezeno
+
+
+#xcodebuild -version
+#Xcode 7.3
+#Build version 7D175
+
+#//usr/libexec/PlistBuddy 
