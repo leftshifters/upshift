@@ -428,6 +428,7 @@ function RunJobs {
 
 function FindJobQueue {
 
+  # ANDROID JOBS
   if [ "${platform}" == "android" ]; then
     if [ "${job}" == "build" ]; then
       jobQueue=("AssembleAndroid")
@@ -440,12 +441,19 @@ function FindJobQueue {
       fi
     fi
   else
+    # iOS JOBS
     if [ "${platform}" == "ios" ]; then
       printf "No iOS related JOB queues have been defined yet."
     else
-      ShowError
-      printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
-      next=false
+      # CLONE
+      if [ "${platform}" == "clone" ]; then
+        jobQueue=("GitClone")
+      else
+        # NOT SUPPORTED
+        ShowError
+        printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
+        next=false
+      fi
     fi
   fi
 
