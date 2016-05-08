@@ -155,3 +155,19 @@
 
 
 
+
+
+
+# /Users/sudhanshuraheja/.stepman/step_collections/1462621641/collection 
+
+
+stepman share start -c git@github.com:leftshifters/bitrise-steplib.git
+
+# Go to repo and git tag -a 0.5.0 -m "messsage"
+stepman share create --tag 0.5.0 --git https://github.com/sudhanshuraheja/bitrise-install-android-build.git --stepid android-install
+
+stepman audit
+
+stepman share finish
+
+# create a Pull Request

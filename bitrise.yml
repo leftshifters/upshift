@@ -1,5 +1,5 @@
 format_version: 1.2.0
-default_step_lib_source: https://github.com/leftshifters/bitrise-steplib.git
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 title: Build script for Android
 
@@ -407,7 +407,7 @@ workflows:
     - git-pull  
     steps:
     - script:
-        title: Install the build on a device
+        title: Install the build on a emulator
         inputs:
         - content: |-
             #!/bin/bash
