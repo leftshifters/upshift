@@ -1,0 +1,9 @@
+title: "Show connected physical devices"
+is_always_run: false
+is_skippable: false
+inputs:
+- debug:
+  opts:
+    title: "Turn on debugging information for this step"
+    is_required: false
+outputs:

@@ -1,0 +1,13 @@
+title: "Pull the latest code"
+is_always_run: false
+is_skippable: false
+inputs:
+- debug:
+  opts:
+    title: "Turn on debugging information for this step"
+    is_required: false
+- gitRepositoryBranch:
+  opts:
+    title: "The git repository branch we need to interact with"
+    is_required: true
+outputs:

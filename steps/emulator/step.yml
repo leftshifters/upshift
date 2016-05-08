@@ -1,0 +1,13 @@
+title: "Load up the emulator"
+is_always_run: false
+is_skippable: false
+inputs:
+- debug:
+  opts:
+    title: "Turn on debugging information for this step"
+    is_required: false
+- emulatorName:
+  opts:
+    title: "The name of the Android Emulator to use"
+    is_required: true
+outputs:

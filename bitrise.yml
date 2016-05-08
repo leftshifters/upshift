@@ -5,489 +5,55 @@ title: Build script for Android
 
 app:
   envs:
-  #- package: ""
-  #- mainActivity: ""
-  #- emailForSSHKey: ""
-  #- debug: "1"
+  - debug: "1"
+  - gitRepositoryURL: "git@bitbucket.org:leftshift/clipboard-android.git"
+  - gitRepositoryBranch: "develop"
+  - package: "com.leftshift.clipboardapp"
+  - mainActivity: "activities.CardActivity"
+  - emailForSSHKey: "sudhanshu@leftshift.io"
   - emulatorName: "Nexus_5_API_22"
-  #- emailForSSHKey: "sudhanshu@leftshift.io"
-  #- gitRepositoryURL: ""
-  #- gitRepositoryBranch: "develop"
-  #- alwaysCleanBeforeBuild: "0"
-  #- alwaysUninstallOlderBuilds: "0"
+  - alwaysCleanBeforeBuild: "0"
+  - alwaysUninstallOlderBuilds: "0"
+
   
 workflows:
 
   setup-ssh:
     steps:
-    - script:
-        title: Setup SSH keys
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Details about the script came from here
-            # https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)
-
-            set -e
-
-            # Dump everything only if debug is on
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Check if email has been defined by the user
-            if [ "${emailForSSHKey}" != "" ]; then
-              # TODO : Allow the user to add the keys to a non default place
-              # Check if an id_rsa already exists at the defualt location
-              if [ ! -f ~/.ssh/id_rsa ]; then
-                printf "File does not exist at ~/.ssh/id_rsa"
-                echo -ne '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
-
-                # Show the created keys on the screen
-                ID_RSA=$(<~/.ssh/id_rsa)
-                ID_RSA_PUB=$(<~/.ssh/id_rsa.pub)
-
-                printf "${BOLD}id_rsa${NORMAL}\n"
-                printf "${ID_RSA}"
-                printf "\n\n${BOLD}id_rsa.pub${NORMAL}\n"
-                printf "${ID_RSA_PUB}"
-
-                printf "All done 🍺\n\n"
-
-              else
-                printf "${BOLD}Error!${NORMAL} Looks like an id_rsa already exists at ~/.ssh/id_rsa \n\n"
-                exit 1
-              fi
-            else
-              printf "${BOLD}Error!${NORMAL} Parameter ${RED}emailForSSHKey${NOCOLOR} not found \n\n"
-              exit 1
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/setup-ssh:
+        title: "Set SSH keys for this project"
 
   devices:
     steps:
-    - script:
-        title: Find Physical Android devices connected to Server
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 devices are found
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Touch device to that they can get unlocked, otherwise ADB just ignores them
-            # Just make sure you hide the STDERR because well we don't care too much about it
-            TOUCH_DEVICE=$(adb -d shell input keyevent 82 2>&1)
-
-            # Find out how many devices are available, and are not emulators
-            DEVICES_FOUND=$(adb devices | grep -v "List of devices attached" | grep -v emulator -c)
-            # For some reason we get one added to the value, so let's just substract it
-            let DEVICES_FOUND=DEVICES_FOUND-1;
-
-            # Show appropriate error message
-            if [ "${DEVICES_FOUND}" -gt 0 ]; then
-              printf "${DEVICES_FOUND} physical device(s) were found 🍺\n\n"
-            else
-              printf "${BOLD}Error!${NORMAL} No physical devices were found\n\n"
-              exit 1
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/devices:
+        title: "Find connected phycial devices"
 
   emulator:
     steps:
-    - script:
-        title: Load up the emulator
-        is_skippable: false
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 get returned anywhere
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # TODO : Create an emulator if one doesn't exist
-            # TODO : Maybe run ./gradlew connectedCheck to see if everything is working fine
-
-            # Check if Boot Animation is still on
-            # https://devmaze.wordpress.com/2011/12/12/starting-and-stopping-android-emulators/
-            # adb shell getprop init.svc.bootanim
-            # We don't really care about this right now
-
-            # Check if a process which calls itself the emulator is running
-            # TODO : may check this using ADB Devices
-            # TODO : Gets fucked up when adb fucks up, keeps ranting multiple devices found (not the exact message)
-            OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
-            # If 0 processes are called emulator, it means we need to load up one
-            if [ "$OUTPUT" == "0" ]; then
-              EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulatorName} 2>emulator.log 1>emulator.log &)
-              # TODO : This is a big #HACK, only errors are returned in the first two seconds, I suck and I don't know a way out
-              # TODO : Another potential problem, we redirect both 1,2 in reset mode (>), the file could get overwritten
-              sleep 2
-              EMULATOR_RESULTS=$(<emulator.log)
-              
-              # Check if there was a PANIC [to test this, put in the wrong emulator name]
-              PANIC_COUNT=$(echo ${EMULATOR_RESULTS} | grep "PANIC" -c)
-
-              # If there was a panic, throw it at the user, they messed up, not us
-              if [ "${PANIC_COUNT}" -gt 0 ]; then
-                printf "${BOLD}Error!${NORMAL} The emulator won't load up. Maybe the ${RED}emulatorName${NOCOLOR} key isn't correct\n"
-                printf "Here's what Mr. Log says:\n\n"
-                printf "${EMULATOR_RESULTS}\n\n"
-                exit 1
-              else 
-                # Seems like there is no panic, let's check for errors
-                # TODO : Can't remember how do you get an error
-                ERROR_COUNT=$(echo ${EMULATOR_RESULTS} | grep "ERROR" -c)
-
-                if [ "${ERROR_COUNT}" -gt 0 ]; then
-                  printf "${EMULATOR_RESULTS}\n\n"
-                  exit 1
-                else
-                  printf "All set baby, ${GREEN}starting${NOCOLOR} to load up the emulator\n"
-                  # ADB gives this option to wait for the device till it comes up, let's just depend on it, 
-                  # this is really mess with us when there is a problem with the emulator fails to load because of it's own bugs
-                  adb wait-for-device
-
-                  # Now that the device is available, the worst is over
-                  # Check if the emulator has finished botting, if not, sleedp for 2 seconds and try this again, this is our final trigger
-                  printf "Seems like the device is now ${GREEN}available${NOCOLOR}, we are getting close\n"
-                  SCREEN_LOADING=$(adb shell getprop sys.boot_completed | tr -d '\r')
-                  while [ "$SCREEN_LOADING" != "1" ]; do
-                    sleep 4
-                    printf "Check if the emulator has finished booting, why is this thing so ${BLUE}damn${NOCOLOR} slow?\n"
-                    SCREEN_LOADING=$(adb shell getprop sys.boot_completed | tr -d '\r')
-                  done
-
-                  # Alright, everything is now done. This is just used to unlock the device.
-                  printf "Almost ${GREEN}done${NOCOLOR}, touch the device once\n"
-                  adb shell input keyevent 82
-                  printf "${GREEN}Super!${NOCOLOR} The emulator is now running. You're one lucky person 🍺\n"
-                fi
-              fi
-            else
-              printf "${GREEN}Dude${NOCOLOR}, Looks like the emulator is already running!\n\n"
-              exit 0
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/emulator:
+        title: "Load up the emulator"
 
   git-clone:
     steps:
-    - script:
-        title: Clone the git Repository
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 get returned anywhere
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Make a TIMESHTAMP for log file
-            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-            # Check if the repo URL is defined
-            if [ "${gitRepositoryURL}" != "" ]; then
-              # Check if the branch name is defined
-              # TODO : Automatically pick the current branch
-              if [ "${gitRepositoryBranch}" != "" ]; then
-
-                printf "Alright, let's ${GREEN}clone${NOCOLOR} the ${BLUE}${gitRepositoryBranch}${NOCOLOR} branch for the ${BLUE}${gitRepositoryURL}${NOCOLOR} repo\n\n"
-              
-                # Alright, let's pull
-                # But you can't pull into an empty directly, now since you already have bitrise.yml and .bitrise.secrets.yml in your directory,
-                #   you will need to clone into another folder, and move stuff back here
-                #   we can't do what the rest of the world tries to do - which is git init, add remote,
-                #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-                git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
-                mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
-                mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
-                rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
-
-                # Load up the results to see if there were any errors
-                CLONE_RESULTS=$(<git-clone-$TIMESHTAMP.log)
-                # If there was a fatal error, tell the user there's something wrong
-                if [ "$(printf "${CLONE_RESULTS}" | grep "fatal" -c)" -gt "0" ] || [ "$(printf "${CLONE_RESULTS}" | grep "error" -c)" -gt "0" ]; then
-                  printf "\n${BOLD}Error!${NORMAL} Something went wrong with the clone, you should look this up\n\n"
-                  exit 1
-                else
-                  # All done
-                  printf "\nAll done ${GREEN}baby${NOCOLOR}! 🍺.\n\n"
-                  exit 0
-                fi
-
-              else
-                # The user hasn't added the required keys
-                printf "${BOLD}Error!${NORMAL} Dude, you need to add the ${BLUE}gitRepositoryBranch${NOCOLOR} for this to work\n\n"
-                exit 1
-              fi
-            else
-              # The user hasn't added the required keys
-              printf "${BOLD}Error!${NORMAL} Dude, you need to add the ${BLUE}gitRepositoryURL${NOCOLOR} for this to work\n\n"
-              exit 1
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/git-clone:
+        title: "Clone the git repository"
 
   git-pull:
     steps:
-    - script:
-        title: Pull the latest code
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 get returned anywhere
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Make a TIMESHTAMP for log file
-            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-            # Check if the branch name is defined
-            # TODO : Automatically pick the current branch
-            if [ "${gitRepositoryBranch}" != "" ]; then
-
-              printf "Alright, let's ${GREEN}pull${NOCOLOR} the ${gitRepositoryBranch} branch for this repo\n\n"
-            
-              # Alright, let's pull
-              git pull origin ${gitRepositoryBranch} 2>&1 | tee git-pull-$TIMESHTAMP.log
-
-              # Load up the results to see if there were any errors
-              PULL_RESULTS=$(<git-pull-$TIMESHTAMP.log)
-              # If there was a fatal error, tell the user there's something wrong
-              if [ "$(printf "${PULL_RESULTS}" | grep "fatal" -c)" -gt "0" ]; then
-                printf "\n${BOLD}Error!${NORMAL} Something went wrong with the pull, you should look this up\n\n"
-                exit 1
-              else
-                # All done
-                printf "\nAll done ${GREEN}baby${NOCOLOR}! 🍺.\n\n"
-                exit 0
-              fi
-
-            else
-              # The user hasn't added the required keys
-              printf "${BOLD}Error!${NORMAL} Dude, you need to add the ${BLUE}gitRepositoryBranch${NOCOLOR} for this to work\n\n"
-              exit 1
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/git-pull:
+        title: "Pull the git repository"
 
   assemble:
     before_run:
     - git-pull
     steps:
-    - script:
-        title: Assemble the Android project
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 get returned anywhere
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Make a TIMESHTAMP for log file
-            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-            # TODO : Add the project name to the logfile and move it to a common location on the server
-            # TODO : Use the logs to show details on a screen somewhere
-
-            # If alwaysCleanBeforeBuild then run clean
-            if [ "${alwaysCleanBeforeBuild}" == 1 ]; then
-              printf "Time to ${GREEN}clean up${NOCOLOR}\n\n"
-              ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
-            else
-              printf "Skipping :clean:, you have ${BLUE}alwaysCleanBeforeBuild${NOCOLOR} turned off\n"
-            fi
-
-            # Now time to build again
-            printf "\nTime to run ${GREEN}assembleDebug${NOCOLOR} on this thing\n\n"
-            ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
-
-            # Get the logged results and try to make some sense out of it
-            BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
-
-            # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
-            # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
-
-            # If the build was successful, let 'em know
-            if [ "$BUILD_SUCCESSFUL" != "1" ]; then
-              printf "\nDamn, it looks like something went ${RED}wrong${NOCOLOR}. You should check this up.\n\n"
-              exit 1
-            else
-              printf "\nAlright, the build was ${GREEN}successful${NOCOLOR} 🍺\n\n"
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/assemble:
+        title: "Build the Android Project"
 
   install:
     before_run:
     - emulator
     - git-pull  
     steps:
-    - script:
-        title: Install the build on a emulator
-        inputs:
-        - content: |-
-            #!/bin/bash
-
-            # Turning this off, because this ends the script if 0 get returned anywhere
-            # set -e
-
-            # This is for font color and style adjustment
-            RED='\033[0;31m'
-            GREEN='\033[0;32m'
-            BLUE='\033[0;34m'
-            NOCOLOR='\033[0m'
-            BOLD=$(tput bold)
-            NORMAL=$(tput sgr0)            
-
-            # An empty space to separate from the preceeding block
-            if [ "${debug}" == "1" ];then
-              set -v
-            fi
-
-            # An empty space to separate from the preceeding block
-            printf "\n"
-
-            # Make a TIMESHTAMP for log file
-            TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-            # TODO : Add the project name to the logfile and move it to a common location on the server
-            # TODO : Use the logs to show details on a screen somewhere
-
-            # If alwaysCleanBeforeBuild then run clean
-            if [ "${alwaysCleanBeforeBuild}" == "1" ]; then
-              printf "Time to ${GREEN}clean up${NOCOLOR}\n\n"
-              ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
-            else
-              printf "Skipping :clean:, you have ${BLUE}alwaysCleanBeforeBuild${NOCOLOR} turned off\n"
-            fi
-
-            # Uninstall older builds if the setting so desires
-            if [ "${alwaysUninstallOlderBuilds}" == "1" ]; then
-              printf "Time to ${GREEN}uninstall${NOCOLOR} older builds\n\n"
-              ./gradlew uninstallAll 2>&1 | tee gradle-uninstall-$TIMESHTAMP.log
-            else
-              printf "Skipping :uninstallAll:, you have ${BLUE}alwaysUninstallOlderBuilds${NOCOLOR} turned off\n"
-            fi
-
-            # Now time to build again
-            printf "\nTime to run ${GREEN}installDebug${NOCOLOR} on this thing\n\n"
-            ./gradlew installDebug --stacktrace 2>&1 | tee gradle-install-$TIMESHTAMP.log
-
-            # Get the logged results and try to make some sense out of it
-            BUILD_RESULTS=$(<gradle-install-$TIMESHTAMP.log)
-
-            # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
-            # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-            BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
-
-            printf "\n\n${GREEN}Super${NOCOLOR}! The build was fine.\n"
-
-            # If the build was successful, let 'em know
-            if [ "$BUILD_SUCCESSFUL" != "1" ]; then
-              printf "Damn, it looks like something went ${RED}wrong${NOCOLOR}. You should check this up.\n\n"
-              exit 1
-            else
-              # TODO : Someday figure out how to get package and mainActivity automatically
-              # Check if package is empty
-              if [ "${package}" != "" ];then
-                if [ "${mainActivity}" != "" ]; then
-                  printf "Starting activity ${BLUE}${mainActivity}${NOCOLOR} in package ${BLUE}${package}${NOCOLOR}\n"
-
-                  # Start the activity and package
-                  adb shell am start -n ${package}/${package}.${mainActivity}
-
-                  # Tell the user everything is nice and easy
-                  printf "\nAlright, the build was ${GREEN}successful${NOCOLOR} 🍺\n\n"
-                else
-                  # The mainActivity is empty it seems
-                  printf "Alright, the build was ${GREEN}successful${NOCOLOR}, but there was no ${BLUE}mainActivity${NOCOLOR} defined, so couldn't start it automatically 🍺\n\n"
-                fi
-              else
-                # The package is empty it seems
-                printf "Alright, the build was ${GREEN}successful${NOCOLOR}, but there was no ${BLUE}package${NOCOLOR} defined, so couldn't start it automatically 🍺\n\n"
-              fi
-            fi
+    - path::~/code/bitrise/bitrise-android/steps/install:
+        title: "Install the app on a device/emulator"

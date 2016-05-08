@@ -1,0 +1,13 @@
+title: "Build the Android code base"
+is_always_run: false
+is_skippable: false
+inputs:
+- debug:
+  opts:
+    title: "Turn on debugging information for this step"
+    is_required: false
+- alwaysCleanBeforeBuild:
+  opts:
+    title: "Run Gradle Clean before building"
+    is_required: false
+outputs:
