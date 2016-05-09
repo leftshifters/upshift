@@ -7,6 +7,7 @@ alwaysUninstallOlderBuilds=true
 package=""
 mainActivity=""
 gitRepositoryBranch=""
+masterPassword="123"
 
 # 2. Load up config from config file
 if [ -f "./config.cfg" ]; then
@@ -56,9 +57,7 @@ function EndScript {
 
 function ShowError {
   printf "\n${redColour}
-###############################################################
-##                 Boom! Something went wrong!               ##
-###############################################################
+################## Boom! Something went wrong! ################
 ${noColour}"
 }
 
@@ -515,6 +514,60 @@ function GitSubmodules {
   fi
 }
 
+##
+## Install pods if they exist
+##
+
+function SetupPods {
+
+  StartAction "SetupPods"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Make a TIMESHTAMP for log file
+  TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+  # Check if Podfile exits
+  if [ -f "Podfile" ]; then
+    # Check if cocoapods is installed
+    POD_VERSION=$(podsasfas --version 2>&1)
+    POD_INSTALLED=$(grep 'command not found' -c <<< ${POD_VERSION})
+
+    if [ "${POD_INSTALLED}" -gt 0 ]; then
+      # Cocoapods is not installed, let's install it first
+      # First check if the master password has been defined
+      if [ "${masterPassword}" != "" ]; then
+        # TODO : test this on an actual machine
+        echo -ne ${masterPassword} | sudo -S gem install cocoapods
+        # TODO : Catch error from install cocoapods
+
+        # https://guides.cocoapods.org/using/pod-install-vs-update.html
+        # We want to keep pods on their own version, hence not updating
+        pod install
+        # TODO : Catch errors from pod install
+
+        printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
+      else
+        ShowError
+        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+        next=false
+      fi
+    else
+      # Given that cocoapods is installed
+      # https://guides.cocoapods.org/using/pod-install-vs-update.html
+      # We want to keep pods on their own version, hence not updating
+      pod install
+      # TODO : Catch errors from pod install
+    fi
+  else
+    printf "\nIt looks like this project doesn't use ${greenColour}pods${noColour}. You're awesome!\n\n"
+  fi
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -523,6 +576,7 @@ function GitSubmodules {
 #AndroidDevices
 #AssembleAndroid
 #GitSubmodules
+#SetupPods
 
 # TODO : Add a function to get the XCode Version
 #function XCodeVersion {
@@ -541,6 +595,10 @@ function GitSubmodules {
 #}
 #XCodeBuildSettings
 
+
+# TODO : Find outdated pods
+# pod outdated
+# from here - https://guides.cocoapods.org/using/pod-install-vs-update.html
 
 
 
@@ -577,6 +635,7 @@ function FindJobQueue {
     if [ "${platform}" == "ios" ]; then
       ## IOS ## NOT SUPPORTED
       printf "No iOS related JOB queues have been defined yet."
+      # Make sure you use SetupPods and GitSubmodules
     else
       ## SETUP ## CLONE ##
       if [ "${platform}" == "setup" ]; then
