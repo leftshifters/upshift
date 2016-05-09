@@ -568,6 +568,18 @@ function SetupPods {
   fi
 }
 
+##
+## Get the XCode version in use
+##
+function XCodeVersion {
+
+  StartAction "XCodeVersion"
+
+  XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+  printf "We are currently using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -577,17 +589,8 @@ function SetupPods {
 #AssembleAndroid
 #GitSubmodules
 #SetupPods
-
-# TODO : Add a function to get the XCode Version
-#function XCodeVersion {
-  #xcodebuild -version | grep "XCode"
-  #xcodebuild -version 2>&1 >xcode-version.log
-  #VERSION=$(<xcode-version.log)
-  #printf "Version: ${VERSION}"
-  #VERSION_NUMBER=$(echo ${VERSION} | grep "XCode")
-  #printf "\nVersionNumber: ${VERSION_NUMBER}"
-# }
 #XCodeVersion
+
 
 # TODO : Add a function to read XCode Build Settings
 #function XCodeBuildSettings {
@@ -633,6 +636,7 @@ function FindJobQueue {
     fi
   else
     if [ "${platform}" == "ios" ]; then
+      jobQueue=("XCodeVersion")
       ## IOS ## NOT SUPPORTED
       printf "No iOS related JOB queues have been defined yet."
       # Make sure you use SetupPods and GitSubmodules
