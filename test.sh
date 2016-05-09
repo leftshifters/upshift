@@ -243,19 +243,19 @@
 #	Simulator - watchOS 2.2       	-sdk watchsimulator2.2
 
 # xcodebuild -showBuildSettings
-#    AVAILABLE_PLATFORMS = appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator
-#    BUILD_DIR = /Users/sudhanshuraheja/Library/Developer/Xcode/DerivedData/Deezeno-fpdbioebihpiyrbfohmfktdwgmgf/Build/Products
+#    ## AVAILABLE_PLATFORMS = appletvos appletvsimulator iphoneos iphonesimulator macosx watchos watchsimulator
+#    # BUILD_DIR = /Users/sudhanshuraheja/Library/Developer/Xcode/DerivedData/Deezeno-fpdbioebihpiyrbfohmfktdwgmgf/Build/Products
 #    CODE_SIGNING_ALLOWED = YES
 #    CODE_SIGNING_REQUIRED = YES
 #    CODE_SIGN_ENTITLEMENTS = GoJek/GO-JEK.entitlements
-#    CODE_SIGN_IDENTITY = iPhone Developer
+#  CODE_SIGN_IDENTITY = iPhone Developer
 #    CORRESPONDING_SIMULATOR_SDK_NAME = iphonesimulator9.3
 #    FULL_PRODUCT_NAME = Deezeno.app / GO-JEK.app
-#    INFOPLIST_FILE = Deezeno/Info.plist
-#    PRODUCT_BUNDLE_IDENTIFIER = com.leftshift.deezeno
-#    PRODUCT_NAME = Deezeno
+#  INFOPLIST_FILE = Deezeno/Info.plist
+#  PRODUCT_BUNDLE_IDENTIFIER = com.leftshift.deezeno
+#  PRODUCT_NAME = Deezeno
 #    PRODUCT_SETTINGS_PATH = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios/Deezeno/Info.plist
-#    PROJECT_FILE_PATH = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios/Deezeno.xcodeproj
+#  PROJECT_FILE_PATH = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios/Deezeno.xcodeproj
 #    SOURCE_ROOT = /Users/sudhanshuraheja/Code/bitrise/deezeno-ios
 #    TARGETNAME = Deezeno
 #    TARGET_NAME = Deezeno
@@ -286,3 +286,9 @@
 #Build version 7D175
 
 #//usr/libexec/PlistBuddy 
+
+
+#set -o pipefail
+
+
+#et -o pipefail && xcodebuild -workspace './GoJek.xcworkspace' -scheme 'GoJek Staging' -configuration 'Debug' -destination 'generic/platform=iOS' -archivePath '/var/lib/jenkins/Library/Developer/Xcode/Archives/2016-05-09/GO-JEK-Dev-b0cd652 2016-05-09 19.14.16.xcarchive' archive CODE_SIGN_IDENTITY='iPhone Developer: Gojek Ci (AKQYP36WDV)' | tee /var/lib/jenkins/Library/Logs/gym/GO-JEK-GoJek\ Staging.log | xcpretty[0m[0m

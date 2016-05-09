@@ -7,7 +7,12 @@ alwaysUninstallOlderBuilds=true
 package=""
 mainActivity=""
 gitRepositoryBranch=""
-masterPassword="123"
+masterPassword=""
+projectName=""
+useWorkspace=false
+scheme=""
+iPhone="iPhone 6"
+iPhoneOS=" (9.3)"
 
 # 2. Load up config from config file
 if [ -f "./config.cfg" ]; then
@@ -56,7 +61,7 @@ function EndScript {
 }
 
 function ShowError {
-  printf "\n${redColour}
+  printf "${redColour}
 ################## Boom! Something went wrong! ################
 ${noColour}"
 }
@@ -589,6 +594,12 @@ function XCPretty {
   # TODO : Allow user to update XCPretty
   StartAction "XCPretty"
 
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
   XCPRETTY_VERSION=$(xcpretty --version 2>&1)
   XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< ${XCPRETTY_VERSION})
 
@@ -611,6 +622,133 @@ function XCPretty {
   fi
 }
 
+##
+## iOS Build Project
+##
+function BuildiOS {
+
+  StartAction "BuildiOS"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Make a TIMESHTAMP for log file
+  TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+  # Either use projectName defined by the user, or pick it automatically
+  if [ "${projectName}" == "" ]; then
+    printf "Dude, you need to define ${redColour}projectName${noColour} in your config.\nSince you haven't, we are going to pick it automatically,\nwhich will take time on every build.\n\n"
+
+    PROJECT_NAME_STRING=$(xcodebuild -showBuildSettings | grep PROJECT_NAME)
+    projectName=${PROJECT_NAME_STRING#"    PROJECT_NAME = "}
+
+    if [ "${projectName}" == "" ]; then
+      ShowError
+      printf "Damn, couldn't even find it automatically. Are you sure this is an iOS repo?\n"
+      next=false
+      return
+    fi
+
+    printf "Found ${blueColour}${projectName}${noColour} automatically. Using this now.\n\n"
+  fi
+
+  # Build using workspace if user asks, if it uses cocoapods user workspace automatically, othewise use xcodeproj
+  PROJECT_TYPE="project"
+  EXTENSION=".xcodeproj"
+
+  if [ "${useWorkspace}" == true ]; then
+    # Since the user is requesting for it, decision is done, we love our users.
+    PROJECT_TYPE="workspace"
+    EXTENSION=".xcworkspace"
+  else
+    if [ -f "Podfile" ]; then
+      # If a Podfile exits, then guys use Cocoapods, load up the workspace by default
+      PROJECT_TYPE="workspace"
+      EXTENSION=".xcworkspace"
+    fi
+  fi
+  
+  PROJECT_PATH="${projectName}${EXTENSION}";
+
+  # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
+  if [ "${scheme}" != "" ];then
+
+    # Load up the simulator first, so that it gets ready while the build happens
+    # Check if the simulator is already open
+    OUTPUT=$(ps -aef | grep "Simulator.app" -c)
+    if [ "${OUTPUT}" -gt 1 ]; then
+      # There's a simulator already running
+      printf "The simulator is already ${greenColour}running${noColour}!\n\n"
+    else
+      # Load up the simulator
+      printf "Starting up the ${greenColour}simulator${noColour}!\n\n"
+      xcrun instruments -w "${iPhone}${iPhoneOS}" 2>&1 1>/dev/null
+    fi
+
+    # Build the effing thing
+    # TODO : Clean the effing thing before you start
+    printf "Compiling the beautiful codebase\n\n"
+    set -o pipefail && xcodebuild -${PROJECT_TYPE} ${PROJECT_PATH} -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee xcode-build-${TIMESHTAMP}.log | xcpretty
+
+    BUILD_RESULTS=$(<xcode-build-${TIMESHTAMP}.log);
+    BUILD_SUCCEDED=$(grep "BUILD SUCCEEDED" -c <<< "${BUILD_RESULTS}")
+
+    if [ "${BUILD_SUCCEDED}" -gt 0 ]; then
+
+      # The build succeded
+      printf "The build was ${greenColour}successful${noColour} 🍺\n\n"
+    else
+      ShowError
+      printf "It seems the build ${redColour}failed${noColour}. You need to look this up\n\n"
+      next=false
+    fi
+
+  else
+    ShowError
+    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can pick one here\n\n"
+    xcodebuild -list
+    next=false
+  fi
+}
+
+##
+## Deploy iOS to a simulator
+##
+function DeployiOSSimulator {
+
+  StartAction "DeployiOSSimulator"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Get the product full name
+  FULL_PRODUCT_NAME=$(xcodebuild -showBuildSettings | grep FULL_PRODUCT_NAME)
+  fullProductName=${FULL_PRODUCT_NAME#"    FULL_PRODUCT_NAME = "}
+
+  # Get the bundle identifier
+  PRODUCT_BUNDLE_IDENTIFIER=$(xcodebuild -showBuildSettings | grep PRODUCT_BUNDLE_IDENTIFIER)
+  productBundleIdentifier=${PRODUCT_BUNDLE_IDENTIFIER#"    PRODUCT_BUNDLE_IDENTIFIER = "}
+
+  printf "About to ${blueColour}deploy${noColour} ${fullProductName} (${productBundleIdentifier}) to the simulator\n\n"
+
+  # TODO : Find a good way to delete the app from the simulator
+  #xcrun simctl uninstall booted ${productBundleIdentifier}
+
+  # Deploy the app to the simulator
+  xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/${fullProductName}
+
+  # Open up the app on the simulator
+  printf "Starting the app\n\n"
+  xcrun simctl launch booted ${productBundleIdentifier}
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -622,6 +760,8 @@ function XCPretty {
 #SetupPods
 #XCodeVersion
 #XCPretty
+#BuildiOS
+#DeployiOSSimulator
 
 
 # TODO : Add a function to read XCode Build Settings
@@ -635,6 +775,9 @@ function XCPretty {
 # pod outdated
 # from here - https://guides.cocoapods.org/using/pod-install-vs-update.html
 
+
+# TODO : Find all iOS Devices
+# xcrun simctl list
 
 
 # Setup Jobs
@@ -668,10 +811,14 @@ function FindJobQueue {
     fi
   else
     if [ "${platform}" == "ios" ]; then
-      jobQueue=("XCodeVersion")
-      ## IOS ## NOT SUPPORTED
-      printf "No iOS related JOB queues have been defined yet."
-      # Make sure you use SetupPods and GitSubmodules
+      ## IOS ## BUILD ##
+      if [ "${job}" == "build" ]; then
+        jobQueue=("XCodeVersion" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
+      else
+        ## IOS ## NOT SUPPORTED
+        ShowError
+        printf "Yo! We only support one commands for iOS right now: build\n"
+      fi
     else
       ## SETUP ## CLONE ##
       if [ "${platform}" == "setup" ]; then
