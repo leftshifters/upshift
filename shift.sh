@@ -43,7 +43,11 @@ job=$2
 # Setup Internal Functions
 
 function StartScript {
-  printf "\n${blueColour}Loading up...${noColour}\n"
+  printf "${greenColour}
+###############################################################
+##              Booting up the engines..                     ##
+###############################################################
+${noColour}"
 }
 
 function EndScript {
@@ -51,7 +55,21 @@ function EndScript {
 }
 
 function ShowError {
-  printf "\n${redColour}Something went wrong!${noColour}\n"
+  printf "\n${redColour}
+###############################################################
+##                 Boom! Something went wrong!               ##
+###############################################################
+${noColour}"
+}
+
+function ShowPreviousFailed {
+  printf "${redColour}Skipping${noColour} action because the previous actions failed\n"
+}
+
+function StartAction {
+  printf "${blueColour}
+############ Starting next action : $1 ##############
+${noColour}\n"
 }
 
 StartScript
@@ -68,8 +86,16 @@ StartScript
 
 function SetupSSH {
 
+  StartAction "SetupSSH"
+
   # Details about the script came from here
   # https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
 
   # Check if email has been defined by the user
   if [ "${emailForSSHKey}" != "" ]; then
@@ -106,6 +132,14 @@ function SetupSSH {
 ##
 
 function InstallOnAndroid {
+
+  StartAction "InstallOnAndroid"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
 
   # Make a TIMESHTAMP for the log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
@@ -175,6 +209,14 @@ function InstallOnAndroid {
 
 function GitPull {
 
+  StartAction "GitPull"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
@@ -212,6 +254,14 @@ function GitPull {
 ##
 
 function GitClone {
+
+  StartAction "GitClone"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
 
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
@@ -265,6 +315,14 @@ function GitClone {
 ##
 
 function StartEmulator {
+
+  StartAction "StartEmulator"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
 
   # TODO : Create an emulator if one doesn't exist
   # TODO : Maybe run ./gradlew connectedCheck to see if everything is working fine
@@ -345,6 +403,14 @@ function StartEmulator {
 ##
 function AndroidDevices {
 
+  StartAction "AndroidDevices"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
   # Touch device to that they can get unlocked, otherwise ADB just ignores them
   # Just make sure you hide the STDERR because well we don't care too much about it
   TOUCH_DEVICE=$(adb -d shell input keyevent 82 2>&1)
@@ -368,6 +434,15 @@ function AndroidDevices {
 ## assemble-android
 ##
 function AssembleAndroid {
+
+  StartAction "AssembleAndroid"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+ 
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
@@ -403,6 +478,43 @@ function AssembleAndroid {
   fi
 }
 
+##
+## Setup Submodule if they exist
+##
+
+function GitSubmodules {
+
+  StartAction "GitSubmodules"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Make a TIMESHTAMP for log file
+  TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+  # Check if .gitmodules exists
+  if [ -f ".gitmodules" ]; then
+    # If the file exists, we need to run init and update and catch errors
+    git submodule init 2>&1 | tee git-submodule-init-$TIMESHTAMP.log
+    git submodule update 2>&1 | tee git-submodule-update-$TIMESHTAMP.log
+
+    SUBMODULE_RESULTS=$(<git-submodule-update-$TIMESHTAMP.log)
+
+    if [ $(echo ${SUBMODULE_RESULTS} | grep "fatal:" -c) -gt 0 ] || [ $(echo ${SUBMODULE_RESULTS} | grep "error:" -c) -gt 0 ]; then
+      ShowError
+      printf "Damn, initializing submodules was ${redColour}not successful${noColour}. You should check this up.\n\n"
+    else
+      printf "\nSubmodules are now ${greenColour}setup${noColour}, one less thing to think about! 🍺\n\n"
+    fi
+    # Else Quietly ignore
+  else
+    printf "\nIt looks like this project doesn't use ${greenColour}submodules${noColour}.\n\n"
+  fi
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -410,6 +522,24 @@ function AssembleAndroid {
 #StartEmulator
 #AndroidDevices
 #AssembleAndroid
+#GitSubmodules
+
+# TODO : Add a function to get the XCode Version
+#function XCodeVersion {
+  #xcodebuild -version | grep "XCode"
+  #xcodebuild -version 2>&1 >xcode-version.log
+  #VERSION=$(<xcode-version.log)
+  #printf "Version: ${VERSION}"
+  #VERSION_NUMBER=$(echo ${VERSION} | grep "XCode")
+  #printf "\nVersionNumber: ${VERSION_NUMBER}"
+# }
+#XCodeVersion
+
+# TODO : Add a function to read XCode Build Settings
+#function XCodeBuildSettings {
+  #xcodebuild -showBuildSettings
+#}
+#XCodeBuildSettings
 
 
 
@@ -429,36 +559,37 @@ function RunJobs {
 function FindJobQueue {
 
   # TODO : Use Case for this, not if, if sucks
-  # ANDROID JOBS
   if [ "${platform}" == "android" ]; then
     if [ "${job}" == "build" ]; then
-      jobQueue=("AssembleAndroid")
+      ## ANDROID ## BUILD ##
+      jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid")
     else
       if [ "${job}" == "emulator" ]; then
-        jobQueue=("StartEmulator" "GitPull" "InstallOnAndroid")
+        ## ANDROID ## EMULATOR ##
+        jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid")
       else
-        # NOT SUPPORTED
+        ## ANDROID ## NOT SUPPORTED
         ShowError
         printf "Yo! We only support two commands for Android right now, build and emulator\n"
       fi
     fi
   else
-    # iOS JOBS
     if [ "${platform}" == "ios" ]; then
+      ## IOS ## NOT SUPPORTED
       printf "No iOS related JOB queues have been defined yet."
     else
-      # CLONE
+      ## SETUP ## CLONE ##
       if [ "${platform}" == "setup" ]; then
         if [ "${job}" == "clone" ]; then
-          jobQueue=("GitClone")
+          jobQueue=("GitClone" "GitSubmodules")
         else
-          # NOT SUPPORTED
+          ## SETUP ## NOT SUPPORTED
           ShowError
           printf "Yo! We only support one commands for Setup right now: clone\n"
         fi
         
       else
-        # NOT SUPPORTED
+        ## NOT SUPPORTED ##
         ShowError
         printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
         next=false
@@ -468,6 +599,7 @@ function FindJobQueue {
 
 }
 
+# Start running the scripts
 FindJobQueue
 RunJobs
 
