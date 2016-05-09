@@ -534,7 +534,7 @@ function SetupPods {
   # Check if Podfile exits
   if [ -f "Podfile" ]; then
     # Check if cocoapods is installed
-    POD_VERSION=$(podsasfas --version 2>&1)
+    POD_VERSION=$(pod --version 2>&1)
     POD_INSTALLED=$(grep 'command not found' -c <<< ${POD_VERSION})
 
     if [ "${POD_INSTALLED}" -gt 0 ]; then
@@ -580,6 +580,37 @@ function XCodeVersion {
 
 }
 
+##
+## Install xcpretty
+##
+function XCPretty {
+
+  # TODO : Add XCPretty to a Job
+  # TODO : Allow user to update XCPretty
+  StartAction "XCPretty"
+
+  XCPRETTY_VERSION=$(xcpretty --version 2>&1)
+  XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< ${XCPRETTY_VERSION})
+
+  if [ "${XCPRETTY_INSTALLED}" -gt 0 ]; then
+    # XCPretty is not installed, let's install it first
+    # First check if the master password has been defined
+    if [ "${masterPassword}" != "" ]; then
+      # TODO : test this on an actual machine
+      echo -ne ${masterPassword} | sudo -S gem install xcpretty
+      # TODO : Catch error from install xcpretty
+
+      printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
+    else
+      ShowError
+      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+      next=false
+    fi
+  else
+    printf "Woot! XCPretty is already installed\n"
+  fi
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -590,6 +621,7 @@ function XCodeVersion {
 #GitSubmodules
 #SetupPods
 #XCodeVersion
+#XCPretty
 
 
 # TODO : Add a function to read XCode Build Settings
