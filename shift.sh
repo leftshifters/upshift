@@ -375,7 +375,7 @@ function AssembleAndroid {
   # TODO : Use the logs to show details on a screen somewhere
 
   # If alwaysCleanBeforeBuild then run clean
-  if [ "${alwaysCleanBeforeBuild}" == 1 ]; then
+  if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
     ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
   else
@@ -428,6 +428,7 @@ function RunJobs {
 
 function FindJobQueue {
 
+  # TODO : Use Case for this, not if, if sucks
   # ANDROID JOBS
   if [ "${platform}" == "android" ]; then
     if [ "${job}" == "build" ]; then
