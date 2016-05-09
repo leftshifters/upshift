@@ -437,6 +437,7 @@ function FindJobQueue {
       if [ "${job}" == "emulator" ]; then
         jobQueue=("StartEmulator" "GitPull" "InstallOnAndroid")
       else
+        # NOT SUPPORTED
         ShowError
         printf "Yo! We only support two commands for Android right now, build and emulator\n"
       fi
@@ -447,8 +448,15 @@ function FindJobQueue {
       printf "No iOS related JOB queues have been defined yet."
     else
       # CLONE
-      if [ "${platform}" == "clone" ]; then
-        jobQueue=("GitClone")
+      if [ "${platform}" == "setup" ]; then
+        if [ "${job}" == "clone" ]; then
+          jobQueue=("GitClone")
+        else
+          # NOT SUPPORTED
+          ShowError
+          printf "Yo! We only support one commands for Setup right now: clone\n"
+        fi
+        
       else
         # NOT SUPPORTED
         ShowError
