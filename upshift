@@ -808,17 +808,22 @@ function SetupScript {
   if [ ! -d "/user/local/upshift/${version}" ]; then
     # Directory doesn't exist, create it
     mkdir -p /usr/local/upshift/${version}
-    printf "Setup the folder in /usr/local/upshift/${version}"
+    #printf "Setup the folder in /usr/local/upshift/${version}\n"
   fi
 
   # Throw yourself into the folder above, it not already there
   if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
     # Copy away
     cp -rf ./upshift /usr/local/upshift/${version}
+    #printf "Copied the script into /usr/local/upshift/${version}/upshift\n"
+
+    # Now add a link to the above file in /usr/local/bin
+    rm -f /usr/local/bin/upshift    
+    ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+    #printf "Setup symlink at /usr/local/bin/upshift\n"
   fi
 
-  # Now add a link to the above file in /usr/local/bin
-  ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+  printf "Installation has been ${greenColour}successfully${noColour} completed\n"
 
 }
 
