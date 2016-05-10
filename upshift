@@ -52,7 +52,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.5"
+version="0.5.0"
 
 
 
@@ -791,6 +791,37 @@ function DeployiOSSimulator {
 
 }
 
+##
+## Setup script
+##
+function SetupScript {
+
+  StartAction "SetupScript"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Check if /usr/local/upshift directory exists, if not create it
+  if [ ! -d "/user/local/upshift/${version}" ]; then
+    # Directory doesn't exist, create it
+    mkdir -p /usr/local/upshift/${version}
+    printf "Setup the folder in /usr/local/upshift/${version}"
+  fi
+
+  # Throw yourself into the folder above, it not already there
+  if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
+    # Copy away
+    cp -rf ./upshift /usr/local/upshift/${version}
+  fi
+
+  # Now add a link to the above file in /usr/local/bin
+  ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -804,6 +835,7 @@ function DeployiOSSimulator {
 #XCPretty
 #BuildiOS
 #DeployiOSSimulator
+#SetupScript
 
 
 # TODO : Add a function to read XCode Build Settings
@@ -867,6 +899,8 @@ function FindJobQueue {
                       ;;
       esac
       ;;
+    "install")
+      jobQueue=("SetupScript");;
     "-v")
       printf "Upshift v${version}"
       ;;
@@ -906,6 +940,10 @@ ${boldStyle}DESCRIPTION${normalStyle}
 
      This command helps you clone a new repository, install submodules and 
      installs pods.
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}install${noUnderlineStyle}
+
+     This command installs this script on your machine
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}-v${noUnderlineStyle}
 
