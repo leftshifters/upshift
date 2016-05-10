@@ -855,16 +855,17 @@ function AddConfig {
     echo debug=false >> config.ci
     echo alwaysCleanBeforeBuild=true >> config.ci
     echo alwaysUninstallOlderBuilds=true >> config.ci
-    echo package="" >> config.ci
-    echo mainActivity="" >> config.ci
-    echo gitRepositoryBranch="" >> config.ci
-    echo masterPassword="" >> config.ci
-    echo projectName="" >> config.ci
+    echo package=\'\' >> config.ci
+    echo mainActivity=\'\' >> config.ci
+    echo gitRepositoryURL=\'\' >> config.ci
+    echo gitRepositoryBranch=\'\' >> config.ci
+    echo masterPassword=\'\' >> config.ci
+    echo projectName=\'\' >> config.ci
     echo useWorkspace=false >> config.ci
-    echo scheme="" >> config.ci
-    echo iPhone="iPhone 6" >> config.ci
-    echo iPhoneOS=" (9.3)" >> config.ci
-    echo xcodeVersion="7.3" >> config.ci
+    echo scheme=\'\' >> config.ci
+    echo iPhone=\'\' >> config.ci
+    echo iPhoneOS=\'\' >> config.ci
+    echo xcodeVersion=\'\' >> config.ci
 
     printf "We just add a very basic confi.ci file in this folder.\n"
   fi
