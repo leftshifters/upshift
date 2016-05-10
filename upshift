@@ -16,8 +16,8 @@ iPhoneOS=" (9.3)"
 xcodeVersion="7.3"
 
 # 2. Load up config from config file
-if [ -f "./config.cfg" ]; then
-  source ./config.cfg
+if [ -f "./config.ci" ]; then
+  source ./config.ci
 fi
 
 # 3. Dump commands to the screen, only if one wants to debug
@@ -52,7 +52,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.5.0"
+version="0.6.0"
 
 
 
@@ -129,7 +129,7 @@ function SetupSSH {
     fi
   else
     ShowError
-    printf "Dude, you need to add the <${redColour}emailForSSHKey${noColour}> parameter to get this to work\n"
+    printf "Dude, you need to add the <${redColour}emailForSSHKey${noColour}> parameter to get this to work\nYou can get a sample config by running upshift setup config\n"
     next=false
   fi
 }
@@ -251,7 +251,7 @@ function GitPull {
   else
     # The user hasn't added the required keys
     ShowError
-    printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\n\n"
+    printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
     next=false
   fi
 }
@@ -306,13 +306,13 @@ function GitClone {
     else
       # The user hasn't added the required keys
       ShowError
-      printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\n\n"
+      printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
       next=false
     fi
   else
     # The user hasn't added the required keys
     ShowError
-    printf "Dude, you need to add the ${blueColour}gitRepositoryURL${noColour} for this to work\n\n"
+    printf "Dude, you need to add the ${blueColour}gitRepositoryURL${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
     next=false
   fi
 }
@@ -397,7 +397,7 @@ function StartEmulator {
 
     else 
       ShowError
-      printf "Dude, you need to define ${blueColour}emulatorName${noColour} for this to work\n\n"
+      printf "Dude, you need to define ${blueColour}emulatorName${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
       next=false
     fi
   else
@@ -562,7 +562,7 @@ function SetupPods {
         printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
       else
         ShowError
-        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
         next=false
       fi
     else
@@ -654,7 +654,7 @@ function XCPretty {
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
     else
       ShowError
-      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
       next=false
     fi
   else
@@ -748,7 +748,7 @@ function BuildiOS {
 
   else
     ShowError
-    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can pick one here\n\n"
+    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can get a sample config by running upshift setup config\nYou can pick one here\n\n"
     xcodebuild -list
     next=false
   fi
@@ -827,6 +827,43 @@ function SetupScript {
 
 }
 
+##
+## Add Configuration File
+##
+function AddConfig {
+
+  StartAction "AddConfig"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Check if config.ci exists in 
+  if [ -f "config.ci" ]; then
+    printf "A config file ${redColour}already exists${noColour}\n"
+  else 
+    # Write the config file
+    echo debug=false >> config.ci
+    echo alwaysCleanBeforeBuild=true >> config.ci
+    echo alwaysUninstallOlderBuilds=true >> config.ci
+    echo package="" >> config.ci
+    echo mainActivity="" >> config.ci
+    echo gitRepositoryBranch="" >> config.ci
+    echo masterPassword="" >> config.ci
+    echo projectName="" >> config.ci
+    echo useWorkspace=false >> config.ci
+    echo scheme="" >> config.ci
+    echo iPhone="iPhone 6" >> config.ci
+    echo iPhoneOS=" (9.3)" >> config.ci
+    echo xcodeVersion="7.3" >> config.ci
+
+    printf "We just add a very basic confi.ci file in this folder.\n"
+  fi
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -898,6 +935,7 @@ function FindJobQueue {
     "setup")
       case "${job}" in
         "clone")      jobQueue=("GitClone" "GitSubmodules" "SetupPods");;
+        "config")     jobQueue=("AddConfig");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for Setup right now: clone\n"
@@ -945,6 +983,13 @@ ${boldStyle}DESCRIPTION${normalStyle}
 
      This command helps you clone a new repository, install submodules and 
      installs pods.
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}setup${noUnderlineStyle} ${underlineStyle}config${noUnderlineStyle}
+
+     This command will create an empty config file in the current folder
+     that you are in. Config files are setup in the main folder and are
+     called config.ci . The variable defined in this file gets more
+     priority than the ones defined inside upshift
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}install${noUnderlineStyle}
 
