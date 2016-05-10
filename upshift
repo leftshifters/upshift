@@ -52,7 +52,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.6.0"
+version="0.6.1"
 
 
 
@@ -818,7 +818,10 @@ function SetupScript {
     #printf "Copied the script into /usr/local/upshift/${version}/upshift\n"
 
     # Now add a link to the above file in /usr/local/bin
-    rm -f /usr/local/bin/upshift    
+    if [ -f "/usr/local/bin/upshift" ]; then
+      # Remove only if it exits
+      rm -f /usr/local/bin/upshift
+    fi
     ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
     #printf "Setup symlink at /usr/local/bin/upshift\n"
   fi
