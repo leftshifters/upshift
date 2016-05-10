@@ -867,6 +867,9 @@ function FindJobQueue {
                       ;;
       esac
       ;;
+    "-v")
+      printf "Upshift v${version}"
+      ;;
     *)
       printf "
 UPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)
@@ -903,6 +906,10 @@ ${boldStyle}DESCRIPTION${normalStyle}
 
      This command helps you clone a new repository, install submodules and 
      installs pods.
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}-v${noUnderlineStyle}
+
+     This command gets you the latest version number
 
 ${boldStyle}COMPATIBILITY${normalStyle}
       This software has only been tried and tested on Mac OSX 10.11.4. If
