@@ -52,7 +52,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.6.0"
+version="0.6.1"
 
 
 
