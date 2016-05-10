@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 1. Read the configuration files
 debug=false
@@ -52,7 +52,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.6.1"
+version="0.6.2"
 
 
 
@@ -88,7 +88,7 @@ function StartAction {
 
 ##
 ## setup-ssh
-## 
+##
 
 function SetupSSH {
 
@@ -279,28 +279,38 @@ function GitClone {
     # TODO : Automatically pick the current branch
     if [ "${gitRepositoryBranch}" != "" ]; then
 
-      printf "Alright, let's ${greenColour}clone${noColour} the ${blueColour}${gitRepositoryBranch}${noColour} branch for the ${blueColour}${gitRepositoryURL}${noColour} repo\n\n"
-    
-      # Alright, let's pull
-      # But you can't pull into an empty directly, now since you already have bitrise.yml and .bitrise.secrets.yml in your directory,
-      #   you will need to clone into another folder, and move stuff back here
-      #   we can't do what the rest of the world tries to do - which is git init, add remote,
-      #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-      git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
-      mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
-      mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
-      rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
+      # Check if this is already a git repository
 
-      # Load up the results to see if there were any errors
-      CLONE_RESULTS=$(<git-clone-$TIMESHTAMP.log)
-      # If there was a fatal error, tell the user there's something wrong
-      if [ "$(printf "${CLONE_RESULTS}" | grep "fatal" -c)" -gt "0" ] || [ "$(printf "${CLONE_RESULTS}" | grep "error" -c)" -gt "0" ]; then
-        ShowError
-        printf "Something failed while we were cloning, you should look this up\n\n"
-        next=false
+      if [ -f ".git/config" ]; then
+
+        printf "You have a .git/config, I believe you already have a cloned repo here!\n"
+
       else
-        # All done
-        printf "\nAll done ${greenColour}baby${noColour}! 🍺.\n\n"
+
+        printf "Alright, let's ${greenColour}clone${noColour} the ${blueColour}${gitRepositoryBranch}${noColour} branch for the ${blueColour}${gitRepositoryURL}${noColour} repo\n\n"
+
+        # Alright, let's pull
+        # But you can't pull into an empty directly, now since you already have bitrise.yml and .bitrise.secrets.yml in your directory,
+        #   you will need to clone into another folder, and move stuff back here
+        #   we can't do what the rest of the world tries to do - which is git init, add remote,
+        #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
+        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
+        mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
+        mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
+        rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
+
+        # Load up the results to see if there were any errors
+        CLONE_RESULTS=$(<git-clone-$TIMESHTAMP.log)
+        # If there was a fatal error, tell the user there's something wrong
+        if [ "$(printf "${CLONE_RESULTS}" | grep "fatal" -c)" -gt "0" ] || [ "$(printf "${CLONE_RESULTS}" | grep "error" -c)" -gt "0" ]; then
+          ShowError
+          printf "Something failed while we were cloning, you should look this up\n\n"
+          next=false
+        else
+          # All done
+          printf "\nAll done ${greenColour}baby${noColour}! 🍺.\n\n"
+        fi
+
       fi
 
     else
@@ -353,7 +363,7 @@ function StartEmulator {
       # TODO : Another potential problem, we redirect both 1,2 in reset mode (>), the file could get overwritten
       sleep 2
       EMULATOR_RESULTS=$(<emulator.log)
-      
+
       # Check if there was a PANIC [to test this, put in the wrong emulator name]
       PANIC_COUNT=$(echo ${EMULATOR_RESULTS} | grep "PANIC" -c)
 
@@ -364,7 +374,7 @@ function StartEmulator {
         printf "Here's what Mr. Log says:\n\n"
         printf "${EMULATOR_RESULTS}\n\n"
         next=false
-      else 
+      else
         # Seems like there is no panic, let's check for errors
         # TODO : Can't remember how do you get an error
         ERROR_COUNT=$(echo ${EMULATOR_RESULTS} | grep "ERROR" -c)
@@ -374,7 +384,7 @@ function StartEmulator {
           next=false
         else
           printf "All set baby, ${greenColour}starting${noColour} to load up the emulator\n"
-          # ADB gives this option to wait for the device till it comes up, let's just depend on it, 
+          # ADB gives this option to wait for the device till it comes up, let's just depend on it,
           # this is really mess with us when there is a problem with the emulator fails to load because of it's own bugs
           adb wait-for-device
 
@@ -395,7 +405,7 @@ function StartEmulator {
         fi
       fi
 
-    else 
+    else
       ShowError
       printf "Dude, you need to define ${blueColour}emulatorName${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
       next=false
@@ -449,7 +459,7 @@ function AssembleAndroid {
     ShowPreviousFailed
     return
   fi
- 
+
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
@@ -710,7 +720,7 @@ function BuildiOS {
       EXTENSION=".xcworkspace"
     fi
   fi
-  
+
   PROJECT_PATH="${projectName}${EXTENSION}";
 
   # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
@@ -804,17 +814,21 @@ function SetupScript {
     return
   fi
 
+  # Only these are available in $PATH on a fresh system
+  # /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  # We will install in /usr/local/bin
+
   # Check if /usr/local/upshift directory exists, if not create it
   if [ ! -d "/user/local/upshift/${version}" ]; then
     # Directory doesn't exist, create it
-    mkdir -p /usr/local/upshift/${version}
+    sudo mkdir -p /usr/local/upshift/${version}
     #printf "Setup the folder in /usr/local/upshift/${version}\n"
   fi
 
   # Throw yourself into the folder above, it not already there
   if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
     # Copy away
-    cp -rf ./upshift /usr/local/upshift/${version}
+    sudo cp -rf ./upshift /usr/local/upshift/${version}
     #printf "Copied the script into /usr/local/upshift/${version}/upshift\n"
 
     # Now add a link to the above file in /usr/local/bin
@@ -822,11 +836,14 @@ function SetupScript {
       # Remove only if it exits
       rm -f /usr/local/bin/upshift
     fi
-    ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+    sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
     #printf "Setup symlink at /usr/local/bin/upshift\n"
+
+    printf "Installation has been ${greenColour}successfully${noColour} completed\n"
+  else
+    printf "This version is already ${greenColour}installed${noColour}\n"
   fi
 
-  printf "Installation has been ${greenColour}successfully${noColour} completed\n"
 
 }
 
@@ -843,24 +860,25 @@ function AddConfig {
     return
   fi
 
-  # Check if config.ci exists in 
+  # Check if config.ci exists in
   if [ -f "config.ci" ]; then
     printf "A config file ${redColour}already exists${noColour}\n"
-  else 
+  else
     # Write the config file
     echo debug=false >> config.ci
     echo alwaysCleanBeforeBuild=true >> config.ci
     echo alwaysUninstallOlderBuilds=true >> config.ci
-    echo package="" >> config.ci
-    echo mainActivity="" >> config.ci
-    echo gitRepositoryBranch="" >> config.ci
-    echo masterPassword="" >> config.ci
-    echo projectName="" >> config.ci
+    echo package=\'\' >> config.ci
+    echo mainActivity=\'\' >> config.ci
+    echo gitRepositoryURL=\'\' >> config.ci
+    echo gitRepositoryBranch=\'\' >> config.ci
+    echo masterPassword=\'\' >> config.ci
+    echo projectName=\'\' >> config.ci
     echo useWorkspace=false >> config.ci
-    echo scheme="" >> config.ci
-    echo iPhone="iPhone 6" >> config.ci
-    echo iPhoneOS=" (9.3)" >> config.ci
-    echo xcodeVersion="7.3" >> config.ci
+    echo scheme=\'\' >> config.ci
+    echo iPhone=\'\' >> config.ci
+    echo iPhoneOS=\'\' >> config.ci
+    echo xcodeVersion=\'\' >> config.ci
 
     printf "We just add a very basic confi.ci file in this folder.\n"
   fi
@@ -928,7 +946,7 @@ function FindJobQueue {
     "ios")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator");;
+        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
@@ -968,7 +986,7 @@ ${boldStyle}DESCRIPTION${normalStyle}
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}android${noUnderlineStyle} ${underlineStyle}build${noUnderlineStyle}
 
-     This command pulls the latest code, checks and install submodules 
+     This command pulls the latest code, checks and install submodules
      and finally builds the Android project.
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}android${noUnderlineStyle} ${underlineStyle}emulator${noUnderlineStyle}
@@ -979,12 +997,12 @@ ${boldStyle}DESCRIPTION${normalStyle}
      ${boldStyle}upshift${normalStyle} ${underlineStyle}ios${noUnderlineStyle} ${underlineStyle}build${noUnderlineStyle}
 
      This command checks if you are building on the correct Xcode version,
-     pulls the code, installs submodules, installs pods, build the latest 
+     pulls the code, installs submodules, installs pods, build the latest
      iOS project and deploys it on the iOS simulator
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}setup${noUnderlineStyle} ${underlineStyle}clone${noUnderlineStyle}
 
-     This command helps you clone a new repository, install submodules and 
+     This command helps you clone a new repository, install submodules and
      installs pods.
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}setup${noUnderlineStyle} ${underlineStyle}config${noUnderlineStyle}
