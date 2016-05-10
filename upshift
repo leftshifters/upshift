@@ -129,7 +129,7 @@ function SetupSSH {
     fi
   else
     ShowError
-    printf "Dude, you need to add the <${redColour}emailForSSHKey${noColour}> parameter to get this to work\n"
+    printf "Dude, you need to add the <${redColour}emailForSSHKey${noColour}> parameter to get this to work\nYou can get a sample config by running upshift setup config\n"
     next=false
   fi
 }
@@ -251,7 +251,7 @@ function GitPull {
   else
     # The user hasn't added the required keys
     ShowError
-    printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\n\n"
+    printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
     next=false
   fi
 }
@@ -306,13 +306,13 @@ function GitClone {
     else
       # The user hasn't added the required keys
       ShowError
-      printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\n\n"
+      printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
       next=false
     fi
   else
     # The user hasn't added the required keys
     ShowError
-    printf "Dude, you need to add the ${blueColour}gitRepositoryURL${noColour} for this to work\n\n"
+    printf "Dude, you need to add the ${blueColour}gitRepositoryURL${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
     next=false
   fi
 }
@@ -397,7 +397,7 @@ function StartEmulator {
 
     else 
       ShowError
-      printf "Dude, you need to define ${blueColour}emulatorName${noColour} for this to work\n\n"
+      printf "Dude, you need to define ${blueColour}emulatorName${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
       next=false
     fi
   else
@@ -562,7 +562,7 @@ function SetupPods {
         printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
       else
         ShowError
-        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
         next=false
       fi
     else
@@ -654,7 +654,7 @@ function XCPretty {
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
     else
       ShowError
-      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\n"
+      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
       next=false
     fi
   else
@@ -748,7 +748,7 @@ function BuildiOS {
 
   else
     ShowError
-    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can pick one here\n\n"
+    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can get a sample config by running upshift setup config\nYou can pick one here\n\n"
     xcodebuild -list
     next=false
   fi
