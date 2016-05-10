@@ -238,7 +238,7 @@ function GitPull {
     # Load up the results to see if there were any errors
     PULL_RESULTS=$(<git-pull-$TIMESHTAMP.log)
     # If there was a fatal error, tell the user there's something wrong
-    if [ "$(printf "${PULL_RESULTS}" | grep "fatal" -c)" -gt "0" ]; then
+    if [ "$(printf "${PULL_RESULTS}" | grep "fatal:" -c)" -gt "0" ] || [ "$(printf "${PULL_RESULTS}" | grep "error:" -c)" -gt "0" ]; then
       ShowError
       printf "Something went wrong with the pull, you should look this up\n\n"
       next=false
