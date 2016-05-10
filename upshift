@@ -835,50 +835,44 @@ function RunJobs {
 
 function FindJobQueue {
 
-  # TODO : Use Case for this, not if, if sucks
-  if [ "${platform}" == "android" ]; then
-    if [ "${job}" == "build" ]; then
-      ## ANDROID ## BUILD ##
-      jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid")
-    else
-      if [ "${job}" == "emulator" ]; then
-        ## ANDROID ## EMULATOR ##
-        jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid")
-      else
-        ## ANDROID ## NOT SUPPORTED
-        ShowError
-        printf "Yo! We only support two commands for Android right now, build and emulator\n"
-      fi
-    fi
-  else
-    if [ "${platform}" == "ios" ]; then
-      ## IOS ## BUILD ##
-      if [ "${job}" == "build" ]; then
-        jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
-      else
-        ## IOS ## NOT SUPPORTED
-        ShowError
-        printf "Yo! We only support one commands for iOS right now: build\n"
-      fi
-    else
-      ## SETUP ## CLONE ##
-      if [ "${platform}" == "setup" ]; then
-        if [ "${job}" == "clone" ]; then
+  case "${platform}" in
+    "android")
+      case "${job}" in
+        "build")
+          jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid")
+          ;;
+        "emulator")
+          jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid")
+          ;;
+        *)
+          ShowError
+          printf "Yo! We only support two commands for Android right now, build and emulator\n"
+          ;;
+      ;;
+    "ios")
+      case "${job}" in
+        "build")
+          jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
+          ;;
+        *)
+          ShowError
+          printf "Yo! We only support one commands for iOS right now: build\n"
+          ;;
+      ;;
+    "setup")
+      case "${job}" in
+        "clone")
           jobQueue=("GitClone" "GitSubmodules")
-        else
-          ## SETUP ## NOT SUPPORTED
+          ;;
+        *)
           ShowError
           printf "Yo! We only support one commands for Setup right now: clone\n"
-        fi
-        
-      else
-        ## NOT SUPPORTED ##
-        ShowError
-        printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
-      fi
-    fi
-  fi
-
+          ;;
+      ;;
+    *)
+      ShowError
+      printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
+      ;;
 }
 
 # Start running the scripts
