@@ -33,6 +33,9 @@ noColour='\033[0m'
 
 boldStyle=$(tput bold)
 normalStyle=$(tput sgr0)
+underlineStyle=$(tput smul)
+noUnderlineStyle=$(tput rmul)
+
 
 # 5. Exit script on error
 # set -e
@@ -76,8 +79,6 @@ function StartAction {
 ############ Starting next action : $1 ##############
 ${noColour}\n"
 }
-
-StartScript
 
 
 
@@ -837,42 +838,80 @@ function FindJobQueue {
 
   case "${platform}" in
     "android")
+      StartScript
       case "${job}" in
-        "build")
-          jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid")
-          ;;
-        "emulator")
-          jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid")
-          ;;
+        "build")      jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid");;
+        "emulator")   jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid");;
         *)
-          ShowError
-          printf "Yo! We only support two commands for Android right now, build and emulator\n"
-          ;;
+                      ShowError
+                      printf "Yo! We only support two commands for Android right now, build and emulator\n"
+                      ;;
+      esac
       ;;
     "ios")
+      StartScript
       case "${job}" in
-        "build")
-          jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
-          ;;
+        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator");;
         *)
-          ShowError
-          printf "Yo! We only support one commands for iOS right now: build\n"
-          ;;
+                      ShowError
+                      printf "Yo! We only support one commands for iOS right now: build\n"
+                      ;;
+      esac
       ;;
     "setup")
       case "${job}" in
-        "clone")
-          jobQueue=("GitClone" "GitSubmodules")
-          ;;
+        "clone")      jobQueue=("GitClone" "GitSubmodules" "SetupPods");;
         *)
-          ShowError
-          printf "Yo! We only support one commands for Setup right now: clone\n"
-          ;;
+                      ShowError
+                      printf "Yo! We only support one commands for Setup right now: clone\n"
+                      ;;
+      esac
       ;;
     *)
-      ShowError
-      printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
+      printf "
+UPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)
+
+${boldStyle}NAME${normalStyle}
+    ${boldStyle}upshift${normalStyle} -- help you build and test mobile apps
+
+${boldStyle}SYNOPSIS${normalStyle}
+    ${boldStyle}upshift${normalStyle} ${underlineStyle}platform${noUnderlineStyle} ${underlineStyle}job${noUnderlineStyle}
+
+${boldStyle}DESCRIPTION${normalStyle}
+     The ${boldStyle}upshift${normalStyle} utility helps you clone, build and test your iOS and
+     Android projects.
+
+     The following options are currently available
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}android${noUnderlineStyle} ${underlineStyle}build${noUnderlineStyle}
+
+     This command pulls the latest code, checks and install submodules 
+     and finally builds the Android project.
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}android${noUnderlineStyle} ${underlineStyle}emulator${noUnderlineStyle}
+
+     This command starts up the emulator on the system, pulls the latest
+     code, installs the git submodules and installs the app on the emulator.
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}ios${noUnderlineStyle} ${underlineStyle}build${noUnderlineStyle}
+
+     This command checks if you are building on the correct Xcode version,
+     pulls the code, installs submodules, installs pods, build the latest 
+     iOS project and deploys it on the iOS simulator
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}setup${noUnderlineStyle} ${underlineStyle}clone${noUnderlineStyle}
+
+     This command helps you clone a new repository, install submodules and 
+     installs pods.
+
+${boldStyle}COMPATIBILITY${normalStyle}
+      This software has only been tried and tested on Mac OSX 10.11.4. If
+      you're planning to use this on windows, your're on your own!
+
+Leftshift Tech.               May 10, 2016                Leftshift Tech.
+      "
       ;;
+  esac
 }
 
 # Start running the scripts
