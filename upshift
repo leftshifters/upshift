@@ -28,8 +28,13 @@ fi
 # 4. Make sure things look good. Here are some font and color adjustments
 redColour='\033[0;31m'
 greenColour='\033[0;32m'
+yellowColour='\033[0;33m'
 blueColour='\033[0;34m'
+grayColour='\033[0;90m'
+whiteColour='\033[0;97m'
 noColour='\033[0m'
+
+grayBgColor='\033[0;100m'
 
 boldStyle=$(tput bold)
 normalStyle=$(tput sgr0)
@@ -46,18 +51,17 @@ next=true
 platform=$1
 job=$2
 
-
+# 7. Application Version
+version="0.5"
 
 
 
 # Setup Internal Functions
+# ⚡ ⚙
 
 function StartScript {
-  printf "${greenColour}
-###############################################################
-##              Booting up the engines..                     ##
-###############################################################
-${noColour}"
+  printf ""
+  printf "\n${boldStyle}◀ BOOTING UP THE ENGINES ►${normalStyle}\n"
 }
 
 function EndScript {
@@ -65,9 +69,7 @@ function EndScript {
 }
 
 function ShowError {
-  printf "${redColour}
-################## Boom! Something went wrong! ################
-${noColour}"
+  printf "${boldStyle}ERROR ${normalStyle}\n"
 }
 
 function ShowPreviousFailed {
@@ -75,9 +77,7 @@ function ShowPreviousFailed {
 }
 
 function StartAction {
-  printf "${blueColour}
-############ Starting next action : $1 ##############
-${noColour}\n"
+  printf "\n${blueColour}◀ ACTION: $1 ►${noColour}\n\n"
 }
 
 
