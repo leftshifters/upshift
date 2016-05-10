@@ -13,6 +13,7 @@ useWorkspace=false
 scheme=""
 iPhone="iPhone 6"
 iPhoneOS=" (9.3)"
+xcodeVersion="7.3"
 
 # 2. Load up config from config file
 if [ -f "./config.cfg" ]; then
@@ -128,6 +129,7 @@ function SetupSSH {
   else
     ShowError
     printf "Dude, you need to add the <${redColour}emailForSSHKey${noColour}> parameter to get this to work\n"
+    next=false
   fi
 }
 
@@ -304,7 +306,7 @@ function GitClone {
       # The user hasn't added the required keys
       ShowError
       printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\n\n"
-      exit 1
+      next=false
     fi
   else
     # The user hasn't added the required keys
@@ -510,6 +512,7 @@ function GitSubmodules {
     if [ $(echo ${SUBMODULE_RESULTS} | grep "fatal:" -c) -gt 0 ] || [ $(echo ${SUBMODULE_RESULTS} | grep "error:" -c) -gt 0 ]; then
       ShowError
       printf "Damn, initializing submodules was ${redColour}not successful${noColour}. You should check this up.\n\n"
+      next=false
     else
       printf "\nSubmodules are now ${greenColour}setup${noColour}, one less thing to think about! 🍺\n\n"
     fi
@@ -581,7 +584,43 @@ function XCodeVersion {
   StartAction "XCodeVersion"
 
   XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
-  printf "We are currently using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+  printf "We are currently using XCode ${blueColour}${XCODE_VERSION}${noColour}\n\n"
+
+  if [ "${XCODE_VERSION}" != "${xcodeVersion}" ]; then
+    # Looks like the xcode version required and available do not match
+    # Check if this system has the XCode version required
+    # TODO : This will vary based on how you setup XCode, find out if there is a better way
+    if [ -d "/Applications/Xcode-${xcodeVersion}.app/" ]; then
+      # Looks like this version is available on this machine
+
+      # Check if the user has added the password for this machine, we need sudo again
+      if [ "${masterPassword}" != "" ]; then
+        # Alright, it seems there is a password, let's try it out
+        printf "${blueColour}Switching${noColour} Xcode versions\n\n"
+        echo -ne ${masterPassword} | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+
+        # Maye it's done, check and confirm
+        XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+
+        if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
+          printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+        else
+          ShowError
+          printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
+          next=false
+        fi
+
+      else
+        ShowError
+        printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
+        next=false
+      fi
+    else
+      ShowError
+      printf "We do not have XCode ${xcodeVersion} on this machine. About time to get it.\n\n"
+      next=false
+    fi
+  fi
 
 }
 
@@ -740,6 +779,8 @@ function DeployiOSSimulator {
   # TODO : Find a good way to delete the app from the simulator
   #xcrun simctl uninstall booted ${productBundleIdentifier}
 
+  #Details here http://dduan.net/post/2015/02/build-and-run-ios-apps-in-commmand-line/
+
   # Deploy the app to the simulator
   xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/${fullProductName}
 
@@ -813,7 +854,7 @@ function FindJobQueue {
     if [ "${platform}" == "ios" ]; then
       ## IOS ## BUILD ##
       if [ "${job}" == "build" ]; then
-        jobQueue=("XCodeVersion" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
+        jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator")
       else
         ## IOS ## NOT SUPPORTED
         ShowError
@@ -834,7 +875,6 @@ function FindJobQueue {
         ## NOT SUPPORTED ##
         ShowError
         printf "Yo! We are not ${blueColour}supporting${noColour} this platform at this time. It's only iOS and Android at this time.\n"
-        next=false
       fi
     fi
   fi
