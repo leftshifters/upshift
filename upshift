@@ -932,7 +932,7 @@ function FindJobQueue {
     "ios")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "BuildiOS" "DeployiOSSimulator");;
+        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
