@@ -22,6 +22,9 @@ This command checks if you are building on the correct Xcode version, pulls the 
 ### upshift setup clone
 This command helps you clone a new repository, install submodules and installs pods.
 
+### upshift setup config
+This command will create an empty config file in the current folder that you are in. Config files are setup in the main folder and are called config.ci . The variable defined in this file gets more priority than the ones defined inside upshift
+
 ### upshift install
 This command installs this script on your machine
 
