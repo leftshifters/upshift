@@ -723,6 +723,22 @@ function BuildiOS {
 
   PROJECT_PATH="${projectName}${EXTENSION}";
 
+  # Check if we have `iPhone` variable set
+  if [ "${iPhone}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhone in config. Do that first and come back.\n\nExample iPhone=\'${blueColour}iPhone 6\'${noColour}\n"
+    next=false
+    return
+  fi
+
+  # Check if we have `iPhoneOS` variable set
+  if [ "${iPhoneOS}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhoneOS in config. Do that first and come back.\n\nExample iPhoneOS=\'${blueColour} (9.3)\'${noColour}\n"
+    next=false
+    return
+  fi
+
   # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
   if [ "${scheme}" != "" ];then
 
