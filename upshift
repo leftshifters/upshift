@@ -294,7 +294,7 @@ function GitClone {
         #   you will need to clone into another folder, and move stuff back here
         #   we can't do what the rest of the world tries to do - which is git init, add remote,
         #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
+        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --progress --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
         rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
