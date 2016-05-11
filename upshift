@@ -657,8 +657,8 @@ function XCPretty {
     # XCPretty is not installed, let's install it first
     # First check if the master password has been defined
     if [ "${masterPassword}" != "" ]; then
-      # TODO : test this on an actual machine
-      echo -ne ${masterPassword} | sudo -S gem install xcpretty
+      # this worked on my machine where xcpretty was not installed.
+      echo -e ${masterPassword} | sudo -S gem install xcpretty
       # TODO : Catch error from install xcpretty
 
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
