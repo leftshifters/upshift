@@ -6,6 +6,7 @@ alwaysCleanBeforeBuild=true
 alwaysUninstallOlderBuilds=true
 package=""
 mainActivity=""
+gitRepositoryURL=""
 gitRepositoryBranch=""
 masterPassword=""
 projectName=""
@@ -18,6 +19,19 @@ xcodeVersion="7.3"
 # 2. Load up config from config file
 if [ -f "./config.ci" ]; then
   source ./config.ci
+fi
+
+#2.1 Load default values for variables which might have been null in config.ci
+if [ "${xcodeVersion}" == "" ]; then
+  xcodeVersion="7.3"
+fi
+
+if [ "iPhone" == "" ]; then
+  iPhone="iPhone 6"
+fi
+
+if [ "iPhoneOS" == "" ]; then
+  iPhoneOS=" (9.3)"
 fi
 
 # 3. Dump commands to the screen, only if one wants to debug
@@ -52,8 +66,11 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.6.2"
+version="0.6.3"
 
+# 8. Set time functions
+startTime=$(date +%s)
+endTime=""
 
 
 # Setup Internal Functions
@@ -65,7 +82,14 @@ function StartScript {
 }
 
 function EndScript {
-  printf "\n"
+  endTime=$(date +%s)
+  totalTime=$((endTime - startTime))
+  printf "This job took ${blueColour}${totalTime} seconds${noColour}\n"
+
+  if [ "${next}" == false ]; then
+    exit 1
+  fi
+
 }
 
 function ShowError {
@@ -109,7 +133,7 @@ function SetupSSH {
     # Check if an id_rsa already exists at the defualt location
     if [ ! -f ~/.ssh/id_rsa ]; then
       printf "File does not exist at ~/.ssh/id_rsa"
-      echo -ne '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
+      echo -e '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
 
       # Show the created keys on the screen
       ID_RSA=$(<~/.ssh/id_rsa)
@@ -294,7 +318,7 @@ function GitClone {
         #   you will need to clone into another folder, and move stuff back here
         #   we can't do what the rest of the world tries to do - which is git init, add remote,
         #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
+        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --progress --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
         rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
@@ -561,7 +585,7 @@ function SetupPods {
       # First check if the master password has been defined
       if [ "${masterPassword}" != "" ]; then
         # TODO : test this on an actual machine
-        echo -ne ${masterPassword} | sudo -S gem install cocoapods
+        echo -e ${masterPassword} | sudo -S gem install cocoapods
         # TODO : Catch error from install cocoapods
 
         # https://guides.cocoapods.org/using/pod-install-vs-update.html
@@ -595,42 +619,59 @@ function XCodeVersion {
   StartAction "XCodeVersion"
 
   XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
-  printf "We are currently using XCode ${blueColour}${XCODE_VERSION}${noColour}\n\n"
 
-  if [ "${XCODE_VERSION}" != "${xcodeVersion}" ]; then
-    # Looks like the xcode version required and available do not match
-    # Check if this system has the XCode version required
-    # TODO : This will vary based on how you setup XCode, find out if there is a better way
-    if [ -d "/Applications/Xcode-${xcodeVersion}.app/" ]; then
-      # Looks like this version is available on this machine
+  if [ "${XCODE_VERSION}" != "" ]; then
 
-      # Check if the user has added the password for this machine, we need sudo again
-      if [ "${masterPassword}" != "" ]; then
-        # Alright, it seems there is a password, let's try it out
-        printf "${blueColour}Switching${noColour} Xcode versions\n\n"
-        echo -ne ${masterPassword} | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+    printf "We are currently using XCode ${blueColour}${XCODE_VERSION}${noColour}\n\n"
 
-        # Maye it's done, check and confirm
-        XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+    if [ "${xcodeVersion}" != "" ]; then
 
-        if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
-          printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+      # Alright now we check if the versions match
+      if [ "${XCODE_VERSION}" != "${xcodeVersion}" ]; then
+        # Looks like the xcode version required and available do not match
+        # Check if this system has the XCode version required
+        # TODO : This will vary based on how you setup XCode, find out if there is a better way
+        printf "We expect XCode versions to be placed like this\n/Applications/Xcode-7.2.app\n/Applications/Xcode-7.3.app\n\n"
+        if [ -d "/Applications/Xcode-${xcodeVersion}.app/" ]; then
+          # Looks like this version is available on this machine
+
+          # Check if the user has added the password for this machine, we need sudo again
+          if [ "${masterPassword}" != "" ]; then
+            # Alright, it seems there is a password, let's try it out
+            printf "${blueColour}Switching${noColour} Xcode versions\n\n"
+            echo -e ${masterPassword} | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+
+            # Maye it's done, check and confirm
+            XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+
+            if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
+              printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+            else
+              ShowError
+              printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
+              next=false
+            fi
+
+          else
+            ShowError
+            printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
+            next=false
+          fi
         else
           ShowError
-          printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
+          printf "We do not have XCode ${xcodeVersion} on this machine. About time to get it.\n\n"
           next=false
         fi
-
-      else
-        ShowError
-        printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
-        next=false
       fi
+
     else
-      ShowError
-      printf "We do not have XCode ${xcodeVersion} on this machine. About time to get it.\n\n"
-      next=false
+      printf "Your config shows that you are not picky about the\n${blueColour}xcodeVersion${noColour}. We will use whatever is available!\n\n"
     fi
+
+  else 
+    ShowError
+    printf "We do not have ${redColour}XCode${noColour} installed on this machine. About time to get it.\n\n"
+    next=false
   fi
 
 }
@@ -657,8 +698,8 @@ function XCPretty {
     # XCPretty is not installed, let's install it first
     # First check if the master password has been defined
     if [ "${masterPassword}" != "" ]; then
-      # TODO : test this on an actual machine
-      echo -ne ${masterPassword} | sudo -S gem install xcpretty
+      # this worked on my machine where xcpretty was not installed.
+      echo -e ${masterPassword} | sudo -S gem install xcpretty
       # TODO : Catch error from install xcpretty
 
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
@@ -723,6 +764,22 @@ function BuildiOS {
 
   PROJECT_PATH="${projectName}${EXTENSION}";
 
+  # Check if we have `iPhone` variable set
+  if [ "${iPhone}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhone in config. Do that first and come back.\n\nExample iPhone=\'${blueColour}iPhone 6\'${noColour}\n"
+    next=false
+    return
+  fi
+
+  # Check if we have `iPhoneOS` variable set
+  if [ "${iPhoneOS}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhoneOS in config. Do that first and come back.\n\nExample iPhoneOS=\'${blueColour} (9.3)\'${noColour}\n"
+    next=false
+    return
+  fi
+
   # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
   if [ "${scheme}" != "" ];then
 
@@ -734,8 +791,22 @@ function BuildiOS {
       printf "The simulator is already ${greenColour}running${noColour}!\n\n"
     else
       # Load up the simulator
-      printf "Starting up the ${greenColour}simulator${noColour}!\n\n"
-      xcrun instruments -w "${iPhone}${iPhoneOS}" 2>&1 1>/dev/null
+
+      # Find out if the target exists on this device on note
+      printf "Getting the list of available simulators\n"
+      DEVICES_AVAILABLE=$(instruments -s devices)
+      DEVICE_FOUND=$(grep "${iPhone} ${iPhoneOS}" -c <<< ${DEVICES_AVAILABLE} )
+
+      if [ "${DEVICE_FOUND}" -gt 0 ]; then
+        printf "Starting up the ${greenColour}simulator${noColour}!\n\n"
+        xcrun instruments -w "${iPhone} ${iPhoneOS}" 2>&1 1>/dev/null
+      else
+        ShowError
+        printf "The device that you wanted to load [${iPhone} ${iPhoneOS}] does not exit\n\n"
+        next=false
+        return
+      fi
+
     fi
 
     # Build the effing thing
@@ -785,19 +856,49 @@ function DeployiOSSimulator {
   PRODUCT_BUNDLE_IDENTIFIER=$(xcodebuild -showBuildSettings | grep PRODUCT_BUNDLE_IDENTIFIER)
   productBundleIdentifier=${PRODUCT_BUNDLE_IDENTIFIER#"    PRODUCT_BUNDLE_IDENTIFIER = "}
 
-  printf "About to ${blueColour}deploy${noColour} ${fullProductName} (${productBundleIdentifier}) to the simulator\n\n"
+  if [ "${fullProductName}" != "" ] && [ "${productBundleIdentifier}" != "" ]; then
 
-  # TODO : Find a good way to delete the app from the simulator
-  #xcrun simctl uninstall booted ${productBundleIdentifier}
+    printf "About to ${blueColour}deploy${noColour} ${fullProductName} (${productBundleIdentifier}) to the simulator\n\n"
 
-  #Details here http://dduan.net/post/2015/02/build-and-run-ios-apps-in-commmand-line/
+    # TODO : Find a good way to delete the app from the simulator
+    #xcrun simctl uninstall booted ${productBundleIdentifier}
 
-  # Deploy the app to the simulator
-  xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/${fullProductName}
+    #Details here http://dduan.net/post/2015/02/build-and-run-ios-apps-in-commmand-line/
 
-  # Open up the app on the simulator
-  printf "Starting the app\n\n"
-  xcrun simctl launch booted ${productBundleIdentifier}
+    # Find the path of the build
+    # Check if Debug-iphonesimulator path exits
+    BUILD_PATH=""
+    if [ -f "./build/Build/Products/Debug-iphonesimulator/${fullProductName}" ]; then
+      # All okay, just use this
+      BUILD_PATH="./build/Build/Products/Debug-iphonesimulator/${fullProductName}\n"
+    else 
+      # So that doesn't exits, damn, let's find the folder
+      PROBABLE_PATH=$(find . | grep "/${fullProductName}$")
+
+      if [[ -d "${PROBABLE_PATH}" && ! -L "${PROBABLE_PATH}" ]]; then
+        # Alright so the path that we found exits
+        BUILD_PATH=${PROBABLE_PATH}
+      else
+        # Couldn't find the path, screw this
+        ShowError
+        printf "Damn. Could't find where the app was built. Time to shut down\n"
+        next=false
+        return
+      fi
+
+    fi
+
+    # Deploy the app to the simulator
+    xcrun simctl install booted ${BUILD_PATH}
+
+    # Open up the app on the simulator
+    printf "Starting the app\n\n"
+    xcrun simctl launch booted ${productBundleIdentifier}
+  else
+    ShowError
+    printf "It looks like this is not an iOS repository. Do you know what's going on?\n\n"
+    next=false
+  fi
 
 }
 
@@ -819,7 +920,7 @@ function SetupScript {
   # We will install in /usr/local/bin
 
   # Check if /usr/local/upshift directory exists, if not create it
-  if [ ! -d "/user/local/upshift/${version}" ]; then
+  if [ ! -d "/usr/local/upshift/${version}" ]; then
     # Directory doesn't exist, create it
     sudo mkdir -p /usr/local/upshift/${version}
     #printf "Setup the folder in /usr/local/upshift/${version}\n"
@@ -885,6 +986,45 @@ function AddConfig {
 
 }
 
+function SetupGradle {
+
+  StartAction "SetupGradle"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Check if Gradle is installed
+  GRADLE_VERSION=$(gradle -v 2>&1)
+  GRADLE_INSTALLED=$(grep 'command not found' -c <<< ${GRADLE_VERSION})
+
+  if [ "${GRADLE_INSTALLED}" -gt 0 ]; then
+    # Gradle is not installed, damn it
+    # TODO : Install gradle if it if is not installed
+    ShowError
+    printf "Alright, so you ${redColour}don't have gradle installed${noColour}. You need to do this when you setup the machine\n"
+    next=false
+    return
+  else
+    # Gradle is already installed
+
+    # Check if gradle wrapper exits
+    if [ -f "./gradlew" ]; then
+      # GradleW exits, all good
+      printf "You are ${greenColour}all good${noColour} boss\n"
+    else
+      # Let's setup the gradle wrapper
+      gradle wrapper
+
+      printf "Alright, we have setup ${blueColour}./gradlew${noColour}, you are all done now\n"
+    fi
+
+  fi
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -899,6 +1039,7 @@ function AddConfig {
 #BuildiOS
 #DeployiOSSimulator
 #SetupScript
+#SetupGradle
 
 
 # TODO : Add a function to read XCode Build Settings
@@ -935,8 +1076,8 @@ function FindJobQueue {
     "android")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("GitPull" "GitSubmodules" "AssembleAndroid");;
-        "emulator")   jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "InstallOnAndroid");;
+        "build")      jobQueue=("GitPull" "GitSubmodules" "SetupGradle" "AssembleAndroid");;
+        "emulator")   jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "SetupGradle" "InstallOnAndroid");;
         *)
                       ShowError
                       printf "Yo! We only support two commands for Android right now, build and emulator\n"
