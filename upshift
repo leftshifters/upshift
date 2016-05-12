@@ -915,7 +915,7 @@ function SetupScript {
   # We will install in /usr/local/bin
 
   # Check if /usr/local/upshift directory exists, if not create it
-  if [ ! -d "/user/local/upshift/${version}" ]; then
+  if [ ! -d "/usr/local/upshift/${version}" ]; then
     # Directory doesn't exist, create it
     sudo mkdir -p /usr/local/upshift/${version}
     #printf "Setup the folder in /usr/local/upshift/${version}\n"
