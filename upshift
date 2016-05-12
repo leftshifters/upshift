@@ -54,6 +54,9 @@ job=$2
 # 7. Application Version
 version="0.6.2"
 
+# 8. Set time functions
+startTime=$(date +%s)
+endTime=""
 
 
 # Setup Internal Functions
@@ -65,7 +68,9 @@ function StartScript {
 }
 
 function EndScript {
-  printf "\n"
+  endTime=$(date +%s)
+  totalTime=$((endTime - startTime))
+  printf "This job took ${blueColour}${totalTime} seconds${noColour}\n"
 }
 
 function ShowError {
