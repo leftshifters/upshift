@@ -114,7 +114,7 @@ function SetupSSH {
     # Check if an id_rsa already exists at the defualt location
     if [ ! -f ~/.ssh/id_rsa ]; then
       printf "File does not exist at ~/.ssh/id_rsa"
-      echo -ne '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
+      echo -e '\n' | ssh-keygen -t rsa -b 4096 -C "${emailForSSHKey}"
 
       # Show the created keys on the screen
       ID_RSA=$(<~/.ssh/id_rsa)
@@ -566,7 +566,7 @@ function SetupPods {
       # First check if the master password has been defined
       if [ "${masterPassword}" != "" ]; then
         # TODO : test this on an actual machine
-        echo -ne ${masterPassword} | sudo -S gem install cocoapods
+        echo -e ${masterPassword} | sudo -S gem install cocoapods
         # TODO : Catch error from install cocoapods
 
         # https://guides.cocoapods.org/using/pod-install-vs-update.html
