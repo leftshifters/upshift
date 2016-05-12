@@ -85,6 +85,11 @@ function EndScript {
   endTime=$(date +%s)
   totalTime=$((endTime - startTime))
   printf "This job took ${blueColour}${totalTime} seconds${noColour}\n"
+
+  if [ "${next}" == false ]; then
+    exit 1
+  fi
+
 }
 
 function ShowError {
