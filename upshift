@@ -299,7 +299,7 @@ function GitClone {
         #   you will need to clone into another folder, and move stuff back here
         #   we can't do what the rest of the world tries to do - which is git init, add remote,
         #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
+        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --progress --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
         mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
         rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
@@ -679,8 +679,8 @@ function XCPretty {
     # XCPretty is not installed, let's install it first
     # First check if the master password has been defined
     if [ "${masterPassword}" != "" ]; then
-      # TODO : test this on an actual machine
-      echo -ne ${masterPassword} | sudo -S gem install xcpretty
+      # this worked on my machine where xcpretty was not installed.
+      echo -e ${masterPassword} | sudo -S gem install xcpretty
       # TODO : Catch error from install xcpretty
 
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
@@ -744,6 +744,22 @@ function BuildiOS {
   fi
 
   PROJECT_PATH="${projectName}${EXTENSION}";
+
+  # Check if we have `iPhone` variable set
+  if [ "${iPhone}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhone in config. Do that first and come back.\n\nExample iPhone=\'${blueColour}iPhone 6\'${noColour}\n"
+    next=false
+    return
+  fi
+
+  # Check if we have `iPhoneOS` variable set
+  if [ "${iPhoneOS}" == "" ]; then
+    ShowError
+    printf "Looks like you forgot to set iPhoneOS in config. Do that first and come back.\n\nExample iPhoneOS=\'${blueColour} (9.3)\'${noColour}\n"
+    next=false
+    return
+  fi
 
   # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
   if [ "${scheme}" != "" ];then
