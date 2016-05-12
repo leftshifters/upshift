@@ -792,8 +792,31 @@ function DeployiOSSimulator {
 
   #Details here http://dduan.net/post/2015/02/build-and-run-ios-apps-in-commmand-line/
 
+  # Find the path of the build
+  # Check if Debug-iphonesimulator path exits
+  BUILD_PATH=""
+  if [ -f "./build/Build/Products/Debug-iphonesimulator/${fullProductName}" ]; then
+    # All okay, just use this
+    BUILD_PATH="./build/Build/Products/Debug-iphonesimulator/${fullProductName}\n"
+  else 
+    # So that doesn't exits, damn, let's find the folder
+    PROBABLE_PATH=$(find . | grep "/${fullProductName}$")
+
+    if [[ -d "${PROBABLE_PATH}" && ! -L "${PROBABLE_PATH}" ]]; then
+      # Alright so the path that we found exits
+      BUILD_PATH=${PROBABLE_PATH}
+    else
+      # Couldn't find the path, screw this
+      ShowError
+      printf "Damn. Could't find where the app was built. Time to shut down\n"
+      next=false
+      return
+    fi
+
+  fi
+
   # Deploy the app to the simulator
-  xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/${fullProductName}
+  xcrun simctl install booted ${BUILD_PATH}
 
   # Open up the app on the simulator
   printf "Starting the app\n\n"
