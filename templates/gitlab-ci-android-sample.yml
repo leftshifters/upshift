@@ -1,0 +1,7 @@
+before_script:
+  - export TERM="xterm"
+  - source /var/opt/env
+  - echo "sdk.dir=$ANDROID_HOME" > local.properties
+dev:
+  script:
+    upshift android build
