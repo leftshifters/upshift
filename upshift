@@ -1139,6 +1139,30 @@ function FindJobQueue {
     "-v")
       printf "Upshift v${version}"
       ;;
+    "action")
+      case "${job}" in
+        "SetupSSH")           jobQueue=("SetupSSH");;
+        "InstallOnAndroid")   jobQueue=("InstallOnAndroid");;
+        "GitPull")            jobQueue=("GitPull");;
+        "GitClone")           jobQueue=("GitClone");;
+        "StartEmulator")      jobQueue=("StartEmulator");;
+        "AndroidDevices")     jobQueue=("AndroidDevices");;
+        "AssembleAndroid")    jobQueue=("AssembleAndroid");;
+        "GitSubmodules")      jobQueue=("GitSubmodules");;
+        "SetupPods")          jobQueue=("SetupPods");;
+        "XCodeVersion")       jobQueue=("XCodeVersion");;
+        "XCPretty")           jobQueue=("XCPretty");;
+        "BuildiOS")           jobQueue=("BuildiOS");;
+        "DeployiOSSimulator") jobQueue=("DeployiOSSimulator");;
+        "SetupScript")        jobQueue=("SetupScript");;
+        "SetupGradle")        jobQueue=("SetupGradle");;
+        "UpgradeVersion")     jobQueue=("UpgradeVersion");;
+        *)
+                      ShowError
+                      printf "Yo! This command is not supported right now\n"
+                      ;;
+        esac
+        ;;
     *)
       printf "
 UPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)
@@ -1186,6 +1210,25 @@ ${boldStyle}DESCRIPTION${normalStyle}
      ${boldStyle}upshift${normalStyle} ${underlineStyle}install${noUnderlineStyle}
 
      This command installs this script on your machine
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupSSH${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}InstallOnAndroid${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitPull${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitClone${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}StartEmulator${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}AndroidDevices${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}AssembleAndroid${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitSubmodules${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupPods${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}XCodeVersion${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}XCPretty${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}BuildiOS${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}DeployiOSSimulator${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupScript${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupGradlepSSH${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}UpgradeVersion${noUnderlineStyle}
+
+     These commands will allow you to run each specific action separately
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}-v${noUnderlineStyle}
 
