@@ -72,6 +72,17 @@ version="0.6.3"
 startTime=$(date +%s)
 endTime=""
 
+# 9. Use the env variables to override the user defined ones
+# Currently only reading masterPassword
+
+# Test: export masterPasswordFromEnv="1231"
+masterPasswordFromEnv=$(printenv masterPasswordFromEnv)
+
+if [ "${masterPasswordFromEnv}" != "" ]; then
+  masterPassword=${masterPasswordFromEnv}
+  printf "\nSet the value of masterPassword from the environment\n\n"
+fi
+
 
 # Setup Internal Functions
 # ⚡ ⚙
