@@ -53,3 +53,7 @@ source /var/opt/env
 # To find packages while are missing
 android list sdk -a --no-ui
 android update sdk -a --no-ui --filter 5,6,7
+
+
+
+for remote in `git branch -r | grep -v master `; do git checkout --track $remote ; done
