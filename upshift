@@ -83,6 +83,13 @@ if [ "${masterPasswordFromEnv}" != "" ]; then
   printf "\nSet the value of masterPassword from the environment\n\n"
 fi
 
+# 10. Find out if this is running via CI
+# We could have multiple, so one variable for each type of service
+GITLAB_CI=$(printenv GITLAB_CI)
+
+# Overall, OR all of them to find out is it is running via CI
+CI=${GITLAB_CI}
+
 
 # Setup Internal Functions
 # ⚡ ⚙
@@ -109,6 +116,10 @@ function ShowError {
 
 function ShowPreviousFailed {
   printf "${redColour}Skipping${noColour} action because the previous actions failed\n"
+}
+
+function ShowCIFailed {
+  printf "${redColour}Skipping${noColour} action because this is running via CI\n"
 }
 
 function StartAction {
@@ -252,6 +263,12 @@ function InstallOnAndroid {
 function GitPull {
 
   StartAction "GitPull"
+
+  # If this is coming via CI, don't pull
+  if [ ${CI} == true ]; then
+    ShowCIFailed
+    return
+  fi
 
   # If 'next' is false, exit
   if [ ${next} == false ]; then
