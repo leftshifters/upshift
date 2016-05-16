@@ -965,7 +965,7 @@ function SetupScript {
     # Now add a link to the above file in /usr/local/bin
     if [ -f "/usr/local/bin/upshift" ]; then
       # Remove only if it exits
-      rm -f /usr/local/bin/upshift
+      sudo rm -f /usr/local/bin/upshift
     fi
     sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
     #printf "Setup symlink at /usr/local/bin/upshift\n"
@@ -1165,7 +1165,7 @@ function FindJobQueue {
       esac
       ;;
     "install")
-      jobQueue=("UpgradeVersion" "SetupScript");;
+      jobQueue=("SetupScript");;
     "-v")
       printf "Upshift v${version}"
       ;;
