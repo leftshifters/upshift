@@ -1025,6 +1025,35 @@ function SetupGradle {
 
 }
 
+function UpgradeVersion {
+
+  StartAction "UpgradeVersion"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/develop/release 2>&1)
+  LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< ${LATEST_VERSION})
+
+  LATEST_VERSION="0.6.2"
+
+  if [ "${LATEST_VERSION_RESULTS}" -gt 0 ]; then
+    printf "There was a problem in confirming the version number.\nIgnoring the message and moving on\n"
+    printf "${LATEST_VERSION}\n\n"
+  else
+    if [ "${LATEST_VERSION}" == "${version}" ]; then
+      printf "You are using the latest version of upshift v${version}\n\n"
+    else
+      printf "Moving you to the latest version of upshift v${version}\n"
+      VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
+    fi    
+  fi
+
+}
+
 #SetupSSH
 #InstallOnAndroid
 #GitPull
@@ -1040,6 +1069,7 @@ function SetupGradle {
 #DeployiOSSimulator
 #SetupScript
 #SetupGradle
+#UpgradeVersion
 
 
 # TODO : Add a function to read XCode Build Settings
@@ -1076,8 +1106,8 @@ function FindJobQueue {
     "android")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("GitPull" "GitSubmodules" "SetupGradle" "AssembleAndroid");;
-        "emulator")   jobQueue=("StartEmulator" "GitPull" "GitSubmodules" "SetupGradle" "InstallOnAndroid");;
+        "build")      jobQueue=("UpgradeVersion" "GitPull" "GitSubmodules" "SetupGradle" "AssembleAndroid");;
+        "emulator")   jobQueue=("UpgradeVersion" "StartEmulator" "GitPull" "GitSubmodules" "SetupGradle" "InstallOnAndroid");;
         *)
                       ShowError
                       printf "Yo! We only support two commands for Android right now, build and emulator\n"
@@ -1087,7 +1117,7 @@ function FindJobQueue {
     "ios")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
+        "build")      jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
@@ -1096,8 +1126,8 @@ function FindJobQueue {
       ;;
     "setup")
       case "${job}" in
-        "clone")      jobQueue=("GitClone" "GitSubmodules" "SetupPods");;
-        "config")     jobQueue=("AddConfig");;
+        "clone")      jobQueue=("UpgradeVersion" "GitClone" "GitSubmodules" "SetupPods");;
+        "config")     jobQueue=("UpgradeVersion" "AddConfig");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for Setup right now: clone\n"
@@ -1105,10 +1135,34 @@ function FindJobQueue {
       esac
       ;;
     "install")
-      jobQueue=("SetupScript");;
+      jobQueue=("UpgradeVersion" "SetupScript");;
     "-v")
       printf "Upshift v${version}"
       ;;
+    "action")
+      case "${job}" in
+        "SetupSSH")           jobQueue=("SetupSSH");;
+        "InstallOnAndroid")   jobQueue=("InstallOnAndroid");;
+        "GitPull")            jobQueue=("GitPull");;
+        "GitClone")           jobQueue=("GitClone");;
+        "StartEmulator")      jobQueue=("StartEmulator");;
+        "AndroidDevices")     jobQueue=("AndroidDevices");;
+        "AssembleAndroid")    jobQueue=("AssembleAndroid");;
+        "GitSubmodules")      jobQueue=("GitSubmodules");;
+        "SetupPods")          jobQueue=("SetupPods");;
+        "XCodeVersion")       jobQueue=("XCodeVersion");;
+        "XCPretty")           jobQueue=("XCPretty");;
+        "BuildiOS")           jobQueue=("BuildiOS");;
+        "DeployiOSSimulator") jobQueue=("DeployiOSSimulator");;
+        "SetupScript")        jobQueue=("SetupScript");;
+        "SetupGradle")        jobQueue=("SetupGradle");;
+        "UpgradeVersion")     jobQueue=("UpgradeVersion");;
+        *)
+                      ShowError
+                      printf "Yo! This command is not supported right now\n"
+                      ;;
+        esac
+        ;;
     *)
       printf "
 UPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)
@@ -1156,6 +1210,25 @@ ${boldStyle}DESCRIPTION${normalStyle}
      ${boldStyle}upshift${normalStyle} ${underlineStyle}install${noUnderlineStyle}
 
      This command installs this script on your machine
+
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupSSH${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}InstallOnAndroid${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitPull${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitClone${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}StartEmulator${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}AndroidDevices${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}AssembleAndroid${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}GitSubmodules${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupPods${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}XCodeVersion${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}XCPretty${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}BuildiOS${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}DeployiOSSimulator${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupScript${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}SetupGradlepSSH${noUnderlineStyle}
+     ${boldStyle}upshift${normalStyle} ${underlineStyle}action${noUnderlineStyle} ${underlineStyle}UpgradeVersion${noUnderlineStyle}
+
+     These commands will allow you to run each specific action separately
 
      ${boldStyle}upshift${normalStyle} ${underlineStyle}-v${noUnderlineStyle}
 
