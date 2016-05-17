@@ -1167,7 +1167,8 @@ function FindJobQueue {
     "install")
       jobQueue=("SetupScript");;
     "-v")
-      printf "Upshift v${version}"
+      printf "Upshift v${version}\n"
+      exit
       ;;
     "action")
       case "${job}" in
