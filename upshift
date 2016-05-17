@@ -18,6 +18,7 @@ xcodeVersion="7.3"
 
 # 2. Load up config from config file
 if [ -f "./config.ci" ]; then
+  # shellcheck disable=SC1091
   source ./config.ci
 fi
 
@@ -26,11 +27,11 @@ if [ "${xcodeVersion}" == "" ]; then
   xcodeVersion="7.3"
 fi
 
-if [ "iPhone" == "" ]; then
+if [ "${iPhone}" == "" ]; then
   iPhone="iPhone 6"
 fi
 
-if [ "iPhoneOS" == "" ]; then
+if [ "${iPhoneOS}" == "" ]; then
   iPhoneOS=" (9.3)"
 fi
 
@@ -199,7 +200,7 @@ function InstallOnAndroid {
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
-    ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
+    ./gradlew clean 2>&1 | tee "gradle-clean-${TIMESHTAMP}.log"
   else
     printf "Skipping :clean:, you have ${blueColour}alwaysCleanBeforeBuild${noColour} turned off\n"
   fi
@@ -207,21 +208,22 @@ function InstallOnAndroid {
   # Uninstall older builds if the setting so desires
   if [ "${alwaysUninstallOlderBuilds}" == true ]; then
     printf "Time to ${greenColour}uninstall${noColour} older builds\n\n"
-    ./gradlew uninstallAll 2>&1 | tee gradle-uninstall-$TIMESHTAMP.log
+    ./gradlew uninstallAll 2>&1 | tee "gradle-uninstall-${TIMESHTAMP}.log"
+
   else
     printf "Skipping :uninstallAll:, you have ${blueColour}alwaysUninstallOlderBuilds${noColour} turned off\n"
   fi
 
   # Now time to build again
   printf "\nTime to run ${greenColour}installDebug${noColour} on this thing\n\n"
-  ./gradlew installDebug --stacktrace 2>&1 | tee gradle-install-$TIMESHTAMP.log
+  ./gradlew installDebug --stacktrace 2>&1 | tee "gradle-install-${TIMESHTAMP}.log"
 
   # Get the logged results and try to make some sense out of it
-  BUILD_RESULTS=$(<gradle-install-$TIMESHTAMP.log)
+  BUILD_RESULTS=$(<"gradle-install-${TIMESHTAMP}.log")
 
   # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
   # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-  BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+  BUILD_SUCCESSFUL=$(echo "${BUILD_RESULTS}" | grep "BUILD SUCCESSFUL" -c)
 
   # If the build was successful, let 'em know
   if [ "$BUILD_SUCCESSFUL" != "1" ]; then
@@ -260,7 +262,7 @@ function GitPull {
   StartAction "GitPull"
 
   # If this is coming via CI, don't pull
-  if [ ${CI} == true ]; then
+  if [ "${CI}" == true ]; then
     ShowCIFailed
     return
   fi
@@ -280,12 +282,12 @@ function GitPull {
     printf "Alright, let's ${greenColour}pull${noColour} the ${gitRepositoryBranch} branch for this repo\n\n"
 
     # Alright, let's pull
-    git pull origin ${gitRepositoryBranch} 2>&1 | tee git-pull-$TIMESHTAMP.log
+    git pull origin ${gitRepositoryBranch} 2>&1 | tee "git-pull-${TIMESHTAMP}.log"
 
     # Load up the results to see if there were any errors
-    PULL_RESULTS=$(<git-pull-$TIMESHTAMP.log)
-    PULL_RESULTS_FATAL=$(grep "fatal:" -c <<< ${PULL_RESULTS})
-    PULL_RESULTS_ERROR=$(grep "error:" -c <<< ${PULL_RESULTS})
+    PULL_RESULTS=$(<"git-pull-${TIMESHTAMP}.log")
+    PULL_RESULTS_FATAL=$(grep "fatal:" -c <<< "${PULL_RESULTS}")
+    PULL_RESULTS_ERROR=$(grep "error:" -c <<< "${PULL_RESULTS}")
     # If there was a fatal error, tell the user there's something wrong
     if [ "${PULL_RESULTS_FATAL}" -gt "0" ] || [ "${PULL_RESULTS_ERROR}" -gt "0" ]; then
       ShowError
@@ -341,13 +343,13 @@ function GitClone {
         #   you will need to clone into another folder, and move stuff back here
         #   we can't do what the rest of the world tries to do - which is git init, add remote,
         #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --progress --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
-        mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
-        mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
-        rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
+        git clone -b "${gitRepositoryBranch}" "${gitRepositoryURL}" tmp --progress --depth 1  2>&1 | tee "git-clone-${TIMESHTAMP}.log"
+        mv tmp/* . 2>&1 | tee "git-clone-${TIMESHTAMP}.log"
+        mv tmp/.* . 2>/dev/null | tee "git-clone-${TIMESHTAMP}.log"
+        rm -rf tmp/ 2>&1 | tee "git-clone-${TIMESHTAMP}.log"
 
         # Load up the results to see if there were any errors
-        CLONE_RESULTS=$(<git-clone-$TIMESHTAMP.log)
+        CLONE_RESULTS=$(<"git-clone-${TIMESHTAMP}.log")
         # If there was a fatal error, tell the user there's something wrong
         if [ "$(printf "${CLONE_RESULTS}" | grep "fatal" -c)" -gt "0" ] || [ "$(printf "${CLONE_RESULTS}" | grep "error" -c)" -gt "0" ]; then
           ShowError
@@ -400,14 +402,14 @@ function StartEmulator {
 
     if [ "${emulatorName}" != "" ]; then
 
-      EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulatorName} 2>emulator.log 1>emulator.log &)
+      EMULATOR_RESULTS=$(nohup "$ANDROID_HOME/tools/emulator" -avd "${emulatorName}" 2>emulator.log 1>emulator.log &)
       # TODO : This is a big #HACK, only errors are returned in the first two seconds, I suck and I don't know a way out
       # TODO : Another potential problem, we redirect both 1,2 in reset mode (>), the file could get overwritten
       sleep 2
       EMULATOR_RESULTS=$(<emulator.log)
 
       # Check if there was a PANIC [to test this, put in the wrong emulator name]
-      PANIC_COUNT=$(echo ${EMULATOR_RESULTS} | grep "PANIC" -c)
+      PANIC_COUNT=$(echo "${EMULATOR_RESULTS}" | grep "PANIC" -c)
 
       # If there was a panic, throw it at the user, they messed up, not us
       if [ "${PANIC_COUNT}" -gt 0 ]; then
@@ -418,7 +420,7 @@ function StartEmulator {
         next=false
       else
         # Seems like there is no panic, let's check for errors
-        ERROR_COUNT=$(echo ${EMULATOR_RESULTS} | grep "ERROR" -c)
+        ERROR_COUNT=$(echo "${EMULATOR_RESULTS}" | grep "ERROR" -c)
 
         if [ "${ERROR_COUNT}" -gt 0 ]; then
           printf "${EMULATOR_RESULTS}\n\n"
@@ -507,21 +509,21 @@ function AssembleAndroid {
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
-    ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
+    ./gradlew clean 2>&1 | tee "gradle-clean-${TIMESHTAMP}.log"
   else
     printf "Skipping :clean:, you have ${blueColour}alwaysCleanBeforeBuild${noColour} turned off\n"
   fi
 
   # Now time to build again
   printf "\nTime to run ${greenColour}assemble${noColour} on this thing\n\n"
-  ./gradlew assemble --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
+  ./gradlew assemble --stacktrace 2>&1 | tee "gradle-assemble-${TIMESHTAMP}.log"
 
   # Get the logged results and try to make some sense out of it
-  BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
+  BUILD_RESULTS=$(<"gradle-assemble-${TIMESHTAMP}.log")
 
   # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
   # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-  BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+  BUILD_SUCCESSFUL=$(echo "$BUILD_RESULTS" | grep "BUILD SUCCESSFUL" -c)
 
   # If the build was successful, let 'em know
   if [ "$BUILD_SUCCESSFUL" != "1" ]; then
@@ -553,12 +555,12 @@ function GitSubmodules {
   # Check if .gitmodules exists
   if [ -f ".gitmodules" ]; then
     # If the file exists, we need to run init and update and catch errors
-    git submodule init 2>&1 | tee git-submodule-init-$TIMESHTAMP.log
-    git submodule update 2>&1 | tee git-submodule-update-$TIMESHTAMP.log
+    git submodule init 2>&1 | tee "git-submodule-init-${TIMESHTAMP}.log"
+    git submodule update 2>&1 | tee "git-submodule-update-${TIMESHTAMP}.log"
 
-    SUBMODULE_RESULTS=$(<git-submodule-update-$TIMESHTAMP.log)
+    SUBMODULE_RESULTS=$(<"git-submodule-update-${TIMESHTAMP}.log")
 
-    if [ $(echo ${SUBMODULE_RESULTS} | grep "fatal:" -c) -gt 0 ] || [ $(echo ${SUBMODULE_RESULTS} | grep "error:" -c) -gt 0 ]; then
+    if [ $(echo "${SUBMODULE_RESULTS}" | grep "fatal:" -c) -gt 0 ] || [ $(echo "${SUBMODULE_RESULTS}" | grep "error:" -c) -gt 0 ]; then
       ShowError
       printf "Damn, initializing submodules was ${redColour}not successful${noColour}. You should check this up.\n\n"
       next=false
@@ -592,13 +594,13 @@ function SetupPods {
   if [ -f "Podfile" ]; then
     # Check if cocoapods is installed
     POD_VERSION=$(pod --version 2>&1)
-    POD_INSTALLED=$(grep 'command not found' -c <<< ${POD_VERSION})
+    POD_INSTALLED=$(grep 'command not found' -c <<< "${POD_VERSION}")
 
     if [ "${POD_INSTALLED}" -gt 0 ]; then
       # Cocoapods is not installed, let's install it first
       # First check if the master password has been defined
       if [ "${masterPassword}" != "" ]; then
-        echo -e ${masterPassword} | sudo -S gem install cocoapods
+        echo -e "${masterPassword}" | sudo -S gem install cocoapods
 
         # https://guides.cocoapods.org/using/pod-install-vs-update.html
         # We want to keep pods on their own version, hence not updating
@@ -649,7 +651,7 @@ function XCodeVersion {
           if [ "${masterPassword}" != "" ]; then
             # Alright, it seems there is a password, let's try it out
             printf "${blueColour}Switching${noColour} Xcode versions\n\n"
-            echo -e ${masterPassword} | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+            echo -e "${masterPassword}" | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
 
             # Maye it's done, check and confirm
             XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
@@ -700,14 +702,14 @@ function XCPretty {
   fi
 
   XCPRETTY_VERSION=$(xcpretty --version 2>&1)
-  XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< ${XCPRETTY_VERSION})
+  XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< "${XCPRETTY_VERSION}")
 
   if [ "${XCPRETTY_INSTALLED}" -gt 0 ]; then
     # XCPretty is not installed, let's install it first
     # First check if the master password has been defined
     if [ "${masterPassword}" != "" ]; then
       # this worked on my machine where xcpretty was not installed.
-      echo -e ${masterPassword} | sudo -S gem install xcpretty
+      echo -e "${masterPassword}" | sudo -S gem install xcpretty
 
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
     else
@@ -801,11 +803,11 @@ function BuildiOS {
       # Find out if the target exists on this device on note
       printf "Getting the list of available simulators\n"
       DEVICES_AVAILABLE=$(instruments -s devices)
-      DEVICE_FOUND=$(grep "${iPhone} ${iPhoneOS}" -c <<< ${DEVICES_AVAILABLE} )
+      DEVICE_FOUND=$(grep "${iPhone} ${iPhoneOS}" -c <<< "${DEVICES_AVAILABLE}" )
 
       if [ "${DEVICE_FOUND}" -gt 0 ]; then
         printf "Starting up the ${greenColour}simulator${noColour}!\n\n"
-        xcrun instruments -w "${iPhone} ${iPhoneOS}" 2>&1 1>/dev/null
+        xcrun instruments -w "${iPhone} ${iPhoneOS}" 1>/dev/null 2>&1 
       else
         ShowError
         printf "The device that you wanted to load [${iPhone} ${iPhoneOS}] does not exit\n\n"
@@ -818,9 +820,9 @@ function BuildiOS {
     # Build the effing thing
     # TODO : Clean the effing thing before you start
     printf "Compiling the beautiful codebase\n\n"
-    set -o pipefail && xcodebuild -${PROJECT_TYPE} ${PROJECT_PATH} -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee xcode-build-${TIMESHTAMP}.log | xcpretty
+    set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee "xcode-build-${TIMESHTAMP}.log" | xcpretty
 
-    BUILD_RESULTS=$(<xcode-build-${TIMESHTAMP}.log);
+    BUILD_RESULTS=$(<"xcode-build-${TIMESHTAMP}.log");
     BUILD_SUCCEDED=$(grep "BUILD SUCCEEDED" -c <<< "${BUILD_RESULTS}")
 
     if [ "${BUILD_SUCCEDED}" -gt 0 ]; then
@@ -895,11 +897,11 @@ function DeployiOSSimulator {
     fi
 
     # Deploy the app to the simulator
-    xcrun simctl install booted ${BUILD_PATH}
+    xcrun simctl install booted "${BUILD_PATH}"
 
     # Open up the app on the simulator
     printf "Starting the app\n\n"
-    xcrun simctl launch booted ${productBundleIdentifier}
+    xcrun simctl launch booted "${productBundleIdentifier}"
   else
     ShowError
     printf "It looks like this is not an iOS repository. Do you know what's going on?\n\n"
@@ -1004,7 +1006,7 @@ function SetupGradle {
 
   # Check if Gradle is installed
   GRADLE_VERSION=$(gradle -v 2>&1)
-  GRADLE_INSTALLED=$(grep 'command not found' -c <<< ${GRADLE_VERSION})
+  GRADLE_INSTALLED=$(grep 'command not found' -c <<< "${GRADLE_VERSION}")
 
   if [ "${GRADLE_INSTALLED}" -gt 0 ]; then
     # Gradle is not installed, damn it
@@ -1041,7 +1043,7 @@ function UpgradeVersion {
   fi
 
   LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/develop/release 2>&1)
-  LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< ${LATEST_VERSION})
+  LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< "${LATEST_VERSION}")
 
   LATEST_VERSION="0.6.2"
 
@@ -1054,6 +1056,7 @@ function UpgradeVersion {
     else
       printf "Moving you to the latest version of upshift v${version}\n"
       VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
+      printf "${VERSION_UPGRADE}\n"
     fi    
   fi
 
@@ -1083,10 +1086,10 @@ function SendEmail {
 jobQueue=()
 
 function RunJobs {
-  for action in ${jobQueue[@]}
+  for action in "${jobQueue[@]}"
     do
       :
-      ${action}
+      "${action}"
   done
 }
 
