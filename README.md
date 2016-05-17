@@ -28,6 +28,26 @@ This command will create an empty config file in the current folder that you are
 ### upshift install
 This command installs this script on your machine
 
+
+### upshift action SetupSSH
+### upshift action InstallOnAndroid
+### upshift action GitPull
+### upshift action GitClone
+### upshift action StartEmulator
+### upshift action AndroidDevices
+### upshift action AssembleAndroid
+### upshift action GitSubmodules
+### upshift action SetupPods
+### upshift action XCodeVersion
+### upshift action XCPretty
+### upshift action BuildiOS
+### upshift action DeployiOSSimulator
+### upshift action SetupScript
+### upshift action SetupGradlepSSH
+### upshift action UpgradeVersion
+
+These commands will allow you to run each specific action separately
+
 ### upshift -v
 This command gets you the latest version number
 
