@@ -1045,8 +1045,6 @@ function UpgradeVersion {
   LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/master/release 2>&1)
   LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< "${LATEST_VERSION}")
 
-  LATEST_VERSION="0.6.2"
-
   if [ "${LATEST_VERSION_RESULTS}" -gt 0 ]; then
     printf "There was a problem in confirming the version number.\nIgnoring the message and moving on\n"
     printf "${LATEST_VERSION}\n\n"
