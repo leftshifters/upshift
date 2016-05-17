@@ -32,6 +32,21 @@ rm -rf /usr/local/gradle-2.13-all.zip
 cd && curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift && chmod +x upshift && ./upshift install
 rm upshift
 
+sudo apt-get install mailutil postfix
+vi /etc/postfix/main.cf
+- Add
+smtp_sasl_auth_enable = yes
+relayhost = smtp.mailgun.org
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd
+- Remove
+relayhost = 
+
+echo 'smtp.mailgun.org postmaster@vercingetorix.mailgun.org:0i0u3gpisfs5' > /etc/postfix/sasl_passwd
+chmod 600 /etc/postfix/sasl_passwd
+postmap /etc/postfix/sasl_passwd
+service postfix restart
+echo "test super test" | mail -s "test subject" "sudhanshu@leftshift.io"
 
 
 vi /var/opt/env
@@ -57,3 +72,4 @@ android update sdk -a --no-ui --filter 5,6,7
 
 
 for remote in `git branch -r | grep -v master `; do git checkout --track $remote ; done
+
