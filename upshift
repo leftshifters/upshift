@@ -513,8 +513,8 @@ function AssembleAndroid {
   fi
 
   # Now time to build again
-  printf "\nTime to run ${greenColour}assembleDebug${noColour} on this thing\n\n"
-  ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
+  printf "\nTime to run ${greenColour}assemble${noColour} on this thing\n\n"
+  ./gradlew assemble --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
 
   # Get the logged results and try to make some sense out of it
   BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
