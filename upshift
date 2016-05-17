@@ -151,7 +151,6 @@ function SetupSSH {
 
   # Check if email has been defined by the user
   if [ "${emailForSSHKey}" != "" ]; then
-    # TODO : Allow the user to add the keys to a non default place
     # Check if an id_rsa already exists at the defualt location
     if [ ! -f ~/.ssh/id_rsa ]; then
       printf "File does not exist at ~/.ssh/id_rsa"
@@ -197,9 +196,6 @@ function InstallOnAndroid {
   # Make a TIMESHTAMP for the log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
-  # TODO : Add the project name to the logfile and move it to a common location on the server
-  # TODO : Use the logs to show details on a screen somewhere
-
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
@@ -234,7 +230,6 @@ function InstallOnAndroid {
     next=false
   else
     printf "\n\n${greenColour}Super${noColour}! The build was fine.\n"
-    # TODO : Someday figure out how to get package and mainActivity automatically
     # Check if package is empty
     if [ "${package}" != "" ];then
       if [ "${mainActivity}" != "" ]; then
@@ -280,7 +275,6 @@ function GitPull {
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
   # Check if the branch name is defined
-  # TODO : Automatically pick the current branch
   if [ "${gitRepositoryBranch}" != "" ]; then
 
     printf "Alright, let's ${greenColour}pull${noColour} the ${gitRepositoryBranch} branch for this repo\n\n"
@@ -330,7 +324,6 @@ function GitClone {
   # Check if the repo URL is defined
   if [ "${gitRepositoryURL}" != "" ]; then
     # Check if the branch name is defined
-    # TODO : Automatically pick the current branch
     if [ "${gitRepositoryBranch}" != "" ]; then
 
       # Check if this is already a git repository
@@ -395,17 +388,12 @@ function StartEmulator {
     return
   fi
 
-  # TODO : Create an emulator if one doesn't exist
-  # TODO : Maybe run ./gradlew connectedCheck to see if everything is working fine
-
   # Check if Boot Animation is still on
   # https://devmaze.wordpress.com/2011/12/12/starting-and-stopping-android-emulators/
   # adb shell getprop init.svc.bootanim
   # We don't really care about this right now
 
   # Check if a process which calls itself the emulator is running
-  # TODO : may check this using ADB Devices
-  # TODO : Gets fucked up when adb fucks up, keeps ranting multiple devices found (not the exact message)
   OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
   # If 0 processes are called emulator, it means we need to load up one
   if [ "$OUTPUT" == "0" ]; then
@@ -430,7 +418,6 @@ function StartEmulator {
         next=false
       else
         # Seems like there is no panic, let's check for errors
-        # TODO : Can't remember how do you get an error
         ERROR_COUNT=$(echo ${EMULATOR_RESULTS} | grep "ERROR" -c)
 
         if [ "${ERROR_COUNT}" -gt 0 ]; then
@@ -516,9 +503,6 @@ function AssembleAndroid {
 
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
-
-  # TODO : Add the project name to the logfile and move it to a common location on the server
-  # TODO : Use the logs to show details on a screen somewhere
 
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
@@ -614,14 +598,11 @@ function SetupPods {
       # Cocoapods is not installed, let's install it first
       # First check if the master password has been defined
       if [ "${masterPassword}" != "" ]; then
-        # TODO : test this on an actual machine
         echo -e ${masterPassword} | sudo -S gem install cocoapods
-        # TODO : Catch error from install cocoapods
 
         # https://guides.cocoapods.org/using/pod-install-vs-update.html
         # We want to keep pods on their own version, hence not updating
         pod install
-        # TODO : Catch errors from pod install
 
         printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
       else
@@ -634,7 +615,6 @@ function SetupPods {
       # https://guides.cocoapods.org/using/pod-install-vs-update.html
       # We want to keep pods on their own version, hence not updating
       pod install
-      # TODO : Catch errors from pod install
     fi
   else
     printf "\nIt looks like this project doesn't use ${greenColour}pods${noColour}. You're awesome!\n\n"
@@ -711,8 +691,6 @@ function XCodeVersion {
 ##
 function XCPretty {
 
-  # TODO : Add XCPretty to a Job
-  # TODO : Allow user to update XCPretty
   StartAction "XCPretty"
 
   # If 'next' is false, exit
@@ -730,7 +708,6 @@ function XCPretty {
     if [ "${masterPassword}" != "" ]; then
       # this worked on my machine where xcpretty was not installed.
       echo -e ${masterPassword} | sudo -S gem install xcpretty
-      # TODO : Catch error from install xcpretty
 
       printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
     else
@@ -810,7 +787,6 @@ function BuildiOS {
     return
   fi
 
-  # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
   if [ "${scheme}" != "" ];then
 
     # Load up the simulator first, so that it gets ready while the build happens
@@ -1032,7 +1008,6 @@ function SetupGradle {
 
   if [ "${GRADLE_INSTALLED}" -gt 0 ]; then
     # Gradle is not installed, damn it
-    # TODO : Install gradle if it if is not installed
     ShowError
     printf "Alright, so you ${redColour}don't have gradle installed${noColour}. You need to do this when you setup the machine\n"
     next=false
@@ -1083,39 +1058,6 @@ function UpgradeVersion {
   fi
 
 }
-
-#SetupSSH
-#InstallOnAndroid
-#GitPull
-#GitClone
-#StartEmulator
-#AndroidDevices
-#AssembleAndroid
-#GitSubmodules
-#SetupPods
-#XCodeVersion
-#XCPretty
-#BuildiOS
-#DeployiOSSimulator
-#SetupScript
-#SetupGradle
-#UpgradeVersion
-
-
-# TODO : Add a function to read XCode Build Settings
-#function XCodeBuildSettings {
-  #xcodebuild -showBuildSettings
-#}
-#XCodeBuildSettings
-
-
-# TODO : Find outdated pods
-# pod outdated
-# from here - https://guides.cocoapods.org/using/pod-install-vs-update.html
-
-
-# TODO : Find all iOS Devices
-# xcrun simctl list
 
 
 # Setup Jobs
