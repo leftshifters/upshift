@@ -1055,6 +1055,7 @@ function UpgradeVersion {
       printf "Moving you to the latest version of upshift v${version}\n"
       VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
       printf "${VERSION_UPGRADE}\n"
+      rm upshift.temp
     fi    
   fi
 
