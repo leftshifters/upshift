@@ -13,7 +13,6 @@ projectName=""
 useWorkspace=false
 scheme=""
 iPhone="iPhone 6"
-iPhoneOS=" (9.3)"
 xcodeVersion="7.3"
 
 # 2. Load up config from config file
@@ -29,10 +28,6 @@ fi
 
 if [ "${iPhone}" == "" ]; then
   iPhone="iPhone 6"
-fi
-
-if [ "${iPhoneOS}" == "" ]; then
-  iPhoneOS=" (9.3)"
 fi
 
 # 3. Dump commands to the screen, only if one wants to debug
@@ -781,14 +776,6 @@ function BuildiOS {
     return
   fi
 
-  # Check if we have `iPhoneOS` variable set
-  if [ "${iPhoneOS}" == "" ]; then
-    ShowError
-    printf "Looks like you forgot to set iPhoneOS in config. Do that first and come back.\n\nExample iPhoneOS=\'${blueColour} (9.3)\'${noColour}\n"
-    next=false
-    return
-  fi
-
   if [ "${scheme}" != "" ];then
 
     # Load up the simulator first, so that it gets ready while the build happens
@@ -799,6 +786,25 @@ function BuildiOS {
       printf "The simulator is already ${greenColour}running${noColour}!\n\n"
     else
       # Load up the simulator
+
+      # Find the correct simulator
+      # From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
+      iPhoneOS=""
+      case "${xcodeVersion}" in
+        "7.3.1") iPhoneOS="(9.3)";;
+        "7.3") iPhoneOS="(9.3)";;
+        "7.2.1") iPhoneOS="(9.2)";;
+        "7.2") iPhoneOS="(9.2)";;
+        "7.1.1") iPhoneOS="(9.1)";;
+        "7.1") iPhoneOS="(9.1)";;
+        "7.0.1") iPhoneOS="(9.0)";;
+        "7.0") iPhoneOS="(9.0)";;
+        *)
+          ShowError
+          printf "The device that you wanted to load [${iPhone} ${iPhoneOS}] does not exit\n\n"
+          next=false
+          return
+        esac
 
       # Find out if the target exists on this device on note
       printf "Getting the list of available simulators\n"
@@ -986,7 +992,6 @@ function AddConfig {
     echo useWorkspace=false >> config.ci
     echo scheme=\'\' >> config.ci
     echo iPhone=\'\' >> config.ci
-    echo iPhoneOS=\'\' >> config.ci
     echo xcodeVersion=\'\' >> config.ci
 
     printf "We just add a very basic confi.ci file in this folder.\n"
