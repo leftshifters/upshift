@@ -826,14 +826,54 @@ function BuildiOS {
     # Build the effing thing
     # TODO : Clean the effing thing before you start
     printf "Compiling the beautiful codebase\n\n"
-    set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee "xcode-build-${TIMESHTAMP}.log" | xcpretty
+
+    #set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee "xcode-build-${TIMESHTAMP}.log" | xcpretty
+
+    set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -derivedDataPath build -archivePath "build/${projectName}.xcarchive" archive | tee "xcode-build-${TIMESHTAMP}.log" | xcpretty
 
     BUILD_RESULTS=$(<"xcode-build-${TIMESHTAMP}.log");
     BUILD_SUCCEDED=$(grep "BUILD SUCCEEDED" -c <<< "${BUILD_RESULTS}")
+    ARCHIVE_SUCCEDED=$(grep "ARCHIVE SUCCEEDED" -c <<< "${BUILD_RESULTS}")
 
-    if [ "${BUILD_SUCCEDED}" -gt 0 ]; then
+    if [ "${BUILD_SUCCEDED}" -gt 0 ] || [ "${ARCHIVE_SUCCEDED}" -gt 0 ]; then
+      # The build or archive succeded
 
-      # The build succeded
+      # Get the UUID from profiles
+      # https://gist.github.com/mxpr/8208289a63ca4e3a35a4
+      # Loop through all files, if you get a UDID, add them to the list of profiles
+      if [ -d "./profiles/" ]; then
+        # The profiles folder exists
+        for profileName in profiles/*.mobileprovision; do
+          uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< $(security cms -D -i "${profileName}" 2>/dev/null))
+
+          # If a UUID exist, then copy it, if it hasn't already been copied
+          if [ "${uuid}" != "" ]; then
+            # Copy file to UUID folder
+            `cp -f ${profileName} ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision`
+            printf "Copies provisioning file ${uuid}.mobileprovision to the system\n"
+          fi
+
+        done
+      else
+        ShowError
+        printf "You need to add your provisioning profiles to a folder called profiles\n\n"
+        next=false
+        exit
+      fi
+
+
+      # Create an IPA (Export the effing thing)
+      set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist "profiles/export.plist" -archivePath "build/${projectName}.xcarchive" -exportPath "build/${projectName}.ipa" 2>&1 | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
+
+      EXPORT_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log")
+      EXPORT_SUCCEDED=$(grep "EXPORT SUCCEDED" -c <<< "${EXPORT_RESULTS}")
+
+      if [ "${EXPORT_SUCCEDED}" -gt 0 ]; then
+        printf "Export Succeded\n"
+      else
+        printf "${EXPORT_RESULTS}\n\n"
+      fi
+
       printf "The build was ${greenColour}successful${noColour} 🍺\n\n"
     else
       ShowError
