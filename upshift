@@ -714,17 +714,25 @@ function XCPretty {
 
   if [ "${XCPRETTY_INSTALLED}" -gt 0 ]; then
     # XCPretty is not installed, let's install it first
-    # First check if the master password has been defined
-    if [ "${masterPassword}" != "" ]; then
-      # this worked on my machine where xcpretty was not installed.
-      echo -e "${masterPassword}" | sudo -S gem install xcpretty
 
-      printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
+    if [ "${CI}" == true ]; then
+      # CI is true, we now need password
+      if [ "${masterPassword}" == "" ]; then
+        # masterPassword exists, do your thing
+        echo -e "${masterPassword}" | sudo -S gem install xcpretty
+      else
+        # Show error and stop
+        ShowError
+        printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
+        next=false
+        exit 1
+      fi
     else
-      ShowError
-      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
-      next=false
+      # User should type in the password
+      sudo -S gem install xcpretty
     fi
+
+    printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
   else
     printf "Woot! XCPretty is already installed\n"
   fi
