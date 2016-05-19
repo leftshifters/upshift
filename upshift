@@ -594,19 +594,28 @@ function SetupPods {
     if [ "${POD_INSTALLED}" -gt 0 ]; then
       # Cocoapods is not installed, let's install it first
       # First check if the master password has been defined
-      if [ "${masterPassword}" != "" ]; then
-        echo -e "${masterPassword}" | sudo -S gem install cocoapods
 
-        # https://guides.cocoapods.org/using/pod-install-vs-update.html
-        # We want to keep pods on their own version, hence not updating
-        pod install
-
-        printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
+      if [ "${CI}" == true ]; then
+        # If we are on CI, we need password
+        if [ "${masterPassword}" == "" ]; then
+          ShowError
+          printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
+          next=false
+          exit 1
+        else
+          # This means we are on CI and password exists
+          echo -e "${masterPassword}" | sudo -S gem install cocoapods          
+        fi
       else
-        ShowError
-        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
-        next=false
+        # This means we are NOT on CI and we don't care about the password
+        sudo -S gem install cocoapods
       fi
+
+      # https://guides.cocoapods.org/using/pod-install-vs-update.html
+      # We want to keep pods on their own version, hence not updating
+      pod install
+
+      printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
     else
       # Given that cocoapods is installed
       # https://guides.cocoapods.org/using/pod-install-vs-update.html
@@ -642,26 +651,30 @@ function XCodeVersion {
         if [ -d "/Applications/Xcode-${xcodeVersion}.app/" ]; then
           # Looks like this version is available on this machine
 
-          # Check if the user has added the password for this machine, we need sudo again
-          if [ "${masterPassword}" != "" ]; then
-            # Alright, it seems there is a password, let's try it out
-            printf "${blueColour}Switching${noColour} Xcode versions\n\n"
-            echo -e "${masterPassword}" | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
-
-            # Maye it's done, check and confirm
-            XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
-
-            if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
-              printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+          printf "${blueColour}Switching${noColour} Xcode versions\n\n"
+          if [ "${CI}" == true ]; then
+            # If we are on CI, expect masterPassword
+            if [ "${masterPassword}" != "" ]; then
+              echo -e "${masterPassword}" | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
             else
               ShowError
-              printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
+              printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
               next=false
+              exit 1          
             fi
+          else
+            # If we are NOT on CI, don't expect password
+            sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+          fi
 
+          # Maye it's done, check and confirm
+          XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+
+          if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
+            printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
           else
             ShowError
-            printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
+            printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
             next=false
           fi
         else
@@ -701,17 +714,25 @@ function XCPretty {
 
   if [ "${XCPRETTY_INSTALLED}" -gt 0 ]; then
     # XCPretty is not installed, let's install it first
-    # First check if the master password has been defined
-    if [ "${masterPassword}" != "" ]; then
-      # this worked on my machine where xcpretty was not installed.
-      echo -e "${masterPassword}" | sudo -S gem install xcpretty
 
-      printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
+    if [ "${CI}" == true ]; then
+      # CI is true, we now need password
+      if [ "${masterPassword}" == "" ]; then
+        # masterPassword exists, do your thing
+        echo -e "${masterPassword}" | sudo -S gem install xcpretty
+      else
+        # Show error and stop
+        ShowError
+        printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
+        next=false
+        exit 1
+      fi
     else
-      ShowError
-      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
-      next=false
+      # User should type in the password
+      sudo -S gem install xcpretty
     fi
+
+    printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
   else
     printf "Woot! XCPretty is already installed\n"
   fi
