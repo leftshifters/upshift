@@ -96,13 +96,11 @@ CI=${GITLAB_CI}
 
 # 11. Find out if you are in docker or not
 DOCKER_COUNT=$(cat /proc/1/cgroup | grep "docker" -c)
-printf "DOCKER_COUNT : ${DOCKER_COUNT}\n"
 
 DOCKER=false
 if [ "${DOCKER_COUNT}" -gt 0 ]; then
   DOCKER=true
 fi
-printf "IN DOCKER : ${DOCKER}"
 
 
 
@@ -622,11 +620,12 @@ function SetupPods {
           exit 1
         else
           # This means we are on CI and password exists
-          echo -e "${masterPassword}" | sudo -S gem install cocoapods          
+          echo -e "${masterPassword}" | sudo -S gem install cocoapods
         fi
       else
         # This means we are NOT on CI and we don't care about the password
-        sudo -S gem install cocoapods
+        sudo gem install cocoapods
+        
       fi
     fi
 
@@ -1091,23 +1090,50 @@ function SetupScript {
   # Check if /usr/local/upshift directory exists, if not create it
   if [ ! -d "/usr/local/upshift/${version}" ]; then
     # Directory doesn't exist, create it
-    sudo mkdir -p /usr/local/upshift/${version}
+
+    # If we are on docker, don't need sudo because there is no password required
+    if [ "${DOCKER}" == true ]; then
+      mkdir -p /usr/local/upshift/${version}
+    else
+      sudo mkdir -p /usr/local/upshift/${version}
+    fi
+    
     #printf "Setup the folder in /usr/local/upshift/${version}\n"
   fi
 
   # Throw yourself into the folder above, it not already there
   if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
     # Copy away
-    sudo cp -rf ./upshift.temp /usr/local/upshift/${version}/upshift
+
+    # If we are on docker, don't need sudo because there is no password required
+    if [ "${DOCKER}" == true ]; then
+      cp -rf ./upshift.temp /usr/local/upshift/${version}/upshift
+    else
+      sudo cp -rf ./upshift.temp /usr/local/upshift/${version}/upshift
+    fi
+
+    
     #printf "Copied the script into /usr/local/upshift/${version}/upshift\n"
 
     # Now add a link to the above file in /usr/local/bin
     if [ -L "/usr/local/bin/upshift" ]; then
       # Remove only if it exits
-      sudo rm -f /usr/local/bin/upshift
+
+      # If we are on docker, don't need sudo because there is no password required
+      if [ "${DOCKER}" == true ]; then
+        rm -f /usr/local/bin/upshift
+      else
+        sudo rm -f /usr/local/bin/upshift
+      fi
+      
     fi
-    sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
-    #printf "Setup symlink at /usr/local/bin/upshift\n"
+
+    # If we are on docker, don't need sudo because there is no password required
+    if [ "${DOCKER}" == true ]; then
+      ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+    else
+      sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+    fi
 
     printf "Installation has been ${greenColour}successfully${noColour} completed\n"
   else
