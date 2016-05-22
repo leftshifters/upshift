@@ -86,6 +86,13 @@ GITLAB_CI=$(printenv GITLAB_CI)
 # Overall, OR all of them to find out is it is running via CI
 CI=${GITLAB_CI}
 
+# 11. To avoid getting the "tput: No value for $TERM and no -T specified" error, export TERM in the script
+termInEnv=$(printenv TERM)
+
+if [ "${termInEnv}" == "" ]; then
+  export TERM="xterm"
+fi
+
 
 # Setup Internal Functions
 # ⚡ ⚙
