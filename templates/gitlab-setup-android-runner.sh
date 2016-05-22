@@ -27,7 +27,7 @@ cd /usr/local/ && wget http://dl.google.com/android/android-sdk_r24.4.1-linux.tg
 rm android-sdk_r24.4.1-linux.tgz
 /usr/local/android-sdk-linux/tools/android update sdk --no-ui
 rm -rf /usr/local/android-sdk_r24.2-linux.tgz
-cd /usr/local/ && wget http://services.gradle.org/distributions/gradle-2.13-all.zip && unzip -o gradle-2.13-all.zip
+cd /usr/local/ && wget http://services.gradle.org/distributions/gradle-2.13-all.zip > gradle.zip && unzip -o gradle-2.13-all.zip && mv gradle-2.13 gradle
 rm -rf /usr/local/gradle-2.13-all.zip
 cd && curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift && chmod +x upshift && ./upshift install
 rm upshift

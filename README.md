@@ -7,6 +7,9 @@ You can install upshift by running the following command on your mac
 curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install
 ```
 
+# Docker
+You can find the upshift docker image for building android at [https://github.com/leftshifters/upshift-docker-android](https://github.com/leftshifters/upshift-docker-android)
+
 # Available Commands
 The following options are currently available
 
