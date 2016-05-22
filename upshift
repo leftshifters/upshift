@@ -95,6 +95,17 @@ if [ "${termInEnv}" == "" ]; then
   printf "Setting Term as xterm"
 fi
 
+# 12. Find out if you are in docker or not
+DOCKER_COUNT=$(cat /proc/1/cgroup | grep "docker" -c)
+printf "DOCKER_COUNT : ${DOCKER_COUNT}\n"
+
+DOCKER=false
+if [ "${DOCKER_COUNT}" -gt 0 ]; then
+  DOCKER=true
+fi
+printf "IN DOCKER : ${DOCKER}"
+
+
 
 # Setup Internal Functions
 # ⚡ ⚙
