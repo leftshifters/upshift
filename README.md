@@ -4,7 +4,7 @@ The upshift utility helps you clone, build and test your iOS and Android project
 # Installation
 You can install upshift by running the following command on your mac
 ```
-curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift && chmod +x upshift && ./upshift install
+curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install
 ```
 
 # Available Commands
