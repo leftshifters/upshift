@@ -1079,7 +1079,7 @@ function SetupScript {
   # Throw yourself into the folder above, it not already there
   if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
     # Copy away
-    sudo cp -rf ./upshift.temp /usr/local/upshift/${version}
+    sudo cp -rf ./upshift.temp /usr/local/upshift/${version}/upshift
     #printf "Copied the script into /usr/local/upshift/${version}/upshift\n"
 
     # Now add a link to the above file in /usr/local/bin
