@@ -962,7 +962,7 @@ function ArchiveIOS {
       set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist "profiles/export.plist" -archivePath "build/${projectName}.xcarchive" -exportPath "build/${projectName}.ipa" 2>&1 | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
 
       EXPORT_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log")
-      EXPORT_SUCCEDED=$(grep "EXPORT SUCCEDED" -c <<< "${EXPORT_RESULTS}")
+      EXPORT_SUCCEDED=$(grep "EXPORT SUCCEEDED" -c <<< "${EXPORT_RESULTS}")
 
       if [ "${EXPORT_SUCCEDED}" -gt 0 ]; then
         printf "The build was ${greenColour}successful${noColour} 🍺\n\n"
@@ -1251,6 +1251,7 @@ function FindJobQueue {
       StartScript
       case "${job}" in
         "build")      jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
+        "distribute") jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "ArchiveIOS");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
