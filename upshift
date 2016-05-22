@@ -88,9 +88,11 @@ CI=${GITLAB_CI}
 
 # 11. To avoid getting the "tput: No value for $TERM and no -T specified" error, export TERM in the script
 termInEnv=$(printenv TERM)
+printf "TermInEnv : ${termInEnv}\n\n"
 
 if [ "${termInEnv}" == "" ]; then
   export TERM="xterm"
+  printf "Setting Term as xterm"
 fi
 
 
