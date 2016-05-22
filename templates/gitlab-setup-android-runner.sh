@@ -22,7 +22,7 @@ apt-get install -q -y python-software-properties
 add-apt-repository ppa:webupd8team/java -y
 apt-get update
 echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-apt-get install oracle-java7-installer -y
+apt-get install oracle-java7-installer oracle-java8-installer -y
 cd /usr/local/ && wget http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && tar xf android-sdk_r24.4.1-linux.tgz
 rm android-sdk_r24.4.1-linux.tgz
 /usr/local/android-sdk-linux/tools/android update sdk --no-ui
@@ -32,12 +32,28 @@ rm -rf /usr/local/gradle-2.13-all.zip
 cd && curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift && chmod +x upshift && ./upshift install
 rm upshift
 
+sudo apt-get install mailutil postfix
+vi /etc/postfix/main.cf
+- Add
+smtp_sasl_auth_enable = yes
+relayhost = smtp.mailgun.org
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd
+- Remove
+relayhost = 
+
+echo 'smtp.mailgun.org postmaster@vercingetorix.mailgun.org:0i0u3gpisfs5' > /etc/postfix/sasl_passwd
+chmod 600 /etc/postfix/sasl_passwd
+postmap /etc/postfix/sasl_passwd
+service postfix restart
+echo "test super test" | mail -s "test subject" "sudhanshu@leftshift.io"
 
 
 vi /var/opt/env
 - Add
 DEBIAN_FRONTEND="noninteractive"
 JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+JAVA8_HOME="/usr/lib/jvm/java-8-oracle"
 PATH="$JAVA_HOME:$PATH"
 ANDROID_HOME="/usr/local/android-sdk-linux"
 PATH="$PATH:$ANDROID_HOME/tools"
@@ -57,3 +73,4 @@ android update sdk -a --no-ui --filter 5,6,7
 
 
 for remote in `git branch -r | grep -v master `; do git checkout --track $remote ; done
+

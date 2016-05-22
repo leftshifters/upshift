@@ -13,11 +13,11 @@ projectName=""
 useWorkspace=false
 scheme=""
 iPhone="iPhone 6"
-iPhoneOS=" (9.3)"
 xcodeVersion="7.3"
 
 # 2. Load up config from config file
 if [ -f "./config.ci" ]; then
+  # shellcheck disable=SC1091
   source ./config.ci
 fi
 
@@ -26,12 +26,8 @@ if [ "${xcodeVersion}" == "" ]; then
   xcodeVersion="7.3"
 fi
 
-if [ "iPhone" == "" ]; then
+if [ "${iPhone}" == "" ]; then
   iPhone="iPhone 6"
-fi
-
-if [ "iPhoneOS" == "" ]; then
-  iPhoneOS=" (9.3)"
 fi
 
 # 3. Dump commands to the screen, only if one wants to debug
@@ -66,7 +62,7 @@ platform=$1
 job=$2
 
 # 7. Application Version
-version="0.6.5"
+version="0.7.0"
 
 # 8. Set time functions
 startTime=$(date +%s)
@@ -151,7 +147,6 @@ function SetupSSH {
 
   # Check if email has been defined by the user
   if [ "${emailForSSHKey}" != "" ]; then
-    # TODO : Allow the user to add the keys to a non default place
     # Check if an id_rsa already exists at the defualt location
     if [ ! -f ~/.ssh/id_rsa ]; then
       printf "File does not exist at ~/.ssh/id_rsa"
@@ -197,13 +192,10 @@ function InstallOnAndroid {
   # Make a TIMESHTAMP for the log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
-  # TODO : Add the project name to the logfile and move it to a common location on the server
-  # TODO : Use the logs to show details on a screen somewhere
-
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
-    ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
+    ./gradlew clean 2>&1 | tee "gradle-clean-${TIMESHTAMP}.log"
   else
     printf "Skipping :clean:, you have ${blueColour}alwaysCleanBeforeBuild${noColour} turned off\n"
   fi
@@ -211,21 +203,22 @@ function InstallOnAndroid {
   # Uninstall older builds if the setting so desires
   if [ "${alwaysUninstallOlderBuilds}" == true ]; then
     printf "Time to ${greenColour}uninstall${noColour} older builds\n\n"
-    ./gradlew uninstallAll 2>&1 | tee gradle-uninstall-$TIMESHTAMP.log
+    ./gradlew uninstallAll 2>&1 | tee "gradle-uninstall-${TIMESHTAMP}.log"
+
   else
     printf "Skipping :uninstallAll:, you have ${blueColour}alwaysUninstallOlderBuilds${noColour} turned off\n"
   fi
 
   # Now time to build again
   printf "\nTime to run ${greenColour}installDebug${noColour} on this thing\n\n"
-  ./gradlew installDebug --stacktrace 2>&1 | tee gradle-install-$TIMESHTAMP.log
+  ./gradlew installDebug --stacktrace 2>&1 | tee "gradle-install-${TIMESHTAMP}.log"
 
   # Get the logged results and try to make some sense out of it
-  BUILD_RESULTS=$(<gradle-install-$TIMESHTAMP.log)
+  BUILD_RESULTS=$(<"gradle-install-${TIMESHTAMP}.log")
 
   # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
   # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-  BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+  BUILD_SUCCESSFUL=$(echo "${BUILD_RESULTS}" | grep "BUILD SUCCESSFUL" -c)
 
   # If the build was successful, let 'em know
   if [ "$BUILD_SUCCESSFUL" != "1" ]; then
@@ -234,7 +227,6 @@ function InstallOnAndroid {
     next=false
   else
     printf "\n\n${greenColour}Super${noColour}! The build was fine.\n"
-    # TODO : Someday figure out how to get package and mainActivity automatically
     # Check if package is empty
     if [ "${package}" != "" ];then
       if [ "${mainActivity}" != "" ]; then
@@ -265,7 +257,7 @@ function GitPull {
   StartAction "GitPull"
 
   # If this is coming via CI, don't pull
-  if [ ${CI} == true ]; then
+  if [ "${CI}" == true ]; then
     ShowCIFailed
     return
   fi
@@ -280,18 +272,17 @@ function GitPull {
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
   # Check if the branch name is defined
-  # TODO : Automatically pick the current branch
   if [ "${gitRepositoryBranch}" != "" ]; then
 
     printf "Alright, let's ${greenColour}pull${noColour} the ${gitRepositoryBranch} branch for this repo\n\n"
 
     # Alright, let's pull
-    git pull origin ${gitRepositoryBranch} 2>&1 | tee git-pull-$TIMESHTAMP.log
+    git pull origin ${gitRepositoryBranch} 2>&1 | tee "git-pull-${TIMESHTAMP}.log"
 
     # Load up the results to see if there were any errors
-    PULL_RESULTS=$(<git-pull-$TIMESHTAMP.log)
-    PULL_RESULTS_FATAL=$(grep "fatal:" -c <<< ${PULL_RESULTS})
-    PULL_RESULTS_ERROR=$(grep "error:" -c <<< ${PULL_RESULTS})
+    PULL_RESULTS=$(<"git-pull-${TIMESHTAMP}.log")
+    PULL_RESULTS_FATAL=$(grep "fatal:" -c <<< "${PULL_RESULTS}")
+    PULL_RESULTS_ERROR=$(grep "error:" -c <<< "${PULL_RESULTS}")
     # If there was a fatal error, tell the user there's something wrong
     if [ "${PULL_RESULTS_FATAL}" -gt "0" ] || [ "${PULL_RESULTS_ERROR}" -gt "0" ]; then
       ShowError
@@ -330,7 +321,6 @@ function GitClone {
   # Check if the repo URL is defined
   if [ "${gitRepositoryURL}" != "" ]; then
     # Check if the branch name is defined
-    # TODO : Automatically pick the current branch
     if [ "${gitRepositoryBranch}" != "" ]; then
 
       # Check if this is already a git repository
@@ -348,13 +338,13 @@ function GitClone {
         #   you will need to clone into another folder, and move stuff back here
         #   we can't do what the rest of the world tries to do - which is git init, add remote,
         #   because we want to ensure we do depth=1 and not download the whole repo, which can be painful at times
-        git clone -b ${gitRepositoryBranch} ${gitRepositoryURL} tmp --progress --depth 1  2>&1 | tee git-clone-$TIMESHTAMP.log
-        mv tmp/* . 2>&1 | tee git-clone-$TIMESHTAMP.log
-        mv tmp/.* . 2>/dev/null | tee git-clone-$TIMESHTAMP.log
-        rm -rf tmp/ 2>&1 | tee git-clone-$TIMESHTAMP.log
+        git clone -b "${gitRepositoryBranch}" "${gitRepositoryURL}" tmp --progress --depth 1  2>&1 | tee "git-clone-${TIMESHTAMP}.log"
+        mv tmp/* . 2>&1 | tee "git-clone-${TIMESHTAMP}.log"
+        mv tmp/.* . 2>/dev/null | tee "git-clone-${TIMESHTAMP}.log"
+        rm -rf tmp/ 2>&1 | tee "git-clone-${TIMESHTAMP}.log"
 
         # Load up the results to see if there were any errors
-        CLONE_RESULTS=$(<git-clone-$TIMESHTAMP.log)
+        CLONE_RESULTS=$(<"git-clone-${TIMESHTAMP}.log")
         # If there was a fatal error, tell the user there's something wrong
         if [ "$(printf "${CLONE_RESULTS}" | grep "fatal" -c)" -gt "0" ] || [ "$(printf "${CLONE_RESULTS}" | grep "error" -c)" -gt "0" ]; then
           ShowError
@@ -395,31 +385,26 @@ function StartEmulator {
     return
   fi
 
-  # TODO : Create an emulator if one doesn't exist
-  # TODO : Maybe run ./gradlew connectedCheck to see if everything is working fine
-
   # Check if Boot Animation is still on
   # https://devmaze.wordpress.com/2011/12/12/starting-and-stopping-android-emulators/
   # adb shell getprop init.svc.bootanim
   # We don't really care about this right now
 
   # Check if a process which calls itself the emulator is running
-  # TODO : may check this using ADB Devices
-  # TODO : Gets fucked up when adb fucks up, keeps ranting multiple devices found (not the exact message)
   OUTPUT=$(ps -aef | grep emulator | grep "sdk/tools" -c)
   # If 0 processes are called emulator, it means we need to load up one
   if [ "$OUTPUT" == "0" ]; then
 
     if [ "${emulatorName}" != "" ]; then
 
-      EMULATOR_RESULTS=$(nohup $ANDROID_HOME/tools/emulator -avd ${emulatorName} 2>emulator.log 1>emulator.log &)
+      EMULATOR_RESULTS=$(nohup "$ANDROID_HOME/tools/emulator" -avd "${emulatorName}" 2>emulator.log 1>emulator.log &)
       # TODO : This is a big #HACK, only errors are returned in the first two seconds, I suck and I don't know a way out
       # TODO : Another potential problem, we redirect both 1,2 in reset mode (>), the file could get overwritten
       sleep 2
       EMULATOR_RESULTS=$(<emulator.log)
 
       # Check if there was a PANIC [to test this, put in the wrong emulator name]
-      PANIC_COUNT=$(echo ${EMULATOR_RESULTS} | grep "PANIC" -c)
+      PANIC_COUNT=$(echo "${EMULATOR_RESULTS}" | grep "PANIC" -c)
 
       # If there was a panic, throw it at the user, they messed up, not us
       if [ "${PANIC_COUNT}" -gt 0 ]; then
@@ -430,8 +415,7 @@ function StartEmulator {
         next=false
       else
         # Seems like there is no panic, let's check for errors
-        # TODO : Can't remember how do you get an error
-        ERROR_COUNT=$(echo ${EMULATOR_RESULTS} | grep "ERROR" -c)
+        ERROR_COUNT=$(echo "${EMULATOR_RESULTS}" | grep "ERROR" -c)
 
         if [ "${ERROR_COUNT}" -gt 0 ]; then
           printf "${EMULATOR_RESULTS}\n\n"
@@ -517,27 +501,24 @@ function AssembleAndroid {
   # Make a TIMESHTAMP for log file
   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
 
-  # TODO : Add the project name to the logfile and move it to a common location on the server
-  # TODO : Use the logs to show details on a screen somewhere
-
   # If alwaysCleanBeforeBuild then run clean
   if [ "${alwaysCleanBeforeBuild}" == true ]; then
     printf "Time to ${greenColour}clean up${noColour}\n\n"
-    ./gradlew clean 2>&1 | tee gradle-clean-$TIMESHTAMP.log
+    ./gradlew clean 2>&1 | tee "gradle-clean-${TIMESHTAMP}.log"
   else
     printf "Skipping :clean:, you have ${blueColour}alwaysCleanBeforeBuild${noColour} turned off\n"
   fi
 
   # Now time to build again
-  printf "\nTime to run ${greenColour}assembleDebug${noColour} on this thing\n\n"
-  ./gradlew assembleDebug --stacktrace 2>&1 | tee gradle-assemble-$TIMESHTAMP.log
+  printf "\nTime to run ${greenColour}assemble${noColour} on this thing\n\n"
+  ./gradlew assemble --stacktrace 2>&1 | tee "gradle-assemble-${TIMESHTAMP}.log"
 
   # Get the logged results and try to make some sense out of it
-  BUILD_RESULTS=$(<gradle-assemble-$TIMESHTAMP.log)
+  BUILD_RESULTS=$(<"gradle-assemble-${TIMESHTAMP}.log")
 
   # When you build via Gradle, it seems it always sends BUILD SUCCESSFUL in the results
   # This could mess up if in some build configuration, there are two messages, one is BUILD SUCCESSFUL and one otherwise
-  BUILD_SUCCESSFUL=$(echo $BUILD_RESULTS | grep "BUILD SUCCESSFUL" -c)
+  BUILD_SUCCESSFUL=$(echo "$BUILD_RESULTS" | grep "BUILD SUCCESSFUL" -c)
 
   # If the build was successful, let 'em know
   if [ "$BUILD_SUCCESSFUL" != "1" ]; then
@@ -569,12 +550,12 @@ function GitSubmodules {
   # Check if .gitmodules exists
   if [ -f ".gitmodules" ]; then
     # If the file exists, we need to run init and update and catch errors
-    git submodule init 2>&1 | tee git-submodule-init-$TIMESHTAMP.log
-    git submodule update 2>&1 | tee git-submodule-update-$TIMESHTAMP.log
+    git submodule init 2>&1 | tee "git-submodule-init-${TIMESHTAMP}.log"
+    git submodule update 2>&1 | tee "git-submodule-update-${TIMESHTAMP}.log"
 
-    SUBMODULE_RESULTS=$(<git-submodule-update-$TIMESHTAMP.log)
+    SUBMODULE_RESULTS=$(<"git-submodule-update-${TIMESHTAMP}.log")
 
-    if [ $(echo ${SUBMODULE_RESULTS} | grep "fatal:" -c) -gt 0 ] || [ $(echo ${SUBMODULE_RESULTS} | grep "error:" -c) -gt 0 ]; then
+    if [ $(echo "${SUBMODULE_RESULTS}" | grep "fatal:" -c) -gt 0 ] || [ $(echo "${SUBMODULE_RESULTS}" | grep "error:" -c) -gt 0 ]; then
       ShowError
       printf "Damn, initializing submodules was ${redColour}not successful${noColour}. You should check this up.\n\n"
       next=false
@@ -608,34 +589,41 @@ function SetupPods {
   if [ -f "Podfile" ]; then
     # Check if cocoapods is installed
     POD_VERSION=$(pod --version 2>&1)
-    POD_INSTALLED=$(grep 'command not found' -c <<< ${POD_VERSION})
+    POD_INSTALLED=$(grep 'command not found' -c <<< "${POD_VERSION}")
 
     if [ "${POD_INSTALLED}" -gt 0 ]; then
       # Cocoapods is not installed, let's install it first
-      # First check if the master password has been defined
-      if [ "${masterPassword}" != "" ]; then
-        # TODO : test this on an actual machine
-        echo -e ${masterPassword} | sudo -S gem install cocoapods
-        # TODO : Catch error from install cocoapods
 
-        # https://guides.cocoapods.org/using/pod-install-vs-update.html
-        # We want to keep pods on their own version, hence not updating
-        pod install
-        # TODO : Catch errors from pod install
-
-        printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
+      if [ "${CI}" == true ]; then
+        # If we are on CI, we need password
+        if [ "${masterPassword}" == "" ]; then
+          ShowError
+          printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
+          next=false
+          exit 1
+        else
+          # This means we are on CI and password exists
+          echo -e "${masterPassword}" | sudo -S gem install cocoapods          
+        fi
       else
-        ShowError
-        printf "Alright, so it seems we need to install cocoapods and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config\n"
-        next=false
+        # This means we are NOT on CI and we don't care about the password
+        sudo -S gem install cocoapods
       fi
-    else
-      # Given that cocoapods is installed
-      # https://guides.cocoapods.org/using/pod-install-vs-update.html
-      # We want to keep pods on their own version, hence not updating
-      pod install
-      # TODO : Catch errors from pod install
     fi
+
+    # https://guides.cocoapods.org/using/pod-install-vs-update.html
+    # We want to keep pods on their own version, hence not updating
+    pod install 2>&1 | tee "pod-install-${TIMESHTAMP}.log"
+    POD_INSTALL=$(<"pod-install-${TIMESHTAMP}.log")
+    POD_INSTALL_FAILED=$(grep "Invalid" -c <<< "${POD_INSTALL}")
+
+    if [ "${POD_INSTALL_FAILED}" -gt 0 ]; then
+      ShowError
+      printf "Damn, pod install ${redColour}not successful${noColour}. You should check this up.\n\n"
+      next=false
+    else
+      printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
+    fi      
   else
     printf "\nIt looks like this project doesn't use ${greenColour}pods${noColour}. You're awesome!\n\n"
   fi
@@ -665,26 +653,30 @@ function XCodeVersion {
         if [ -d "/Applications/Xcode-${xcodeVersion}.app/" ]; then
           # Looks like this version is available on this machine
 
-          # Check if the user has added the password for this machine, we need sudo again
-          if [ "${masterPassword}" != "" ]; then
-            # Alright, it seems there is a password, let's try it out
-            printf "${blueColour}Switching${noColour} Xcode versions\n\n"
-            echo -e ${masterPassword} | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
-
-            # Maye it's done, check and confirm
-            XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
-
-            if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
-              printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
+          printf "${blueColour}Switching${noColour} Xcode versions\n\n"
+          if [ "${CI}" == true ]; then
+            # If we are on CI, expect masterPassword
+            if [ "${masterPassword}" != "" ]; then
+              echo -e "${masterPassword}" | sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
             else
               ShowError
-              printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
+              printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
               next=false
+              exit 1          
             fi
+          else
+            # If we are NOT on CI, don't expect password
+            sudo xcode-select -switch "/Applications/Xcode-${xcodeVersion}.app/"
+          fi
 
+          # Maye it's done, check and confirm
+          XCODE_VERSION=$(xcodebuild -version | grep "Xcode" | tr -d "Xcode ")
+
+          if [ "${XCODE_VERSION}" == "${xcodeVersion}" ]; then
+            printf "We are now using XCode ${blueColour}${XCODE_VERSION}${noColour}\n"
           else
             ShowError
-            printf "Alright, so we need the sudo password to change the Xcode version.\nWould you be a sweetheart and add it\nto the ${blueColour}masterPassword${noColour} key in the config\n\n"
+            printf "Something went wrong. Maybe we messed up big time or the password that you entered was wrong.\n\n"
             next=false
           fi
         else
@@ -711,8 +703,6 @@ function XCodeVersion {
 ##
 function XCPretty {
 
-  # TODO : Add XCPretty to a Job
-  # TODO : Allow user to update XCPretty
   StartAction "XCPretty"
 
   # If 'next' is false, exit
@@ -722,22 +712,28 @@ function XCPretty {
   fi
 
   XCPRETTY_VERSION=$(xcpretty --version 2>&1)
-  XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< ${XCPRETTY_VERSION})
+  XCPRETTY_INSTALLED=$(grep 'command not found' -c <<< "${XCPRETTY_VERSION}")
 
   if [ "${XCPRETTY_INSTALLED}" -gt 0 ]; then
     # XCPretty is not installed, let's install it first
-    # First check if the master password has been defined
-    if [ "${masterPassword}" != "" ]; then
-      # this worked on my machine where xcpretty was not installed.
-      echo -e ${masterPassword} | sudo -S gem install xcpretty
-      # TODO : Catch error from install xcpretty
 
-      printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
+    if [ "${CI}" == true ]; then
+      # CI is true, we now need password
+      if [ "${masterPassword}" == "" ]; then
+        # masterPassword exists, do your thing
+        echo -e "${masterPassword}" | sudo -S gem install xcpretty
+      else
+        # Show error and stop
+        ShowError
+        printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
+        next=false
+      fi
     else
-      ShowError
-      printf "Alright, so it seems we need to install xcpretty and that requires\nadmin permissions. You need to add  ${redColour}masterPassword${noColour} to your config\nfor this to work.\nYou can get a sample config by running upshift setup config"
-      next=false
+      # User should type in the password
+      sudo -S gem install xcpretty
+      printf "\nXCPretty is now ${greenColour}installed${noColour}, one less thing to think about! 🍺\n\n"
     fi
+
   else
     printf "Woot! XCPretty is already installed\n"
   fi
@@ -802,15 +798,6 @@ function BuildiOS {
     return
   fi
 
-  # Check if we have `iPhoneOS` variable set
-  if [ "${iPhoneOS}" == "" ]; then
-    ShowError
-    printf "Looks like you forgot to set iPhoneOS in config. Do that first and come back.\n\nExample iPhoneOS=\'${blueColour} (9.3)\'${noColour}\n"
-    next=false
-    return
-  fi
-
-  # TODO : Find a way to find scheme automatically by parsing xcodebuild -list
   if [ "${scheme}" != "" ];then
 
     # Load up the simulator first, so that it gets ready while the build happens
@@ -822,14 +809,33 @@ function BuildiOS {
     else
       # Load up the simulator
 
+      # Find the correct simulator
+      # From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
+      iPhoneOS=""
+      case "${xcodeVersion}" in
+        "7.3.1") iPhoneOS="(9.3)";;
+        "7.3") iPhoneOS="(9.3)";;
+        "7.2.1") iPhoneOS="(9.2)";;
+        "7.2") iPhoneOS="(9.2)";;
+        "7.1.1") iPhoneOS="(9.1)";;
+        "7.1") iPhoneOS="(9.1)";;
+        "7.0.1") iPhoneOS="(9.0)";;
+        "7.0") iPhoneOS="(9.0)";;
+        *)
+          ShowError
+          printf "The device that you wanted to load [${iPhone} ${iPhoneOS}] does not exit\n\n"
+          next=false
+          return
+        esac
+
       # Find out if the target exists on this device on note
       printf "Getting the list of available simulators\n"
       DEVICES_AVAILABLE=$(instruments -s devices)
-      DEVICE_FOUND=$(grep "${iPhone} ${iPhoneOS}" -c <<< ${DEVICES_AVAILABLE} )
+      DEVICE_FOUND=$(grep "${iPhone} ${iPhoneOS}" -c <<< "${DEVICES_AVAILABLE}" )
 
       if [ "${DEVICE_FOUND}" -gt 0 ]; then
         printf "Starting up the ${greenColour}simulator${noColour}!\n\n"
-        xcrun instruments -w "${iPhone} ${iPhoneOS}" 2>&1 1>/dev/null
+        xcrun instruments -w "${iPhone} ${iPhoneOS}" 1>/dev/null 2>&1 
       else
         ShowError
         printf "The device that you wanted to load [${iPhone} ${iPhoneOS}] does not exit\n\n"
@@ -842,13 +848,13 @@ function BuildiOS {
     # Build the effing thing
     # TODO : Clean the effing thing before you start
     printf "Compiling the beautiful codebase\n\n"
-    set -o pipefail && xcodebuild -${PROJECT_TYPE} ${PROJECT_PATH} -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee xcode-build-${TIMESHTAMP}.log | xcpretty
 
-    BUILD_RESULTS=$(<xcode-build-${TIMESHTAMP}.log);
+    set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=${iPhone}" -derivedDataPath build | tee "xcode-build-${TIMESHTAMP}.log" | xcpretty
+
+    BUILD_RESULTS=$(<"xcode-build-${TIMESHTAMP}.log");
     BUILD_SUCCEDED=$(grep "BUILD SUCCEEDED" -c <<< "${BUILD_RESULTS}")
 
     if [ "${BUILD_SUCCEDED}" -gt 0 ]; then
-
       # The build succeded
       printf "The build was ${greenColour}successful${noColour} 🍺\n\n"
     else
@@ -863,6 +869,120 @@ function BuildiOS {
     xcodebuild -list
     next=false
   fi
+}
+
+##
+## Archive iOS
+##
+
+function ArchiveIOS {
+
+  StartAction "ArchiveIOS"
+
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
+
+  # Make a TIMESHTAMP for log file
+  TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+  # Either use projectName defined by the user, or pick it automatically
+  if [ "${projectName}" == "" ]; then
+    printf "Dude, you need to define ${redColour}projectName${noColour} in your config.\nSince you haven't, we are going to pick it automatically,\nwhich will take time on every build.\n\n"
+
+    PROJECT_NAME_STRING=$(xcodebuild -showBuildSettings | grep PROJECT_NAME)
+    projectName=${PROJECT_NAME_STRING#"    PROJECT_NAME = "}
+
+    if [ "${projectName}" == "" ]; then
+      ShowError
+      printf "Damn, couldn't even find it automatically. Are you sure this is an iOS repo?\n"
+      next=false
+      return
+    fi
+
+    printf "Found ${blueColour}${projectName}${noColour} automatically. Using this now.\n\n"
+  fi
+
+  # Build using workspace if user asks, if it uses cocoapods user workspace automatically, othewise use xcodeproj
+  PROJECT_TYPE="project"
+  EXTENSION=".xcodeproj"
+
+  if [ "${useWorkspace}" == true ]; then
+    # Since the user is requesting for it, decision is done, we love our users.
+    PROJECT_TYPE="workspace"
+    EXTENSION=".xcworkspace"
+  else
+    if [ -f "Podfile" ]; then
+      # If a Podfile exits, then guys use Cocoapods, load up the workspace by default
+      PROJECT_TYPE="workspace"
+      EXTENSION=".xcworkspace"
+    fi
+  fi
+
+  PROJECT_PATH="${projectName}${EXTENSION}";
+
+  if [ "${scheme}" != "" ]; then
+
+    set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -derivedDataPath build -archivePath "build/${projectName}.xcarchive" archive | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
+
+    ARCHIVE_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log");
+    ARCHIVE_SUCCEDED=$(grep "ARCHIVE SUCCEEDED" -c <<< "${ARCHIVE_RESULTS}")
+
+    if [ "${ARCHIVE_SUCCEDED}" -gt 0 ]; then
+      # The archive succeded
+
+      # Get the UUID from profiles
+      # https://gist.github.com/mxpr/8208289a63ca4e3a35a4
+      # Loop through all files, if you get a UDID, add them to the list of profiles
+      if [ -d "./profiles/" ]; then
+        # The profiles folder exists
+        for profileName in profiles/*.mobileprovision; do
+          uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< $(security cms -D -i "${profileName}" 2>/dev/null))
+
+          # If a UUID exist, then copy it, if it hasn't already been copied
+          if [ "${uuid}" != "" ]; then
+            # Copy file to UUID folder
+            `cp -f ${profileName} ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision`
+            printf "Copy provisioning file ${uuid}.mobileprovision to the system\n"
+          fi
+
+        done
+      else
+        ShowError
+        printf "You need to add your provisioning profiles to a folder called profiles\n\n"
+        next=false
+        exit
+      fi
+
+
+      # Create an IPA (Export the effing thing)
+      printf "Create an IPA\n"
+      set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist "profiles/export.plist" -archivePath "build/${projectName}.xcarchive" -exportPath "build/${projectName}.ipa" 2>&1 | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
+
+      EXPORT_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log")
+      EXPORT_SUCCEDED=$(grep "EXPORT SUCCEEDED" -c <<< "${EXPORT_RESULTS}")
+
+      if [ "${EXPORT_SUCCEDED}" -gt 0 ]; then
+        printf "The build was ${greenColour}successful${noColour} 🍺\n\n"
+      else
+        ShowError
+        printf "It seems the export ${redColour}failed${noColour}. You need to look this up\n\n"
+        next=false
+      fi
+    else
+      ShowError
+      printf "It seems the build ${redColour}failed${noColour}. You need to look this up\n\n"
+      next=false
+    fi
+  else
+    ShowError
+    printf "Dude, you need to define the ${blueColour}scheme${noColour} that you would like to build.\nYou can get a sample config by running upshift setup config\nYou can pick one here\n\n"
+    xcodebuild -list
+    next=false
+  fi
+
 }
 
 ##
@@ -919,11 +1039,11 @@ function DeployiOSSimulator {
     fi
 
     # Deploy the app to the simulator
-    xcrun simctl install booted ${BUILD_PATH}
+    xcrun simctl install booted "${BUILD_PATH}"
 
     # Open up the app on the simulator
     printf "Starting the app\n\n"
-    xcrun simctl launch booted ${productBundleIdentifier}
+    xcrun simctl launch booted "${productBundleIdentifier}"
   else
     ShowError
     printf "It looks like this is not an iOS repository. Do you know what's going on?\n\n"
@@ -1008,7 +1128,6 @@ function AddConfig {
     echo useWorkspace=false >> config.ci
     echo scheme=\'\' >> config.ci
     echo iPhone=\'\' >> config.ci
-    echo iPhoneOS=\'\' >> config.ci
     echo xcodeVersion=\'\' >> config.ci
 
     printf "We just add a very basic confi.ci file in this folder.\n"
@@ -1028,11 +1147,10 @@ function SetupGradle {
 
   # Check if Gradle is installed
   GRADLE_VERSION=$(gradle -v 2>&1)
-  GRADLE_INSTALLED=$(grep 'command not found' -c <<< ${GRADLE_VERSION})
+  GRADLE_INSTALLED=$(grep 'command not found' -c <<< "${GRADLE_VERSION}")
 
   if [ "${GRADLE_INSTALLED}" -gt 0 ]; then
     # Gradle is not installed, damn it
-    # TODO : Install gradle if it if is not installed
     ShowError
     printf "Alright, so you ${redColour}don't have gradle installed${noColour}. You need to do this when you setup the machine\n"
     next=false
@@ -1065,10 +1183,8 @@ function UpgradeVersion {
     return
   fi
 
-  LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/develop/release 2>&1)
-  LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< ${LATEST_VERSION})
-
-  LATEST_VERSION="0.6.2"
+  LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/master/release 2>&1)
+  LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< "${LATEST_VERSION}")
 
   if [ "${LATEST_VERSION_RESULTS}" -gt 0 ]; then
     printf "There was a problem in confirming the version number.\nIgnoring the message and moving on\n"
@@ -1079,54 +1195,41 @@ function UpgradeVersion {
     else
       printf "Moving you to the latest version of upshift v${version}\n"
       VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
+      printf "${VERSION_UPGRADE}\n"
+      rm upshift.temp
     fi    
   fi
 
 }
 
-#SetupSSH
-#InstallOnAndroid
-#GitPull
-#GitClone
-#StartEmulator
-#AndroidDevices
-#AssembleAndroid
-#GitSubmodules
-#SetupPods
-#XCodeVersion
-#XCPretty
-#BuildiOS
-#DeployiOSSimulator
-#SetupScript
-#SetupGradle
-#UpgradeVersion
+function SendEmail {
 
+  StartAction "SendEmail"
 
-# TODO : Add a function to read XCode Build Settings
-#function XCodeBuildSettings {
-  #xcodebuild -showBuildSettings
-#}
-#XCodeBuildSettings
+  # If 'next' is false, exit
+  if [ ${next} == false ]; then
+    ShowPreviousFailed
+    return
+  fi
 
+  MAIL_TO=$1
+  MAIL_SUBJECT=$2
+  MAIL_BODY=$3
 
-# TODO : Find outdated pods
-# pod outdated
-# from here - https://guides.cocoapods.org/using/pod-install-vs-update.html
+  SEND_EMAIL=$(echo "${MAIL_BODY}" | mail -s "${MAIL_SUBJECT}" "${MAIL_TO}")
+  printf "${SEND_EMAIL}\n"
 
-
-# TODO : Find all iOS Devices
-# xcrun simctl list
-
+}
 
 # Setup Jobs
 
 jobQueue=()
 
 function RunJobs {
-  for action in ${jobQueue[@]}
+  for action in "${jobQueue[@]}"
     do
       :
-      ${action}
+      "${action}"
   done
 }
 
@@ -1148,6 +1251,7 @@ function FindJobQueue {
       StartScript
       case "${job}" in
         "build")      jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
+        "distribute") jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "ArchiveIOS");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
@@ -1167,7 +1271,8 @@ function FindJobQueue {
     "install")
       jobQueue=("SetupScript");;
     "-v")
-      printf "Upshift v${version}"
+      printf "Upshift v${version}\n"
+      exit
       ;;
     "action")
       case "${job}" in
@@ -1183,6 +1288,7 @@ function FindJobQueue {
         "XCodeVersion")       jobQueue=("XCodeVersion");;
         "XCPretty")           jobQueue=("XCPretty");;
         "BuildiOS")           jobQueue=("BuildiOS");;
+        "ArchiveIOS")         jobQueue=("ArchiveIOS");;
         "DeployiOSSimulator") jobQueue=("DeployiOSSimulator");;
         "SetupScript")        jobQueue=("SetupScript");;
         "SetupGradle")        jobQueue=("SetupGradle");;
