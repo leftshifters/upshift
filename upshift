@@ -36,6 +36,14 @@ if [ "${debug}" == true ];then
 fi
 
 # 4. Make sure things look good. Here are some font and color adjustments
+
+# To avoid getting the "tput: No value for $TERM and no -T specified" error, export TERM in the script
+termInEnv=$(printenv TERM)
+
+if [ "${termInEnv}" == "" ]; then
+  export TERM="xterm"
+fi
+
 redColour='\033[0;31m'
 greenColour='\033[0;32m'
 yellowColour='\033[0;33m'
@@ -86,16 +94,7 @@ GITLAB_CI=$(printenv GITLAB_CI)
 # Overall, OR all of them to find out is it is running via CI
 CI=${GITLAB_CI}
 
-# 11. To avoid getting the "tput: No value for $TERM and no -T specified" error, export TERM in the script
-termInEnv=$(printenv TERM)
-printf "TermInEnv : ${termInEnv}\n\n"
-
-if [ "${termInEnv}" == "" ]; then
-  export TERM="xterm"
-  printf "Setting Term as xterm"
-fi
-
-# 12. Find out if you are in docker or not
+# 11. Find out if you are in docker or not
 DOCKER_COUNT=$(cat /proc/1/cgroup | grep "docker" -c)
 printf "DOCKER_COUNT : ${DOCKER_COUNT}\n"
 
