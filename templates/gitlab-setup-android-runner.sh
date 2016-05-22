@@ -22,7 +22,7 @@ apt-get install -q -y python-software-properties
 add-apt-repository ppa:webupd8team/java -y
 apt-get update
 echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-apt-get install oracle-java7-installer -y
+apt-get install oracle-java7-installer oracle-java8-installer -y
 cd /usr/local/ && wget http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz && tar xf android-sdk_r24.4.1-linux.tgz
 rm android-sdk_r24.4.1-linux.tgz
 /usr/local/android-sdk-linux/tools/android update sdk --no-ui
@@ -53,6 +53,7 @@ vi /var/opt/env
 - Add
 DEBIAN_FRONTEND="noninteractive"
 JAVA_HOME="/usr/lib/jvm/java-7-oracle"
+JAVA8_HOME="/usr/lib/jvm/java-8-oracle"
 PATH="$JAVA_HOME:$PATH"
 ANDROID_HOME="/usr/local/android-sdk-linux"
 PATH="$PATH:$ANDROID_HOME/tools"
