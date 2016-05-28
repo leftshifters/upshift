@@ -1,11 +1,18 @@
 package bash
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestBash(test *testing.T) {
-	returnValue := Bash("ls -l")
-	fmt.Println("Tested ", returnValue)
+	type testCase struct {
+		command, output string
+	}
+	var tests = []testCase{{"pwd", "/Users/sudhanshuraheja/gocode/src/upshift/bash"}}
+
+	for _, t := range tests {
+		if t.output == Bash(t.command) {
+			test.Errorf("The output of command <%s> should be <%s>", t.command, t.output)
+		}
+	}
 }

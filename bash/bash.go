@@ -2,6 +2,7 @@ package bash
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,18 +16,16 @@ func init() {
 // Execute arbitary bash script like "ls -la"
 func Bash(command string) string {
 
-	// Literally flicked from http://nathanleclaire.com/blog/2014/12/29/shelled-out-commands-in-golang/
+	var outputBuffer bytes.Buffer
 
+	// Literally flicked from http://nathanleclaire.com/blog/2014/12/29/shelled-out-commands-in-golang/
 	commandParams := strings.Fields(command)
 
 	if len(commandParams) == 0 {
 		// TODO : Find better ways to show and pass errors
 		fmt.Println("There was nothing in the command")
-		return ""
+		return outputBuffer.String()
 	}
-
-	// fmt.Println("CMD: ", commandParams[:1])
-	fmt.Println("PRM: ", commandParams[1:])
 
 	cmd := exec.Command(commandParams[0], commandParams[1:]...)
 	cmdReader, err := cmd.StdoutPipe()
@@ -38,7 +37,7 @@ func Bash(command string) string {
 	scanner := bufio.NewScanner(cmdReader)
 	go func() {
 		for scanner.Scan() {
-			fmt.Println(scanner.Text())
+			outputBuffer.WriteString(scanner.Text())
 		}
 	}()
 
@@ -54,12 +53,5 @@ func Bash(command string) string {
 		os.Exit(1)
 	}
 
-	return command
+	return outputBuffer.String()
 }
-
-// func main() {
-// 	Bash("")
-// 	Bash("ls")
-// 	Bash("ls -la")
-// 	Bash("ls -la -la")
-// }
