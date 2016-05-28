@@ -13,7 +13,7 @@ func init() {
 }
 
 // Execute arbitary bash script like "ls -la"
-func Bash(command string) {
+func Bash(command string) string {
 
 	// Literally flicked from http://nathanleclaire.com/blog/2014/12/29/shelled-out-commands-in-golang/
 
@@ -22,7 +22,7 @@ func Bash(command string) {
 	if len(commandParams) == 0 {
 		// TODO : Find better ways to show and pass errors
 		fmt.Println("There was nothing in the command")
-		return
+		return ""
 	}
 
 	// fmt.Println("CMD: ", commandParams[:1])
@@ -54,6 +54,7 @@ func Bash(command string) {
 		os.Exit(1)
 	}
 
+	return command
 }
 
 // func main() {
