@@ -292,3 +292,39 @@
 
 
 #et -o pipefail && xcodebuild -workspace './GoJek.xcworkspace' -scheme 'GoJek Staging' -configuration 'Debug' -destination 'generic/platform=iOS' -archivePath '/var/lib/jenkins/Library/Developer/Xcode/Archives/2016-05-09/GO-JEK-Dev-b0cd652 2016-05-09 19.14.16.xcarchive' archive CODE_SIGN_IDENTITY='iPhone Developer: Gojek Ci (AKQYP36WDV)' | tee /var/lib/jenkins/Library/Logs/gym/GO-JEK-GoJek\ Staging.log | xcpretty[0m[0m
+
+
+
+
+# xcodebuild -scheme "schemeName" -showBuildSettings >> mynew.xcconfig
+
+
+
+# Sudhanshus-MacBook-Air:gojek-ios sudhanshuraheja$ git blame GoJek/NewBookingCompleteController.swift -e | grep " 158)"
+# 163564e6 (<vinod@leftshift.io>                           2016-02-02 20:03:55 +0530  158)                     if checkErrorRequest(Int(response!.statusCode),json: JSON(JSONResponse!)) {
+
+
+# https://gist.github.com/johanneswuerbach/5559514
+
+
+# https://www.objc.io/issues/6-build-tools/travis-ci/
+
+
+# agvtool what-marketing-version
+# https://github.com/nomad/shenzhen/blob/master/lib/shenzhen/agvtool.rb
+
+
+# https://www.objc.io/issues/6-build-tools/travis-ci/
+# https://docs.travis-ci.com/user/customizing-the-build/
+# https://gist.github.com/johanneswuerbach/5559514
+# https://discuss.circleci.com/t/ios-code-signing/1231
+
+
+
+
+
+# https://github.com/heroku/stack-images/blob/master/bin/cedar.sh
+
+
+# https://github.com/ainoya/docker-android-project/blob/master/Dockerfile
+# https://github.com/gfx/docker-android-project/blob/master/Dockerfile
