@@ -1,28 +1,59 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
+	"io/ioutil"
+	"log"
 	"os"
-	bash "upshift/bash"
+	"strings"
+
+	"github.com/progrium/go-basher"
 )
 
-func init() {
-	log.SetOutput(os.Stderr)
-	log.SetLevel(log.DebugLevel)
+// Define structs for Config
+type ApplicationConfig struct {
+	Debug bool
 }
 
-func main() {
-	// output, err := bash.Bash("echo 134 | grep 134 -c")
-	output, err := bash.Bash("echo 134 && echo 134| grep 134 -c")
-	// output := bash.Bash("xcodebuild -project Deezeno.xcodeproj -scheme deezeno-ios -hideShellScriptEnvironment -sdk iphonesimulator -destination \"platform=iphonesimulator,name=iPhone 6\" -derivedDataPath build | tee \"xcode-build\" | xcpretty")
-	// output := bash.Bash("xcodebuild -project Deezeno.xcodeproj -scheme deezeno-ios -hideShellScriptEnvironment -sdk iphonesimulator -destination \"platform=iphonesimulator,name=iPhone 6\" -derivedDataPath build")
-	// output := bash.Bash("xcodebuild")
+type RunnerConfig struct {
+	RootPassword string
+}
 
-	if err != nil {
-		log.Error(err)
-		log.Error(err.code)
+type BuildConfig struct {
+	GitRepoURL           string
+	GitRepoBranch        string
+	CleanBeforeBuild     bool
+	UninstallOlderBuilds bool
+}
+
+type iOSConfig struct {
+	ProjectName  string
+	UseWorkspace bool
+	Scheme       string
+	TestDevice   string
+	Xcode        string
+}
+
+type AndroidConfig struct {
+	PackageName      string
+	MainActivityName string
+}
+
+// Read Config from a TOML File
+
+// Main Function
+func main() {
+	bash, _ := basher.NewContext("/bin/bash", false)
+	// bash.ExportFunc("reverse", reverse)
+	if bash.HandleFuncs(os.Args) {
+		os.Exit(0)
 	}
 
-	log.Info("<", output, ">")
+	bash.CopyEnv()
+	bash.Source("main.bash", nil)
 
+	status, err := bash.Run("main", os.Args[1:])
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(status)
 }
