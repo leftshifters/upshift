@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func init() {
-
+func GetAppVersion() string {
+	return "0.7.3"
 }
 
 func IsDocker() (bool, error) {

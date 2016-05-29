@@ -3,12 +3,77 @@ package setup
 import (
 	"io/ioutil"
 	"log"
+	"net/http"
+	"strings"
+	"upshift/bash"
 	"upshift/utils"
 )
 
 func init() {
 
 }
+
+func UpgradeScript() (int, bool) {
+	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
+	if err != nil {
+		log.Println("We were unable to find out the latest version", err.Error())
+		return 1, false
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("We were unable to read the data from the server", err.Error())
+		return 1, false
+	}
+
+	latestVersion := string(body)
+	latestVersion = strings.TrimSpace(latestVersion)
+
+	if latestVersion == utils.GetAppVersion() {
+		log.Println("You are already at the latest version", utils.GetAppVersion())
+		return 0, false
+	}
+
+	log.Println("We are now going to upgrade you to the latest version of upshift")
+
+	status, err := bash.Run("upgradeScript", []string{})
+	if err != nil {
+		log.Println("We were unable to upgrade you", err.Error())
+		return status, false
+	}
+
+	return 0, false
+}
+
+// function UpgradeVersion {
+
+//   StartAction "UpgradeVersion"
+
+//   # If 'next' is false, exit
+//   if [ ${next} == false ]; then
+//     ShowPreviousFailed
+//     return
+//   fi
+
+//   LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/master/release 2>&1)
+//   LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< "${LATEST_VERSION}")
+
+//   if [ "${LATEST_VERSION_RESULTS}" -gt 0 ]; then
+//     printf "There was a problem in confirming the version number.\nIgnoring the message and moving on\n"
+//     printf "${LATEST_VERSION}\n\n"
+//   else
+//     if [ "${LATEST_VERSION}" == "${version}" ]; then
+//       printf "You are using the latest version of upshift v${version}\n\n"
+//     else
+//       printf "Moving you to the latest version of upshift v${version}\n"
+//       VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
+//       printf "${VERSION_UPGRADE}\n"
+//       rm upshift.temp
+//     fi
+//   fi
+
+// }
 
 func SetupConfig() (int, bool) {
 

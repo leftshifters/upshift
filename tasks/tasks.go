@@ -34,7 +34,7 @@ func Setup(conf config.Config) {
 	}
 
 	tasks := findTask(job, action, flavour)
-	log.Println(tasks)
+	// log.Println(tasks)
 
 	for i, action := range tasks.actions {
 		loadTask(i+1, len(tasks.actions), action)
@@ -127,6 +127,7 @@ func loadTask(count int, total int, task string) bool {
 	log.Println(count, "/", total, task)
 	switch task {
 	case "upgradeScript":
+		setup.UpgradeScript()
 	case "showVersion":
 	case "setupXcode":
 	case "setupXcpretty":
