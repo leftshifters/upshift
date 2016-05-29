@@ -3,6 +3,9 @@ package tasks
 import (
 	"log"
 	"os"
+	// "upshift/actions/android"
+	// "upshift/actions/ios"
+	"upshift/actions/setup"
 	"upshift/config"
 )
 
@@ -31,6 +34,7 @@ func Setup(conf config.Config) {
 	}
 
 	tasks := findTask(job, action, flavour)
+	log.Println(tasks)
 
 	for i, action := range tasks.actions {
 		loadTask(i+1, len(tasks.actions), action)
@@ -129,6 +133,7 @@ func loadTask(count int, total int, task string) bool {
 	case "setupPods":
 	case "setupGradle":
 	case "setupConfig":
+		setup.SetupConfig()
 	case "setupScript":
 	case "setupSsh":
 	case "gitPull":

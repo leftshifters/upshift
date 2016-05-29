@@ -14,7 +14,7 @@ UninstallOlderBuilds = false
 ProjectName = "testProject"
 UseWorkspace = false
 Scheme = "testScheme"
-#TestDevice = "iPhone 6"
+TestDevice = "iPhone 6"
 Xcode = "7.3.1"
 
 [Android]

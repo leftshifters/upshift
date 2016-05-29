@@ -43,3 +43,12 @@ func ReadIfFileExists(filePath string) (string, error) {
 		return "", errors.New("File does not exist " + filePath + err.Error())
 	}
 }
+
+func FileExists(filepath string) bool {
+	_, err := os.Stat(filepath)
+	if err == nil {
+		return true
+	} else {
+		return false
+	}
+}
