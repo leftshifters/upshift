@@ -19,7 +19,7 @@ func IsDocker() (bool, error) {
 
 		cGroupBytes, err := ioutil.ReadFile(cGroupFile)
 		if err != nil {
-			return false, errors.New("Could not read /proc/1/cgroup")
+			return false, errors.New("Could not read /proc/1/cgroup " + err.Error())
 		}
 
 		// Check if docker is written inside the cGroup file
@@ -29,5 +29,17 @@ func IsDocker() (bool, error) {
 	} else {
 		// File not found, ceratinly not docker
 		return false, nil
+	}
+}
+
+func ReadIfFileExists(filePath string) (string, error) {
+	if _, err := os.Stat(filePath); err == nil {
+		fileBytes, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return "", errors.New("Could you read file" + filePath + err.Error())
+		}
+		return string(fileBytes), nil
+	} else {
+		return "", errors.New("File does not exist")
 	}
 }
