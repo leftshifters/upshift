@@ -1,9 +1,9 @@
 package config
 
 import (
+	"errors"
 	"github.com/BurntSushi/toml"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -48,29 +48,27 @@ func init() {
 
 }
 
-func loadConfig() Config {
+func Load(fileName string) (Config, error) {
 
 	var conf Config
 
 	// See if a TOML file is available in this folder
-	if _, err := os.Stat("sample.toml"); err == nil {
-		// path/to/whatever exists
-		log.Println("File exits")
+	if _, err := os.Stat(fileName); err == nil {
 
-		tomlBytes, err := ioutil.ReadFile("sample.toml")
+		tomlBytes, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			log.Println("Unable to read sample.toml")
+			return conf, errors.New("We couldn't read the file you mentioned")
 		}
 
 		tomlData := string(tomlBytes)
 
 		if _, err := toml.Decode(tomlData, &conf); err != nil {
-			log.Println(err.Error())
+			return conf, err
 		}
 
 	} else {
-		log.Println("File does not exist")
+		return conf, errors.New("The config file does not exist")
 	}
 
-	return conf
+	return conf, nil
 }
