@@ -79,7 +79,7 @@ func Load(fileName string) (Config, error) {
 		}
 
 	} else {
-		return conf, errors.New("The config file does not exist")
+		return conf, errors.New("The config file does not exist. You can create it by typing\nupshift setup config")
 	}
 
 	return conf, nil

@@ -6,50 +6,105 @@ import (
 	"os"
 	"path/filepath"
 	"upshift/config"
-	lc "upshift/log-colours"
-	"upshift/utils"
+	// lc "upshift/log-colours"
+	// "upshift/utils"
 )
 
 // Main Function
 func main() {
-	bash, _ := basher.NewContext("/bin/bash", false)
-	bash.ExportFunc("reverse", reverse)
-	if bash.HandleFuncs(os.Args) {
-		os.Exit(0)
-	}
 
-	// Setup Config
+	// Load Config
 	fileFullPath, err := filepath.Abs("./config/sample.toml")
 	if err != nil {
 		log.Println(err)
 	}
 
-	conf, err := config.Load(fileFullPath)
+	_, err = config.Load(fileFullPath)
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println("Logging is", conf.Application.Debug)
+
+	log.Println(os.Args)
+
+	var job, action, flavour string
+
+	if len(os.Args) > 1 {
+		job = os.Args[1]
+	}
+
+	if len(os.Args) > 2 {
+		action = os.Args[2]
+	}
+
+	if len(os.Args) > 3 {
+		action = os.Args[3]
+	}
+
+	findTask(job, action, flavour)
+
+	os.Exit(0)
+}
+
+func findTask(job string, action string, flavour string) {
+	switch job {
+	case "ios":
+		switch action {
+		case "build":
+		case "run":
+		case "deploy":
+		default:
+		}
+	case "android":
+		switch action {
+		case "build":
+		case "run":
+		case "deploy":
+		default:
+		}
+	case "setup":
+		switch action {
+		case "clone":
+		case "config":
+		default:
+		}
+	case "install":
+	case "-v":
+	case "action":
+		switch action {
+		case "setupSsh":
+		case "setupScript":
+		case "setupGradle":
+		case "setupPods":
+		case "setupXcode":
+		case "setupXcpretty":
+		case "upgradeScript":
+		case "gitPull":
+		case "gitClone":
+		case "gitSubmodules":
+		case "iosSimulator":
+		case "androidEmulator":
+		case "iosBuild":
+		case "androidBuild":
+		case "iosRun":
+		case "androidRun":
+		case "iosDeploy":
+		case "androidDeploy":
+		}
+	default:
+	}
+}
+
+func loadBash() {
+	bash, _ := basher.NewContext("/bin/bash", false)
+	if bash.HandleFuncs(os.Args) {
+		os.Exit(0)
+	}
 
 	bash.CopyEnv()
 	bash.Source("main.bash", nil)
 
-	// TODO : Add xterm if TERM is empty
-
-	log.Println("Getting", lc.Blue.Format, "started", lc.Default.Format, "again.")
-
-	// TODO : Read from env masterPasswordFromEnv
-	// TODO : Read GITLAB_CI from env
-
-	inDocker, _ := utils.IsDocker()
-	log.Println("Are we in docker? ", inDocker)
-
-	status, err := bash.Run("main", os.Args[1:])
-	if err != nil {
-		log.Fatal(err)
-	}
-	os.Exit(status)
-}
-
-func reverse(str []string) {
-
+	// status, err := bash.Run("gradleTasks", []string{"123", "234"})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }

@@ -36,10 +36,10 @@ func ReadIfFileExists(filePath string) (string, error) {
 	if _, err := os.Stat(filePath); err == nil {
 		fileBytes, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			return "", errors.New("Could you read file" + filePath + err.Error())
+			return "", errors.New("Could not read file" + filePath + err.Error())
 		}
 		return string(fileBytes), nil
 	} else {
-		return "", errors.New("File does not exist")
+		return "", errors.New("File does not exist " + filePath + err.Error())
 	}
 }
