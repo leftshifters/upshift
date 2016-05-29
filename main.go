@@ -4,94 +4,22 @@ import (
 	"github.com/progrium/go-basher"
 	"log"
 	"os"
-	"path/filepath"
 	"upshift/config"
-	// lc "upshift/log-colours"
-	// "upshift/utils"
+	"upshift/tasks"
 )
 
 // Main Function
 func main() {
 
 	// Load Config
-	fileFullPath, err := filepath.Abs("./config/sample.toml")
+	conf, err := config.Load()
 	if err != nil {
-		log.Println(err)
+		log.Println("We couldn't detect a config file, you should get one", err)
 	}
 
-	_, err = config.Load(fileFullPath)
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println(os.Args)
-
-	var job, action, flavour string
-
-	if len(os.Args) > 1 {
-		job = os.Args[1]
-	}
-
-	if len(os.Args) > 2 {
-		action = os.Args[2]
-	}
-
-	if len(os.Args) > 3 {
-		action = os.Args[3]
-	}
-
-	findTask(job, action, flavour)
+	tasks.Setup(conf)
 
 	os.Exit(0)
-}
-
-func findTask(job string, action string, flavour string) {
-	switch job {
-	case "ios":
-		switch action {
-		case "build":
-		case "run":
-		case "deploy":
-		default:
-		}
-	case "android":
-		switch action {
-		case "build":
-		case "run":
-		case "deploy":
-		default:
-		}
-	case "setup":
-		switch action {
-		case "clone":
-		case "config":
-		default:
-		}
-	case "install":
-	case "-v":
-	case "action":
-		switch action {
-		case "setupSsh":
-		case "setupScript":
-		case "setupGradle":
-		case "setupPods":
-		case "setupXcode":
-		case "setupXcpretty":
-		case "upgradeScript":
-		case "gitPull":
-		case "gitClone":
-		case "gitSubmodules":
-		case "iosSimulator":
-		case "androidEmulator":
-		case "iosBuild":
-		case "androidBuild":
-		case "iosRun":
-		case "androidRun":
-		case "iosDeploy":
-		case "androidDeploy":
-		}
-	default:
-	}
 }
 
 func loadBash() {

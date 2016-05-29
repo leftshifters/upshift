@@ -5,6 +5,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // Define structs for Config
@@ -48,7 +49,20 @@ func init() {
 
 }
 
-func Load(fileName string) (Config, error) {
+func Load() (Config, error) {
+	var conf Config
+
+	fileFullPath, err := filepath.Abs("./sample.toml")
+	if err != nil {
+		return conf, errors.New("Could not find toml file" + err.Error())
+	}
+
+	conf, err = LoadFile(fileFullPath)
+
+	return conf, nil
+}
+
+func LoadFile(fileName string) (Config, error) {
 
 	var conf Config
 
