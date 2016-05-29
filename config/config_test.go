@@ -7,7 +7,7 @@ import (
 func TestConfig(t *testing.T) {
 	conf, _ := Load("sample.toml")
 
-	if conf.Application.Debug != true {
+	if conf.Application.Debug != false {
 		t.Fail()
 		t.Log("conf.Application.Debug Failed")
 	}

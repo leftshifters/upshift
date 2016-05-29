@@ -62,8 +62,20 @@ func Load(fileName string) (Config, error) {
 
 		tomlData := string(tomlBytes)
 
-		if _, err := toml.Decode(tomlData, &conf); err != nil {
-			return conf, err
+		_, err = toml.Decode(tomlData, &conf)
+		if err != nil {
+			return conf, errors.New("We couldn't decode the config file")
+		}
+
+		// Add Default Values
+
+		// iPhone="iPhone 6"
+		if conf.IOS.TestDevice == "" {
+			conf.IOS.TestDevice = "iPhone 6"
+		}
+		// xcodeVersion="7.3"
+		if conf.IOS.Xcode == "" {
+			conf.IOS.Xcode = "7.3.1"
 		}
 
 	} else {
