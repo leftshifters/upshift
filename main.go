@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"upshift/config"
 	lc "upshift/log-colours"
+	"upshift/utils"
 )
 
 // Main Function
@@ -35,6 +36,12 @@ func main() {
 	// TODO : Add xterm if TERM is empty
 
 	log.Println("Getting", lc.Blue.Format, "started", lc.Default.Format, "again.")
+
+	// TODO : Read from env masterPasswordFromEnv
+	// TODO : Read GITLAB_CI from env
+
+	inDocker, _ := utils.IsDocker()
+	log.Println("Are we in docker? ", inDocker)
 
 	status, err := bash.Run("main", os.Args[1:])
 	if err != nil {
