@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"upshift/config"
+	lc "upshift/log-colours"
 )
 
 // Main Function
@@ -30,6 +31,10 @@ func main() {
 
 	bash.CopyEnv()
 	bash.Source("main.bash", nil)
+
+	// TODO : Add xterm if TERM is empty
+
+	log.Println("Getting", lc.Blue.Format, "started", lc.Default.Format, "again.")
 
 	status, err := bash.Run("main", os.Args[1:])
 	if err != nil {
