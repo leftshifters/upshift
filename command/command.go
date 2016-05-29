@@ -1,0 +1,48 @@
+package command
+
+import (
+	"bytes"
+	"errors"
+	"log"
+	"os/exec"
+	"strings"
+)
+
+func init() {
+
+}
+
+func RunWithoutStdout(params []string, input string) (string, error) {
+	var name string
+	var out bytes.Buffer
+	var args []string
+
+	if len(params) == 0 {
+		return out.String(), errors.New("You need to send in something for this to work")
+	}
+
+	if len(params) > 0 {
+		name = params[0]
+	}
+
+	if len(params) > 1 {
+		args = params[1:]
+	}
+
+	cmd := exec.Command(name, args...)
+
+	log.Println(cmd.Stdin)
+	if input != "" {
+		cmd.Stdin = strings.NewReader(input)
+	}
+	log.Println(cmd.Stdin)
+
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return out.String(), errors.New("We were unable to run this command" + err.Error())
+	}
+
+	return out.String(), nil
+
+}

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 	// "upshift/actions/android"
-	// "upshift/actions/ios"
+	"upshift/actions/ios"
 	"upshift/actions/setup"
 	"upshift/config"
 )
@@ -130,6 +130,7 @@ func loadTask(count int, total int, task string) bool {
 		setup.UpgradeScript()
 	case "showVersion":
 	case "setupXcode":
+		ios.SetupXcode()
 	case "setupXcpretty":
 	case "setupPods":
 	case "setupGradle":

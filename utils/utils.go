@@ -11,6 +11,20 @@ func GetAppVersion() string {
 	return "0.7.3"
 }
 
+func IsCI() bool {
+	isGitlab := os.Getenv("GITLAB_CI")
+	if isGitlab == "true" {
+		return true
+	} else {
+		return false
+	}
+}
+
+// GITLAB_CI=$(printenv GITLAB_CI)
+
+// # Overall, OR all of them to find out is it is running via CI
+// CI=${GITLAB_CI}
+
 func IsDocker() (bool, error) {
 	// To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
 	cGroupFile := "/proc/1/cgroup"

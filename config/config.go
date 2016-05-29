@@ -4,9 +4,12 @@ import (
 	"errors"
 	"github.com/BurntSushi/toml"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 )
+
+var conf Config
 
 // Define structs for Config
 type Config struct {
@@ -49,10 +52,20 @@ func init() {
 
 }
 
-func Load() (Config, error) {
-	var conf Config
+func Get() (Config, error) {
+	if &conf == nil {
+		log.Println("Trying to load confi.toml")
+		conf, err := Load()
+		if err != nil {
+			log.Println(err.Error())
+			return conf, err
+		}
+	}
+	return conf, nil
+}
 
-	fileFullPath, err := filepath.Abs("./sample.toml")
+func Load() (Config, error) {
+	fileFullPath, err := filepath.Abs("./config.toml")
 	if err != nil {
 		return conf, errors.New("Could not find toml file" + err.Error())
 	}

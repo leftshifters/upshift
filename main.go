@@ -16,6 +16,8 @@ func main() {
 		log.Println("We couldn't detect a config file, you should get one", err)
 	}
 
+	log.Println(conf)
+
 	tasks.Setup(conf)
 
 	os.Exit(0)
