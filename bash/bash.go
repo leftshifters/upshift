@@ -54,12 +54,7 @@ func Bash(command string) (string, error) {
 	if err != nil {
 		return "", errors.New("There was a problem starting the command " + name)
 	}
-
-	// Fire up wait to finish up and close things
-	err = cmd.Wait()
-	if err != nil {
-		return "", errors.New("It wasn't the best of endings, there were some problems wrapping up, but isn't too much to worry about")
-	}
+	defer cmd.Wait()
 
 	return <-ch, nil
 }
@@ -72,9 +67,5 @@ func setupScanner(pipe io.ReadCloser, ch chan string) {
 			log.Info("Scanner <", readText, ">")
 			ch <- readText
 		}
-		// if scanner.Err() != nil {
-		// 	log.Info("ScannerErr <", scanner.Err().Error(), ">")
-		// 	ch <- scanner.Err().Error()
-		// }
 	}()
 }

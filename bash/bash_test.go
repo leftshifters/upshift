@@ -31,7 +31,8 @@ func TestBash(test *testing.T) {
 	// showResult(success, "Checking for empty params")
 
 	// output, _ := Bash("echo 123")
-	output, err := Bash("xcodebuild -showBuildSettings")
+	// output, err := Bash("xcodebuild -showBuildSettings")
+	output, err := Bash("gradle tasks")
 	// output, err := Bash("sleep 3")
 	if output != "123" {
 		test.Fail()
