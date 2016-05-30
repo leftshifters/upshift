@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Upshift by leftshifters</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Upshift</h1>
+        <p>The upshift utility helps you clone, build and test your iOS and Android projects.</p>
+
+        <p class="view"><a href="https://github.com/leftshifters/upshift">View the Project on GitHub <small>leftshifters/upshift</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/leftshifters/upshift/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/leftshifters/upshift/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/leftshifters/upshift">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="upshift" class="anchor" href="#upshift" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Upshift</h1>
+
+<p>The upshift utility helps you clone, build and test your iOS and Android projects.</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>You can install upshift by running the following command on your mac</p>
+
+<pre><code>curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift &gt; upshift.temp &amp;&amp; chmod +x upshift.temp &amp;&amp; ./upshift.temp install
+</code></pre>
+
+<h1>
+<a id="available-commands" class="anchor" href="#available-commands" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Available Commands</h1>
+
+<p>The following options are currently available</p>
+
+<h3>
+<a id="upshift-android-build" class="anchor" href="#upshift-android-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift android build</h3>
+
+<p>This command pulls the latest code, checks and install submodules and finally builds the Android project.</p>
+
+<h3>
+<a id="upshift-android-emulator" class="anchor" href="#upshift-android-emulator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift android emulator</h3>
+
+<p>This command starts up the emulator on the system, pulls the latest code, installs the git submodules and installs the app on the emulator.</p>
+
+<h3>
+<a id="upshift-ios-build" class="anchor" href="#upshift-ios-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift ios build</h3>
+
+<p>This command checks if you are building on the correct Xcode version, pulls the code, installs submodules, installs pods, build the latest iOS project and deploys it on the iOS simulator</p>
+
+<h3>
+<a id="upshift-setup-clone" class="anchor" href="#upshift-setup-clone" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift setup clone</h3>
+
+<p>This command helps you clone a new repository, install submodules and installs pods.</p>
+
+<h3>
+<a id="upshift-setup-config" class="anchor" href="#upshift-setup-config" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift setup config</h3>
+
+<p>This command will create an empty config file in the current folder that you are in. Config files are setup in the main folder and are called config.ci . The variable defined in this file gets more priority than the ones defined inside upshift</p>
+
+<h3>
+<a id="upshift-install" class="anchor" href="#upshift-install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift install</h3>
+
+<p>This command installs this script on your machine</p>
+
+<h3>
+<a id="upshift-action-setupssh" class="anchor" href="#upshift-action-setupssh" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action SetupSSH</h3>
+
+<h3>
+<a id="upshift-action-installonandroid" class="anchor" href="#upshift-action-installonandroid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action InstallOnAndroid</h3>
+
+<h3>
+<a id="upshift-action-gitpull" class="anchor" href="#upshift-action-gitpull" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action GitPull</h3>
+
+<h3>
+<a id="upshift-action-gitclone" class="anchor" href="#upshift-action-gitclone" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action GitClone</h3>
+
+<h3>
+<a id="upshift-action-startemulator" class="anchor" href="#upshift-action-startemulator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action StartEmulator</h3>
+
+<h3>
+<a id="upshift-action-androiddevices" class="anchor" href="#upshift-action-androiddevices" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action AndroidDevices</h3>
+
+<h3>
+<a id="upshift-action-assembleandroid" class="anchor" href="#upshift-action-assembleandroid" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action AssembleAndroid</h3>
+
+<h3>
+<a id="upshift-action-gitsubmodules" class="anchor" href="#upshift-action-gitsubmodules" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action GitSubmodules</h3>
+
+<h3>
+<a id="upshift-action-setuppods" class="anchor" href="#upshift-action-setuppods" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action SetupPods</h3>
+
+<h3>
+<a id="upshift-action-xcodeversion" class="anchor" href="#upshift-action-xcodeversion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action XCodeVersion</h3>
+
+<h3>
+<a id="upshift-action-xcpretty" class="anchor" href="#upshift-action-xcpretty" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action XCPretty</h3>
+
+<h3>
+<a id="upshift-action-buildios" class="anchor" href="#upshift-action-buildios" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action BuildiOS</h3>
+
+<h3>
+<a id="upshift-action-deployiossimulator" class="anchor" href="#upshift-action-deployiossimulator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action DeployiOSSimulator</h3>
+
+<h3>
+<a id="upshift-action-setupscript" class="anchor" href="#upshift-action-setupscript" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action SetupScript</h3>
+
+<h3>
+<a id="upshift-action-setupgradlepssh" class="anchor" href="#upshift-action-setupgradlepssh" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action SetupGradlepSSH</h3>
+
+<h3>
+<a id="upshift-action-upgradeversion" class="anchor" href="#upshift-action-upgradeversion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift action UpgradeVersion</h3>
+
+<p>These commands will allow you to run each specific action separately</p>
+
+<h3>
+<a id="upshift--v" class="anchor" href="#upshift--v" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>upshift -v</h3>
+
+<p>This command gets you the latest version number</p>
+
+<h1>
+<a id="compatibility" class="anchor" href="#compatibility" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compatibility</h1>
+
+<p>This software has only been tried and tested on Mac OSX 10.11.4. If you're planning to use this on windows, your're on your own!</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/leftshifters">leftshifters</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
