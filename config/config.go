@@ -54,7 +54,7 @@ func init() {
 
 func Get() (Config, error) {
 	if &conf == nil {
-		log.Println("Trying to load confi.toml")
+		log.Println("Trying to load config.toml")
 		conf, err := Load()
 		if err != nil {
 			log.Println(err.Error())
