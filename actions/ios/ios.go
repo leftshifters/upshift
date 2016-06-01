@@ -2,7 +2,7 @@ package ios
 
 import (
 	"log"
-	"os"
+	// "os"
 	"strings"
 	"upshift/command"
 	"upshift/config"
@@ -60,7 +60,7 @@ func SetupXcode() (int, bool) {
 			return 1, true
 		}
 
-		out, err := command.RunWithoutStdout([]string{"sudo", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword)
+		out, err := command.RunWithoutStdout([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
 		if err != nil {
 			log.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
 			return 1, true
