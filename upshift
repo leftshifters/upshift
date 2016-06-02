@@ -1041,7 +1041,7 @@ function DeployiOSSimulator {
       BUILD_PATH="./build/Build/Products/Debug-iphonesimulator/${fullProductName}\n"
     else 
       # So that doesn't exits, damn, let's find the folder
-      PROBABLE_PATH=$(find . | grep "/${fullProductName}$")
+      PROBABLE_PATH=$(find ./build/Build/Products/Debug-iphonesimulator | grep "/${fullProductName}$")
 
       if [[ -d "${PROBABLE_PATH}" && ! -L "${PROBABLE_PATH}" ]]; then
         # Alright so the path that we found exits
