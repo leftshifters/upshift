@@ -23,7 +23,7 @@ struct TaskHandler {
 		// Loop through tasks and fire away
 		for (index, task) in tasks.enumerated() {
 			// print(task)
-			log.Highlight("Starting \(task.uppercased()) [\(index + 1)/\(tasks.count)]")
+			log.Highlight("[\(index + 1)/\(tasks.count)] Starting \(task.uppercased())")
 			_ = run(action: task)
 		}
 
@@ -145,6 +145,8 @@ struct TaskHandler {
 
 	func run(action: String) -> (Int, Bool) {
 		switch action {
+		case "setupScript":
+			print("do nothing")
 		default:
 			log.Error("\(CryEmoji) Ouch, I have no idea how to handle \(Red)\(action)\(Default)")
 		}

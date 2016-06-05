@@ -35,7 +35,7 @@ struct Log {
 
 	func Highlight(_ message: String?) {
 		if let data = message {
-			print("\n\(Blue)◀ \(data) ►\(Default)")
+			print("\n\(Blue)\(LollipopEmoji) \(data)\(Default)")
 		}
 	}
 }
