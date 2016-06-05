@@ -15,8 +15,22 @@ struct TaskHandler {
 		}
 
 		// print("The job is \(job!) and action is \(action!)")
+
+		// Find the sequence of tasks that we need to run
 		let tasks = findTaskQueue(forJob: job, andAction: action);
-		print(tasks)
+		// print(tasks)
+
+		// Loop through tasks and fire away
+		for (index, task) in tasks.enumerated() {
+			// print(task)
+			log.Highlight("Starting \(task.uppercased()) [\(index + 1)/\(tasks.count)]")
+			_ = run(action: task)
+		}
+
+		defer {
+			print("\n\(BeersEmoji) All done")
+		}
+
 	}
 
 	func findTaskQueue(forJob: String, andAction: String?) -> [String] {
@@ -127,6 +141,14 @@ struct TaskHandler {
 			}
 		}
 		return tasks
+	}
+
+	func run(action: String) -> (Int, Bool) {
+		switch action {
+		default:
+			log.Error("\(CryEmoji) Ouch, I have no idea how to handle \(Red)\(action)\(Default)")
+		}
+		return (0, false)
 	}
 
 }
