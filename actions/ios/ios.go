@@ -2,7 +2,7 @@ package ios
 
 import (
 	"log"
-	// "os"
+	"os"
 	"strings"
 	"upshift/command"
 	"upshift/config"
