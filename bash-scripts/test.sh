@@ -328,3 +328,29 @@
 
 # https://github.com/ainoya/docker-android-project/blob/master/Dockerfile
 # https://github.com/gfx/docker-android-project/blob/master/Dockerfile
+
+
+
+docker run -d -P -v $HOME/gocode/bin:/usr/local/upshift/bin --name upshift ubuntu:16.04 /usr/local/upshift/bin/upshift -v
+docker run -P -v $HOME/gocode/bin:/usr/local/upshift/bin -it --name upshift ubuntu:16.04 /bin/bash
+docker rm upshift
+#docker run --name upshift ubuntu:16.04 upshift -v
+docker run --name upshift ubuntu:16.04 upshift -v && docker rm upshift
+#docker rm upshift
+#-d to run in background
+#-P to expose ports
+
+
+docker build -t upshift:latest .
+
+
+env GOOS=linux GOARCH=amd64 go build -v upshift
+
+
+
+docker run --name upshift ubuntu:16.04
+
+
+
+
+
