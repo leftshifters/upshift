@@ -11,3 +11,5 @@ print(version)
 // Setup the configuration by reading config.toml
 var conf = Config()
 conf.loadTOML()
+
+var tasks = TaskHandler()
