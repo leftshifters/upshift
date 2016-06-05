@@ -2,3 +2,4 @@
 config.ci
 config.toml
 .gradle
+.build
