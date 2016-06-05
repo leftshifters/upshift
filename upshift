@@ -23,7 +23,7 @@ fi
 
 #2.1 Load default values for variables which might have been null in config.ci
 if [ "${xcodeVersion}" == "" ]; then
-  xcodeVersion="7.3"
+  xcodeVersion="7.3.1"
 fi
 
 if [ "${iPhone}" == "" ]; then
