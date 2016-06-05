@@ -95,7 +95,10 @@ GITLAB_CI=$(printenv GITLAB_CI)
 CI=${GITLAB_CI}
 
 # 11. Find out if you are in docker or not
-DOCKER_COUNT=$(cat /proc/1/cgroup | grep "docker" -c)
+DOCKER_COUNT=0
+if [ -f /proc/1/cgroup ]; then
+  DOCKER_COUNT=$(cat /proc/1/cgroup | grep "docker" -c)
+fi
 
 DOCKER=false
 if [ "${DOCKER_COUNT}" -gt 0 ]; then
@@ -1285,7 +1288,7 @@ function FindJobQueue {
       StartScript
       case "${job}" in
         "build")      jobQueue=("UpgradeVersion" "GitPull" "GitSubmodules" "SetupGradle" "AssembleAndroid");;
-        "emulator")   jobQueue=("UpgradeVersion" "StartEmulator" "GitPull" "GitSubmodules" "SetupGradle" "InstallOnAndroid");;
+        "run")   jobQueue=("UpgradeVersion" "StartEmulator" "GitPull" "GitSubmodules" "SetupGradle" "InstallOnAndroid");;
         *)
                       ShowError
                       printf "Yo! We only support two commands for Android right now, build and emulator\n"
@@ -1295,8 +1298,9 @@ function FindJobQueue {
     "ios")
       StartScript
       case "${job}" in
-        "build")      jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
-        "distribute") jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "ArchiveIOS");;
+        "build")      jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS");;
+        "run") jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "BuildiOS" "DeployiOSSimulator");;
+        "deploy") jobQueue=("UpgradeVersion" "XCodeVersion" "GitPull" "GitSubmodules" "SetupPods" "XCPretty" "ArchiveIOS");;
         *)
                       ShowError
                       printf "Yo! We only support one commands for iOS right now: build\n"
