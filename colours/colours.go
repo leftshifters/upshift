@@ -5,7 +5,7 @@ type Color struct {
 	Format string
 }
 
-var Red, Green, Yellow, Blue, Gray, White, Default Color
+var Red, Green, Yellow, Blue, Gray, White, Default, Bold, Light, Underline Color
 
 func init() {
 	Red = Color{name: "red", Format: "\033[0;31m"}
@@ -15,4 +15,8 @@ func init() {
 	Gray = Color{name: "gray", Format: "\033[0;90m"}
 	White = Color{name: "white", Format: "\033[0;97m"}
 	Default = Color{name: "default", Format: "\033[0m"}
+
+	Bold = Color{name: "bold", Format: "\033[1m"}
+	Light = Color{name: "light", Format: "\033[2m"}
+	Underline = Color{name: "underline", Format: "\033[4m"}
 }

@@ -16,7 +16,7 @@ func GetAppVersion() string {
 
 // Log Information, this shows up in blue
 func LogInfo(message string) {
-	fmt.Println(colours.Blue.Format + "🔰  Maybe should know this" + colours.Default.Format)
+	fmt.Println("🔰  " + colours.Green.Format + colours.Bold.Format + "Maybe should know this" + colours.Default.Format)
 	fmt.Println(message + "\n")
 }
 

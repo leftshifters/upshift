@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"os"
 	// "upshift/actions/android"
+	"strconv"
+	"strings"
 	"upshift/actions/ios"
 	"upshift/actions/setup"
+	colours "upshift/colours"
 	"upshift/config"
 )
 
@@ -19,7 +22,7 @@ func init() {
 
 func Setup(conf config.Config) {
 
-	var job, action, flavour string
+	var job, action string
 
 	if len(os.Args) > 1 {
 		job = os.Args[1]
@@ -29,56 +32,52 @@ func Setup(conf config.Config) {
 		action = os.Args[2]
 	}
 
-	if len(os.Args) > 3 {
-		flavour = os.Args[3]
-	}
-
-	tasks := findTask(job, action, flavour)
-	// fmt.Println(tasks)
+	tasks := findTask(job, action)
 
 	for i, action := range tasks.actions {
+		fmt.Println(colours.Blue.Format + colours.Bold.Format + "🛢  Starting " + strings.ToUpper(action) + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
 		loadTask(i+1, len(tasks.actions), action)
 	}
 }
 
-func findTask(job string, action string, flavour string) taskList {
+func findTask(job string, action string) taskList {
 	switch job {
-	case "ios":
+	case "ios", "iOS", "i":
 		switch action {
 		case "build":
 			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "iosBuild"}}
 		case "run":
 			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "iosSimulator", "iosRun"}}
 		case "deploy":
-			return taskList{actions: []string{}}
+			return taskList{actions: []string{"showHelp"}}
 		default:
-			return taskList{actions: []string{}}
+			return taskList{actions: []string{"showHelp"}}
 		}
-	case "android":
+	case "android", "Android", "a":
 		switch action {
 		case "build":
 			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradle", "androidBuild"}}
 		case "run":
 			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradle", "androidEmulator", "androidRun"}}
 		case "deploy":
-			return taskList{actions: []string{}}
+			return taskList{actions: []string{"showHelp"}}
 		default:
-			return taskList{actions: []string{}}
+			return taskList{actions: []string{"showHelp"}}
 		}
-	case "setup":
+	case "setup", "Setup", "s":
 		switch action {
 		case "clone":
 			return taskList{actions: []string{"gitClone"}}
 		case "config":
 			return taskList{actions: []string{"setupConfig"}}
 		default:
-			return taskList{actions: []string{}}
+			return taskList{actions: []string{"showHelp"}}
 		}
 	case "install":
 		return taskList{actions: []string{"setupScript"}}
-	case "-v":
+	case "-v", "--version", "-version":
 		return taskList{actions: []string{"showVersion"}}
-	case "action":
+	case "action", "act":
 		switch action {
 		case "setupSsh":
 			return taskList{actions: []string{"setupSsh"}}
@@ -118,13 +117,12 @@ func findTask(job string, action string, flavour string) taskList {
 			return taskList{actions: []string{"androidDeploy"}}
 		}
 	default:
-		return taskList{actions: []string{}}
+		return taskList{actions: []string{"showHelp"}}
 	}
-	return taskList{actions: []string{}}
+	return taskList{actions: []string{"showHelp"}}
 }
 
 func loadTask(count int, total int, task string) bool {
-	fmt.Println(count, "/", total, task)
 	switch task {
 	case "upgradeScript":
 		setup.UpgradeScript()

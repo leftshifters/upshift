@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	colours "upshift/colours"
+	// "fmt"
+	// colours "upshift/colours"
 	"upshift/config"
 	"upshift/tasks"
 	"upshift/utils"
@@ -16,8 +16,8 @@ func main() {
 	if err != nil {
 		utils.LogInfo(err.Error())
 	}
-	fmt.Println(colours.Red.Format + "Config:" + colours.Default.Format)
-	fmt.Println(conf)
+	// fmt.Println(colours.Red.Format + "Config:" + colours.Default.Format)
+	// fmt.Println(conf)
 
 	tasks.Setup(conf)
 }
