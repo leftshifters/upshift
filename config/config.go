@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"path/filepath"
+	colours "upshift/colours"
 	"upshift/utils"
 )
 
@@ -72,7 +73,7 @@ func Load() (Config, error) {
 	}
 
 	conf, err = LoadFile(fileFullPath)
-	if err == nil {
+	if err != nil {
 		return conf, err
 	}
 
@@ -86,14 +87,14 @@ func LoadFile(fileName string) (Config, error) {
 	// See if a TOML file is available in this folder
 	tomlBytes, err := utils.ReadIfFileExists(fileName)
 	if err != nil {
-		return conf, errors.New("We couldn't read the file you mentioned")
+		return conf, errors.New("Dude, we couldn't read the config file " + colours.Red.Format + fileName + colours.Default.Format + "\nIf you would like to create one, go run " + colours.Blue.Format + "upshift setup config" + colours.Default.Format)
 	}
 
 	tomlData := string(tomlBytes)
 
 	_, err = toml.Decode(tomlData, &conf)
 	if err != nil {
-		return conf, errors.New("We couldn't decode the config file")
+		return conf, errors.New("Crap, we couldn't really " + colours.Red.Format + "understand" + colours.Default.Format + " what was written in your toml file.\nYou should go and check it again")
 	}
 
 	// Add Default Values

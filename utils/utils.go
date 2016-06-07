@@ -2,14 +2,28 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+	colours "upshift/colours"
 )
 
 // Get the App Version
 func GetAppVersion() string {
 	return "0.7.3"
+}
+
+// Log Information, this shows up in blue
+func LogInfo(message string) {
+	fmt.Println(colours.Blue.Format + "🔰  Maybe should know this" + colours.Default.Format)
+	fmt.Println(message + "\n")
+}
+
+// Log an error, show them this shit in color, red most probably
+func LogError(message string) {
+	fmt.Println(colours.Red.Format + "Error" + colours.Default.Format)
+	fmt.Println(message + "\n")
 }
 
 // Check if the currect script is running in a CI
@@ -50,7 +64,7 @@ func IsDocker() bool {
 // Read a file if it exists
 func ReadIfFileExists(filePath string) (string, error) {
 	// Check if file exits, if it doesn't just return an error
-	if FileExists(filePath) {
+	if FileExists(filePath) == false {
 		return "", errors.New("File does not exist " + filePath)
 	}
 
