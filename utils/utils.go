@@ -16,13 +16,13 @@ func GetAppVersion() string {
 
 // Log Information, this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + colours.Green.Format + colours.Bold.Format + "Maybe should know this" + colours.Default.Format)
+	fmt.Println("🔰  " + colours.Green.Format + colours.Bold.Format + "Maybe should " + colours.Underline.Format + "know this" + colours.Default.Format)
 	fmt.Println(message + "\n")
 }
 
 // Log an error, show them this shit in color, red most probably
 func LogError(message string) {
-	fmt.Println(colours.Red.Format + "Error" + colours.Default.Format)
+	fmt.Println("☎️  " + colours.Red.Format + colours.Bold.Format + "Shit! Something broke" + colours.Default.Format)
 	fmt.Println(message + "\n")
 }
 

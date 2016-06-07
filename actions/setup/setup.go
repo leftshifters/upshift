@@ -6,11 +6,65 @@ import (
 	"net/http"
 	"strings"
 	"upshift/bash"
+	colours "upshift/colours"
 	"upshift/utils"
 )
 
 func init() {
 
+}
+
+func ShowHelp() (int, bool) {
+	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
+	fmt.Println(colours.Bold.Format + "\nNAME" + colours.Default.Format)
+	fmt.Println("\tupshift -- the creative mobile app builder")
+	fmt.Println(colours.Bold.Format + "\nSYNOPSIS" + colours.Default.Format)
+	fmt.Println("\tupshift " + colours.Underline.Format + "job" + colours.Default.Format + " " + colours.Underline.Format + "action" + colours.Default.Format)
+	fmt.Println(colours.Bold.Format + "\nDESCRIPTION" + colours.Default.Format)
+	fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
+
+	fmt.Println(colours.Bold.Format + "\nOPTIONS (job queues)" + colours.Default.Format)
+	fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do\n")
+	fmt.Println("\tupshift ios build\n\t\tto build your iOS project\n")
+	fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator\n")
+	fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight\n")
+	fmt.Println("\tupshift android build\n\t\tto build your Android project\n")
+	fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator\n")
+	fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric\n")
+	fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml\n")
+	fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder\n")
+	fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
+	fmt.Println("\tupshift -v\n\t\tto view the version number\n")
+
+	fmt.Println(colours.Bold.Format + "\nOPTIONS (specific actions)" + colours.Default.Format)
+	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
+	fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
+	fmt.Println("\tupshift action setupScript -- to setup this very script")
+	fmt.Println("\tupshift action setupGradle -- to setup gradle on your machine")
+	fmt.Println("\tupshift action setupPods -- to setup cocoapods on your machine")
+	fmt.Println("\tupshift action setupXcode -- to choose the correct xcode version for the project")
+	fmt.Println("\tupshift action setupXcpretty -- to setup xcpretty for build output which doesn't suck")
+	fmt.Println("\tupshift action upgradeScript -- to upgrade this script")
+
+	fmt.Println("\tupshift action gitPull -- to pull from code from a repo")
+	fmt.Println("\tupshift action gitClone -- to clone a repo")
+	fmt.Println("\tupshift action gitSubmodules -- to setup git modules in the project")
+
+	fmt.Println("\tupshift action iosSimulator -- to start the iOS simulator")
+	fmt.Println("\tupshift action iosBuild -- to build an iOS app")
+	fmt.Println("\tupshift action iosRun -- to run an iOS app in the simulator")
+	fmt.Println("\tupshift action iosDeploy -- to archive and deploy an iOS app")
+
+	fmt.Println("\tupshift action androidEmulator -- to start the android emulator")
+	fmt.Println("\tupshift action androidBuild -- to build an android project")
+	fmt.Println("\tupshift action androidRun -- to run an android project")
+	fmt.Println("\tupshift action androidDeploy -- to deploy an android project")
+
+	fmt.Println(colours.Bold.Format + "\nCOMPATIBILITY" + colours.Default.Format)
+	fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
+	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + colours.Underline.Format + "https://leftshift.io\n" + colours.Default.Format)
+
+	return 0, false
 }
 
 func UpgradeScript() (int, bool) {

@@ -87,7 +87,7 @@ func LoadFile(fileName string) (Config, error) {
 	// See if a TOML file is available in this folder
 	tomlBytes, err := utils.ReadIfFileExists(fileName)
 	if err != nil {
-		return conf, errors.New("Dude, we couldn't read the config file " + colours.Red.Format + fileName + colours.Default.Format + "\nIf you would like to create one, go run " + colours.Blue.Format + "upshift setup config" + colours.Default.Format)
+		return conf, errors.New("You should have a config file at " + colours.Red.Format + fileName + colours.Default.Format + "\nIf you would like to create one, go run " + colours.Blue.Format + "upshift setup config" + colours.Default.Format)
 	}
 
 	tomlData := string(tomlBytes)

@@ -10,6 +10,7 @@ import (
 	"upshift/actions/setup"
 	colours "upshift/colours"
 	"upshift/config"
+	"upshift/utils"
 )
 
 type taskList struct {
@@ -35,7 +36,7 @@ func Setup(conf config.Config) {
 	tasks := findTask(job, action)
 
 	for i, action := range tasks.actions {
-		fmt.Println(colours.Blue.Format + colours.Bold.Format + "🛢  Starting " + strings.ToUpper(action) + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
+		fmt.Println(colours.Blue.Format + colours.Bold.Format + "🛢  Starting " + colours.Underline.Format + strings.ToUpper(action) + colours.Default.Format + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
 		loadTask(i+1, len(tasks.actions), action)
 	}
 }
@@ -126,28 +127,31 @@ func loadTask(count int, total int, task string) bool {
 	switch task {
 	case "upgradeScript":
 		setup.UpgradeScript()
-	case "showVersion":
+	// case "showVersion":
+	case "showHelp":
+		setup.ShowHelp()
 	case "setupXcode":
 		ios.SetupXcode()
-	case "setupXcpretty":
-	case "setupPods":
-	case "setupGradle":
+	// case "setupXcpretty":
+	// case "setupPods":
+	// case "setupGradle":
 	case "setupConfig":
 		setup.SetupConfig()
-	case "setupScript":
-	case "setupSsh":
-	case "gitPull":
-	case "gitSubmodules":
-	case "gitClone":
-	case "iosBuild":
-	case "iosRun":
-	case "iosSimulator":
-	case "iosDeploy":
-	case "androidBuild":
-	case "androidRun":
-	case "androidEmulator":
-	case "androidDeploy":
+	// case "setupScript":
+	// case "setupSsh":
+	// case "gitPull":
+	// case "gitSubmodules":
+	// case "gitClone":
+	// case "iosBuild":
+	// case "iosRun":
+	// case "iosSimulator":
+	// case "iosDeploy":
+	// case "androidBuild":
+	// case "androidRun":
+	// case "androidEmulator":
+	// case "androidDeploy":
 	default:
+		utils.LogError("It's sad, but we don't know how to " + colours.Underline.Format + "handle this effing case" + colours.Default.Format + "\nYou should try upshift -v to find out what do we support")
 	}
 	return true
 }
