@@ -2,11 +2,10 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/BurntSushi/toml"
-	"io/ioutil"
-	"log"
-	"os"
 	"path/filepath"
+	"upshift/utils"
 )
 
 var conf Config
@@ -54,10 +53,10 @@ func init() {
 
 func Get() (Config, error) {
 	if &conf == nil {
-		log.Println("Trying to load config.toml")
+		fmt.Println("Trying to load config.toml")
 		conf, err := Load()
 		if err != nil {
-			log.Println(err.Error())
+			fmt.Println(err.Error())
 			return conf, err
 		}
 	}
@@ -65,12 +64,17 @@ func Get() (Config, error) {
 }
 
 func Load() (Config, error) {
+	var conf Config
+
 	fileFullPath, err := filepath.Abs("./config.toml")
 	if err != nil {
-		return conf, errors.New("Could not find toml file" + err.Error())
+		return conf, errors.New("Could not create absolute path" + err.Error())
 	}
 
 	conf, err = LoadFile(fileFullPath)
+	if err == nil {
+		return conf, err
+	}
 
 	return conf, nil
 }
@@ -80,33 +84,27 @@ func LoadFile(fileName string) (Config, error) {
 	var conf Config
 
 	// See if a TOML file is available in this folder
-	if _, err := os.Stat(fileName); err == nil {
+	tomlBytes, err := utils.ReadIfFileExists(fileName)
+	if err != nil {
+		return conf, errors.New("We couldn't read the file you mentioned")
+	}
 
-		tomlBytes, err := ioutil.ReadFile(fileName)
-		if err != nil {
-			return conf, errors.New("We couldn't read the file you mentioned")
-		}
+	tomlData := string(tomlBytes)
 
-		tomlData := string(tomlBytes)
+	_, err = toml.Decode(tomlData, &conf)
+	if err != nil {
+		return conf, errors.New("We couldn't decode the config file")
+	}
 
-		_, err = toml.Decode(tomlData, &conf)
-		if err != nil {
-			return conf, errors.New("We couldn't decode the config file")
-		}
+	// Add Default Values
 
-		// Add Default Values
-
-		// iPhone="iPhone 6"
-		if conf.IOS.TestDevice == "" {
-			conf.IOS.TestDevice = "iPhone 6"
-		}
-		// xcodeVersion="7.3"
-		if conf.IOS.Xcode == "" {
-			conf.IOS.Xcode = "7.3.1"
-		}
-
-	} else {
-		return conf, errors.New("The config file does not exist. You can create it by typing\nupshift setup config")
+	// iPhone="iPhone 6"
+	if conf.IOS.TestDevice == "" {
+		conf.IOS.TestDevice = "iPhone 6"
+	}
+	// xcodeVersion="7.3"
+	if conf.IOS.Xcode == "" {
+		conf.IOS.Xcode = "7.3.1"
 	}
 
 	return conf, nil

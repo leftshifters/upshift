@@ -7,11 +7,19 @@ import (
 	"strings"
 )
 
+// Get the App Version
 func GetAppVersion() string {
 	return "0.7.3"
 }
 
+// Check if the currect script is running in a CI
 func IsCI() bool {
+	// Inspiration
+	// GITLAB_CI=$(printenv GITLAB_CI)
+	// # Overall, OR all of them to find out is it is running via CI
+	// CI=${GITLAB_CI}
+
+	// Get GITLAB_CI from the environment
 	isGitlab := os.Getenv("GITLAB_CI")
 	if isGitlab == "true" {
 		return true
@@ -20,44 +28,42 @@ func IsCI() bool {
 	}
 }
 
-// GITLAB_CI=$(printenv GITLAB_CI)
-
-// # Overall, OR all of them to find out is it is running via CI
-// CI=${GITLAB_CI}
-
-func IsDocker() (bool, error) {
+// Check if the current script is running in a docker container
+func IsDocker() bool {
 	// To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
+	// We don't need to return an error on this, just a true of false
 	cGroupFile := "/proc/1/cgroup"
 
-	if _, err := os.Stat(cGroupFile); err == nil {
-
-		cGroupBytes, err := ioutil.ReadFile(cGroupFile)
-		if err != nil {
-			return false, errors.New("Could not read /proc/1/cgroup " + err.Error())
-		}
-
-		// Check if docker is written inside the cGroup file
-		cGroupString := string(cGroupBytes)
-		return strings.Contains(cGroupString, "docker"), nil
-
-	} else {
-		// File not found, ceratinly not docker
-		return false, nil
+	if FileExists(cGroupFile) == false {
+		// File not found, ceratinly not docker or a linux machine
+		return false
 	}
+
+	// Read the file, and then check if the work docker is written inside it
+	// We can read it directly because we know the file exits
+	cGroupBytes, _ := ReadIfFileExists(cGroupFile)
+	cGroupString := string(cGroupBytes)
+	return strings.Contains(cGroupString, "docker")
+
 }
 
+// Read a file if it exists
 func ReadIfFileExists(filePath string) (string, error) {
-	if _, err := os.Stat(filePath); err == nil {
-		fileBytes, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			return "", errors.New("Could not read file" + filePath + err.Error())
-		}
-		return string(fileBytes), nil
-	} else {
-		return "", errors.New("File does not exist " + filePath + err.Error())
+	// Check if file exits, if it doesn't just return an error
+	if FileExists(filePath) {
+		return "", errors.New("File does not exist " + filePath)
 	}
+
+	// If file exists, go ahead and read the shit out of it
+	fileBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", errors.New("Could not read file" + filePath + err.Error())
+	}
+
+	return string(fileBytes), nil
 }
 
+// Simply to check if a file exists or not
 func FileExists(filepath string) bool {
 	_, err := os.Stat(filepath)
 	if err == nil {

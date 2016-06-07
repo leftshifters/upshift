@@ -1,8 +1,8 @@
 package setup
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"upshift/bash"
@@ -16,14 +16,14 @@ func init() {
 func UpgradeScript() (int, bool) {
 	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
 	if err != nil {
-		log.Println("We were unable to find out the latest version", err.Error())
+		fmt.Println("We were unable to find out the latest version", err.Error())
 		return 1, false
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("We were unable to read the data from the server", err.Error())
+		fmt.Println("We were unable to read the data from the server", err.Error())
 		return 1, false
 	}
 
@@ -31,15 +31,15 @@ func UpgradeScript() (int, bool) {
 	latestVersion = strings.TrimSpace(latestVersion)
 
 	if latestVersion == utils.GetAppVersion() {
-		log.Println("You are already at the latest version", utils.GetAppVersion())
+		fmt.Println("You are already at the latest version", utils.GetAppVersion())
 		return 0, false
 	}
 
-	log.Println("We are now going to upgrade you to the latest version of upshift")
+	fmt.Println("We are now going to upgrade you to the latest version of upshift")
 
 	status, err := bash.Run("upgradeScript", []string{})
 	if err != nil {
-		log.Println("We were unable to upgrade you", err.Error())
+		fmt.Println("We were unable to upgrade you", err.Error())
 		return status, false
 	}
 
@@ -79,7 +79,7 @@ func SetupConfig() (int, bool) {
 
 	configExits := utils.FileExists("./config.toml")
 	if configExits == true {
-		log.Println("It looks like a config.toml is already here, skipping this step")
+		fmt.Println("It looks like a config.toml is already here, skipping this step")
 		return 1, false
 	} else {
 		// Config does not exist
@@ -112,12 +112,12 @@ MainActivityName = "testActivity"`
 
 		err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
 		if err != nil {
-			log.Println("We could not write the config file, the OS told us this <" + err.Error() + ">")
+			fmt.Println("We could not write the config file, the OS told us this <" + err.Error() + ">")
 			return 1, false
 		}
 	}
 
-	log.Println("We just added a config.toml to this folder!")
+	fmt.Println("We just added a config.toml to this folder!")
 	return 0, false
 }
 

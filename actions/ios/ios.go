@@ -1,7 +1,7 @@
 package ios
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strings"
 	"upshift/command"
@@ -17,7 +17,7 @@ func SetupXcode() (int, bool) {
 
 	version, err := command.RunWithoutStdout([]string{"xcodebuild", "-version"}, "")
 	if err != nil {
-		log.Println("We were unable to get the Xcode version", err.Error())
+		fmt.Println("We were unable to get the Xcode version", err.Error())
 		return 1, true
 	}
 
@@ -29,26 +29,26 @@ func SetupXcode() (int, bool) {
 		}
 	}
 
-	log.Println(currentXcodeVersion)
+	fmt.Println(currentXcodeVersion)
 	currentXcodeVersion = "7.3"
 
 	conf, err := config.Get()
 	if err != nil {
-		log.Println("We were unable to load the config file", err.Error())
+		fmt.Println("We were unable to load the config file", err.Error())
 		return 1, true
 	}
 
 	requiredXcodeVersion := conf.IOS.Xcode
 
 	if requiredXcodeVersion == currentXcodeVersion {
-		log.Println("You are on the correct version of Xcode")
+		fmt.Println("You are on the correct version of Xcode")
 		return 0, false
 	}
 
-	log.Println("Alright, so we will try and switch the Xcode version now")
+	fmt.Println("Alright, so we will try and switch the Xcode version now")
 
 	if utils.FileExists("/Applications/Xcode-"+requiredXcodeVersion+".app/") == false {
-		log.Println("It seems you don't have this version of Xcode")
+		fmt.Println("It seems you don't have this version of Xcode")
 		return 1, true
 	}
 
@@ -56,27 +56,27 @@ func SetupXcode() (int, bool) {
 		// We are on CI, we need to enter password programatically
 		RootPassword := os.Getenv("RootPassword")
 		if RootPassword == "" {
-			log.Println("We can't do this without the root password, you need to set it up in your environment")
+			fmt.Println("We can't do this without the root password, you need to set it up in your environment")
 			return 1, true
 		}
 
 		out, err := command.RunWithoutStdout([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
 		if err != nil {
-			log.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
+			fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
 			return 1, true
 		}
 
-		log.Println(out)
+		fmt.Println(out)
 
 	} else {
 		// We are not on CI, ask the user to enter the password
 		out, err := command.RunWithoutStdout([]string{"sudo", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, "")
 		if err != nil {
-			log.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
+			fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
 			return 1, true
 		}
 
-		log.Println(out)
+		fmt.Println(out)
 	}
 
 	return 0, false

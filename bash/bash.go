@@ -2,8 +2,8 @@ package bash
 
 import (
 	"errors"
+	"fmt"
 	"github.com/progrium/go-basher"
-	"log"
 	"os"
 )
 
@@ -21,8 +21,6 @@ func Load() {
 
 	bash.CopyEnv()
 	bash.Source("main.bash", nil)
-
-	log.Println("We are ready to handle bash requests")
 }
 
 func Run(command string, params []string) (int, error) {
@@ -33,7 +31,7 @@ func Run(command string, params []string) (int, error) {
 
 	status, err := bash.Run(command, params)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return status, errors.New("We were unable to run the bash task" + err.Error())
 	}
 

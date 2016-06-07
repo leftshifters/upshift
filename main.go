@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
-	"os"
+	"fmt"
+	colours "upshift/colours"
 	"upshift/config"
 	"upshift/tasks"
 )
@@ -13,12 +13,10 @@ func main() {
 	// Load Config
 	conf, err := config.Load()
 	if err != nil {
-		log.Println("We couldn't detect a config file, you should get one", err)
+		fmt.Println("We couldn't detect a config file, you should get one", err)
 	}
-
-	log.Println(conf)
+	fmt.Println(colours.Red.Format + "Config:" + colours.Default.Format)
+	fmt.Println(conf)
 
 	tasks.Setup(conf)
-
-	os.Exit(0)
 }

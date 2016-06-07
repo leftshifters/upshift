@@ -3,7 +3,7 @@ package command
 import (
 	"bytes"
 	"errors"
-	"log"
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -31,11 +31,11 @@ func RunWithoutStdout(params []string, input string) (string, error) {
 
 	cmd := exec.Command(name, args...)
 
-	log.Println(cmd.Stdin)
+	fmt.Println(cmd.Stdin)
 	if input != "" {
 		cmd.Stdin = strings.NewReader(input)
 	}
-	log.Println(cmd.Stdin)
+	fmt.Println(cmd.Stdin)
 
 	cmd.Stdout = &out
 	err := cmd.Run()

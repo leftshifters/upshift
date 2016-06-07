@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"log"
+	"fmt"
 	"os"
 	// "upshift/actions/android"
 	"upshift/actions/ios"
@@ -34,7 +34,7 @@ func Setup(conf config.Config) {
 	}
 
 	tasks := findTask(job, action, flavour)
-	// log.Println(tasks)
+	// fmt.Println(tasks)
 
 	for i, action := range tasks.actions {
 		loadTask(i+1, len(tasks.actions), action)
@@ -124,7 +124,7 @@ func findTask(job string, action string, flavour string) taskList {
 }
 
 func loadTask(count int, total int, task string) bool {
-	log.Println(count, "/", total, task)
+	fmt.Println(count, "/", total, task)
 	switch task {
 	case "upgradeScript":
 		setup.UpgradeScript()
