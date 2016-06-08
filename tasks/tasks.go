@@ -35,10 +35,21 @@ func Setup() {
 
 	tasks := findTask(job, action)
 
+	var status int
+	var skipNext bool
+
 	for i, action := range tasks.actions {
-		fmt.Println(c.Blue + c.Bold + "\n🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
-		loadTask(action)
+		fmt.Println(c.Blue + c.Bold + "🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
+		status, skipNext = loadTask(action)
+		fmt.Print("\n")
+
+		if skipNext == true {
+			fmt.Println(c.Gray + "➡️  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + c.Default)
+			break
+		}
 	}
+
+	os.Exit(status)
 }
 
 func findTask(job string, action string) taskList {
@@ -123,20 +134,20 @@ func findTask(job string, action string) taskList {
 	return taskList{actions: []string{"showHelp"}}
 }
 
-func loadTask(task string) bool {
+func loadTask(task string) (int, bool) {
 	switch task {
 	case "upgradeScript":
-		setup.UpgradeScript()
+		return setup.UpgradeScript()
 	// case "showVersion":
 	case "showHelp":
-		setup.ShowHelp()
+		return setup.ShowHelp()
 	case "setupXcode":
-		ios.SetupXcode()
+		return ios.SetupXcode()
 	// case "setupXcpretty":
 	// case "setupPods":
 	// case "setupGradle":
 	case "setupConfig":
-		setup.SetupConfig()
+		return setup.SetupConfig()
 	// case "setupScript":
 	// case "setupSsh":
 	// case "gitPull":
@@ -153,5 +164,5 @@ func loadTask(task string) bool {
 	default:
 		utils.LogError("It's sad, but we don't know how to " + c.Underline + "handle this effing case" + c.Default + "\nYou should try upshift -v to find out what do we support")
 	}
-	return true
+	return 0, true
 }
