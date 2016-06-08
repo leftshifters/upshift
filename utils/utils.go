@@ -14,16 +14,26 @@ func GetAppVersion() string {
 	return "0.7.3"
 }
 
+// Get the default Xcode version
+func GetDefaultXcodeVersion() string {
+	return "7.3.1"
+}
+
+// Log Message, this shows up in green and underlined
+func LogMessage(message string) {
+	fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
+}
+
 // Log Information, this shows up in blue
 func LogInfo(message string) {
 	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe should " + c.Underline + "know this" + c.Default)
-	fmt.Println(message + "\n")
+	fmt.Println(message)
 }
 
 // Log an error, show them this shit in color, red most probably
 func LogError(message string) {
 	fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
-	fmt.Println(message + "\n")
+	fmt.Println(message)
 }
 
 // Get RootPassword
@@ -69,6 +79,45 @@ func IsDocker() bool {
 	cGroupString := string(cGroupBytes)
 	return strings.Contains(cGroupString, "docker")
 
+}
+
+// Read last few bytes of a file
+func ReadTailIfFileExists(filePath string, size int64) (string, error) {
+	// Check if file exits, if it doesn't just return an error
+	if FileExists(filePath) == false {
+		return "", errors.New("File does not exist " + filePath)
+	}
+
+	// If file exists, go ahead and read the shit out of it
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", errors.New("Could not open file " + filePath + "\n" + err.Error())
+	}
+	// Close the file when you are about to close the function
+	defer file.Close()
+
+	// Get the file size from the OS
+	fileStat, err := os.Stat(filePath)
+	// Calculate where you want to start reading
+	startByte := fileStat.Size() - size
+	// Calculate the amount of data that you need read
+	readSize := size
+	// If the file size is less than the amount of data you're trying to read, adjust the two above
+	if startByte < 0 {
+		startByte = 0
+		readSize = fileStat.Size()
+	}
+
+	// Make a byte buffer to read the amount of data
+	byteBuffer := make([]byte, readSize)
+	// Ignore the number of bytes read, we just need the effing output
+	_, err = file.ReadAt(byteBuffer, startByte)
+	if err != nil {
+		// Reading failed, dump the error
+		return "", errors.New("Could not read file" + filePath + "\n" + err.Error())
+	}
+
+	return string(byteBuffer), nil
 }
 
 // Read a file if it exists

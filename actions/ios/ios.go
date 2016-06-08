@@ -35,8 +35,10 @@ func SetupXcode() (int, bool) {
 
 	conf, err := config.Get()
 	if err != nil {
-		fmt.Println("We were unable to load the config file", err.Error())
-		return 1, true
+		fmt.Println("We were unable to load the config file\n", err.Error())
+
+		fmt.Println("You are currently on Xcode-" + currentXcodeVersion + " and the latest Xcode version is " + utils.GetDefaultXcodeVersion() + ". For now, we will continue using the version that you have right now")
+		return 0, false
 	}
 
 	requiredXcodeVersion := conf.IOS.Xcode

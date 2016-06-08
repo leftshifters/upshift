@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"upshift/basher"
@@ -34,7 +35,7 @@ func GitPull() (int, bool) {
 	// Find out which repo and branch are they on
 	out, err := command.RunWithoutStdout([]string{"git", "status"}, "")
 	if err != nil {
-		fmt.Println("Either this is not a git repository, or you don't even have git installed.")
+		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
 		return 1, true
 	}
 
@@ -44,7 +45,7 @@ func GitPull() (int, bool) {
 	if len(gitStatusOutputRows) > 0 {
 		firstRow = gitStatusOutputRows[0]
 	} else {
-		fmt.Println("You are probably not in a git repository. Quit messing around.")
+		utils.LogError("You are probably not in a git repository. Quit messing around.")
 		return 1, true
 	}
 
@@ -57,9 +58,71 @@ func GitPull() (int, bool) {
 	// If they have more
 	// 		Show them the remotes, and ask them to specify it in config.toml
 
-	conf, err := config.Get()
+	// Find out which repo and branch are they on
+	out, err = command.RunWithoutStdout([]string{"git", "remote"}, "")
+	if err != nil {
+		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
+		return 1, true
+	}
 
-	return 1, true
+	var currentRemote string
+	gitRemoteOutputRows := strings.Split(out, "\n")
+	switch len(gitRemoteOutputRows) {
+	case 0:
+		utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
+		return 1, true
+	case 1:
+		currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
+		fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")
+	default:
+		// This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
+		conf, _ := config.Get()
+
+		if conf.Build.GitRepoRemote != "" {
+			// Alright, so they have defined a remote, let's check if it exits in our list of remotes
+			for _, row := range gitRemoteOutputRows {
+				if strings.TrimSpace(conf.Build.GitRepoRemote) == row {
+					currentRemote = row
+				}
+			}
+
+			// Didn't find their remote in git remotes, tell them so
+			if currentRemote == "" {
+				utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Build.GitRepoRemote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
+				return 1, true
+			} else {
+				fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
+			}
+		} else {
+			// They haven't defined a remote in config, screw them
+			utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from")
+			return 1, true
+		}
+	}
+
+	utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
+	// Now we have both, a remote and a branch, let's pull
+	logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull-123.log")
+	status, err := basher.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
+	if err != nil {
+		utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
+		return status, true
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(logFileFullPath, 500)
+	if err != nil {
+		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+		return status, true
+	}
+
+	if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
+		utils.LogError("Something went wrong with the pull, you need to look at this.")
+		return 1, true
+	}
+
+	fmt.Println("We were able to pull the latest code, awesome")
+	return 0, false
 }
 
 //   # Make a TIMESHTAMP for log file

@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"github.com/BurntSushi/toml"
 	"path/filepath"
 	c "upshift/colours"
@@ -55,10 +54,8 @@ func init() {
 
 func Get() (Config, error) {
 	if conf.Application.Loaded == false {
-		fmt.Println("Trying to load config.toml")
 		conf, err := Load()
 		if err != nil {
-			fmt.Println(err.Error())
 			return conf, err
 		}
 	}
