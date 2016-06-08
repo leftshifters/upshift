@@ -21,23 +21,42 @@ func init() {
 
 }
 
-//     # https://guides.cocoapods.org/using/pod-install-vs-update.html
-//     # We want to keep pods on their own version, hence not updating
-//     pod install 2>&1 | tee "pod-install-${TIMESHTAMP}.log"
-//     POD_INSTALL=$(<"pod-install-${TIMESHTAMP}.log")
-//     POD_INSTALL_FAILED=$(grep "Invalid" -c <<< "${POD_INSTALL}")
+func InstallPods() (int, bool) {
+	podsPath, _ := filepath.Abs("Podfile")
+	podsExist := utils.FileExists(podsPath)
 
-//     if [ "${POD_INSTALL_FAILED}" -gt 0 ]; then
-//       ShowError
-//       printf "Damn, pod install ${redColour}not successful${noColour}. You should check this up.\n\n"
-//       next=false
-//     else
-//       printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
-//     fi
-//   else
-//     printf "\nIt looks like this project doesn't use ${greenColour}pods${noColour}. You're awesome!\n\n"
-//   fi
-// }
+	if podsExist == false {
+		fmt.Println("It looks like this project doesn't use pods")
+		return 0, false
+	}
+
+	// So pods exist, damn
+	fmt.Println("It looks like this project uses pods, let me try and set them up")
+
+	utils.LogMessage("$ pod install")
+	podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
+	status, err := basher.Run("PodInstall", []string{podInstallLogFullPath})
+	if err != nil {
+		utils.LogError("We couldn't initialise pods\n" + err.Error())
+		return status, true
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(podInstallLogFullPath, 500)
+	if err != nil {
+		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+		return status, true
+	}
+
+	if strings.Contains(tailData, "fatal") == true || strings.Contains(tailData, "error") == true || strings.Contains(tailData, "Invalid") == true {
+		utils.LogError("Something went wrong with installing pods, you need to look at this.")
+		return 1, true
+	}
+
+	fmt.Println("We were able to successfully setup cocoapods, moving on")
+	return 0, false
+
+}
 
 //
 // Initialize submodules in a project
@@ -54,7 +73,7 @@ func GitSubmodules() (int, bool) {
 	// So git submodules exist
 	fmt.Println("It looks like this project uses git submodules, let me try and set them up")
 
-	utils.LogMessage("git submodule init")
+	utils.LogMessage("$ git submodule init")
 	initLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-init.log")
 	status, err := basher.Run("GitSubmoduleInit", []string{initLogFileFullPath})
 	if err != nil {
@@ -62,7 +81,7 @@ func GitSubmodules() (int, bool) {
 		return status, true
 	}
 
-	utils.LogMessage("git submodule update")
+	utils.LogMessage("$ git submodule update")
 	updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
 	status, err = basher.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
 	if err != nil {
@@ -169,6 +188,7 @@ func GitPull() (int, bool) {
 	// Now we have both, a remote and a branch, let's pull
 	logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull.log")
 	status, err := basher.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
+	// status, err := basher.Run("RunSingleCommand", []string{"$(git pull " + currentRemote + " " + currentBranch + " 2>&1 | tee \"" + logFileFullPath + "\")"})
 	if err != nil {
 		utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
 		return status, true

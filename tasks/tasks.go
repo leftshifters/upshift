@@ -61,9 +61,9 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "iosSimulator", "iosRun"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosSimulator", "iosRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		default:
@@ -115,6 +115,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"gitClone"}}
 		case "gitSubmodules":
 			return taskList{actions: []string{"gitSubmodules"}}
+		case "installPods":
+			return taskList{actions: []string{"installPods"}}
 		case "iosSimulator":
 			return taskList{actions: []string{"iosSimulator"}}
 		case "androidEmulator":
@@ -161,6 +163,8 @@ func loadTask(task string) (int, bool) {
 	case "gitSubmodules":
 		return setup.GitSubmodules()
 	// case "gitClone":
+	case "installPods":
+		return setup.InstallPods()
 	// case "iosBuild":
 	// case "iosRun":
 	// case "iosSimulator":

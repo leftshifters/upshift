@@ -41,3 +41,9 @@ GitSubmoduleUpdate() {
 	mkdir -p .upshift/logs/
 	git submodule update 2>&1 | tee $1
 }
+
+PodInstall() {
+	LOGFILE=$1
+	mkdir -p .upshift/logs/
+	pod install 2>&1 | tee $1	
+}
