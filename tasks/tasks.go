@@ -35,6 +35,8 @@ func Setup() {
 
 	tasks := findTask(job, action)
 
+	fmt.Print("\n")
+
 	var status int
 	var skipNext bool
 
@@ -49,7 +51,9 @@ func Setup() {
 		}
 	}
 
-	os.Exit(status)
+	if status > 0 {
+		os.Exit(status)
+	}
 }
 
 func findTask(job string, action string) taskList {

@@ -101,35 +101,6 @@ func UpgradeScript() (int, bool) {
 	return 0, false
 }
 
-// function UpgradeVersion {
-
-//   StartAction "UpgradeVersion"
-
-//   # If 'next' is false, exit
-//   if [ ${next} == false ]; then
-//     ShowPreviousFailed
-//     return
-//   fi
-
-//   LATEST_VERSION=$(curl -sS https://raw.githubusercontent.com/leftshifters/upshift/master/release 2>&1)
-//   LATEST_VERSION_RESULTS=$(grep 'curl:' -c <<< "${LATEST_VERSION}")
-
-//   if [ "${LATEST_VERSION_RESULTS}" -gt 0 ]; then
-//     printf "There was a problem in confirming the version number.\nIgnoring the message and moving on\n"
-//     printf "${LATEST_VERSION}\n\n"
-//   else
-//     if [ "${LATEST_VERSION}" == "${version}" ]; then
-//       printf "You are using the latest version of upshift v${version}\n\n"
-//     else
-//       printf "Moving you to the latest version of upshift v${version}\n"
-//       VERSION_UPGRADE=$(curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install)
-//       printf "${VERSION_UPGRADE}\n"
-//       rm upshift.temp
-//     fi
-//   fi
-
-// }
-
 func SetupConfig() (int, bool) {
 
 	configExits := utils.FileExists("./config.toml")
@@ -167,7 +138,7 @@ MainActivityName = "testActivity"`
 
 		err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
 		if err != nil {
-			fmt.Println("We could not write the config file, the OS told us this <" + err.Error() + ">")
+			utils.LogError("We could not write the config file, the OS told us this <" + err.Error() + ">")
 			return 1, false
 		}
 	}
