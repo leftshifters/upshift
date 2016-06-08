@@ -93,7 +93,7 @@ func UpgradeScript() (int, bool) {
 
 	status, err := basher.Run("UpgradeScript", []string{})
 	if err != nil {
-		fmt.Println("Your fingertips will suck for some more time, we couldn't upgrade you because of this - ", err.Error())
+		utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
 		return status, false
 	}
 

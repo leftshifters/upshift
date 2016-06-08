@@ -5,6 +5,7 @@ import (
 	"fmt"
 	gobasher "github.com/progrium/go-basher"
 	"os"
+	colours "upshift/colours"
 )
 
 var bash *gobasher.Context
@@ -31,13 +32,12 @@ func Run(command string, params []string) (int, error) {
 	}
 
 	status, err := bash.Run(command, params)
-	fmt.Println("STATUS")
-	fmt.Println(status)
-	fmt.Println("ERROR")
-	fmt.Println(err)
-	if err != nil {
-		fmt.Println(err)
-		return status, errors.New("We were unable to run the bash task" + err.Error())
+	if status > 0 || err != nil {
+		errorString := "There was a problem running " + colours.Red.Format + command + colours.Default.Format + "."
+		if err != nil {
+			errorString += " We were stopped by the following error " + err.Error()
+		}
+		return status, errors.New(errorString)
 	}
 
 	return status, nil
