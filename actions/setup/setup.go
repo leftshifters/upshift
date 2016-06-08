@@ -10,10 +10,16 @@ import (
 	"upshift/utils"
 )
 
+//
+// Init function, doesn't do shit
+//
 func init() {
 
 }
 
+//
+// Show help, so that the user knows what to do
+//
 func ShowHelp() (int, bool) {
 	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
 	fmt.Println(c.Bold + "\nNAME" + c.Default)
@@ -67,6 +73,11 @@ func ShowHelp() (int, bool) {
 	return 0, false
 }
 
+//
+// Call this function to download the latest version of the binary
+// And update the user to the latest version.
+// It does nothing if the user is on the latest version
+//
 func UpgradeScript() (int, bool) {
 	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
 	if err != nil {
@@ -101,6 +112,9 @@ func UpgradeScript() (int, bool) {
 	return 0, false
 }
 
+//
+// When a new project doesn't have config, they call this one to create one for them
+//
 func SetupConfig() (int, bool) {
 
 	configExits := utils.FileExists("./config.toml")
@@ -146,37 +160,3 @@ MainActivityName = "testActivity"`
 	fmt.Println("We just added a config.toml to this folder!")
 	return 0, false
 }
-
-// function AddConfig {
-
-//   StartAction "AddConfig"
-
-//   # If 'next' is false, exit
-//   if [ ${next} == false ]; then
-//     ShowPreviousFailed
-//     return
-//   fi
-
-//   # Check if config.ci exists in
-//   if [ -f "config.ci" ]; then
-//     printf "A config file ${redColour}already exists${noColour}\n"
-//   else
-//     # Write the config file
-//     echo debug=false >> config.ci
-//     echo alwaysCleanBeforeBuild=true >> config.ci
-//     echo alwaysUninstallOlderBuilds=true >> config.ci
-//     echo package=\'\' >> config.ci
-//     echo mainActivity=\'\' >> config.ci
-//     echo gitRepositoryURL=\'\' >> config.ci
-//     echo gitRepositoryBranch=\'\' >> config.ci
-//     echo masterPassword=\'\' >> config.ci
-//     echo projectName=\'\' >> config.ci
-//     echo useWorkspace=false >> config.ci
-//     echo scheme=\'\' >> config.ci
-//     echo iPhone=\'\' >> config.ci
-//     echo xcodeVersion=\'\' >> config.ci
-
-//     printf "We just add a very basic confi.ci file in this folder.\n"
-//   fi
-
-// }
