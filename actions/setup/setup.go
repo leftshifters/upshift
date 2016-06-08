@@ -79,7 +79,7 @@ func SetupXcpretty() (int, bool) {
 	// Check which version of Xcpretty was installed
 	version, err := command.RunWithoutStdout([]string{"xcpretty", "--version"}, "")
 	if err == nil {
-		fmt.Println("Xcpretty is pretty much setup on this system. You are on version " + version)
+		fmt.Println("Xcpretty is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
 		return 0, false
 	}
 
