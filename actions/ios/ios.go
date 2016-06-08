@@ -13,11 +13,13 @@ func init() {
 
 }
 
+//
+// Choose the correct version of Xcode for the project
+// It is usually defined in config.toml
 func SetupXcode() (int, bool) {
-
 	version, err := command.RunWithoutStdout([]string{"xcodebuild", "-version"}, "")
 	if err != nil {
-		fmt.Println("We were unable to get the Xcode version", err.Error())
+		utils.LogError("We were unable to get the Xcode version " + err.Error())
 		return 1, true
 	}
 
@@ -29,7 +31,7 @@ func SetupXcode() (int, bool) {
 		}
 	}
 
-	fmt.Println(currentXcodeVersion)
+	fmt.Println("We are currently using Xcode-" + currentXcodeVersion)
 	currentXcodeVersion = "7.3"
 
 	conf, err := config.Get()
@@ -37,6 +39,7 @@ func SetupXcode() (int, bool) {
 		fmt.Println("We were unable to load the config file", err.Error())
 		return 1, true
 	}
+	fmt.Println(conf)
 
 	requiredXcodeVersion := conf.IOS.Xcode
 
@@ -48,7 +51,7 @@ func SetupXcode() (int, bool) {
 	fmt.Println("Alright, so we will try and switch the Xcode version now")
 
 	if utils.FileExists("/Applications/Xcode-"+requiredXcodeVersion+".app/") == false {
-		fmt.Println("It seems you don't have this version of Xcode")
+		fmt.Println("It seems you don't have /Applications/Xcode-" + requiredXcodeVersion + ".app/")
 		return 1, true
 	}
 

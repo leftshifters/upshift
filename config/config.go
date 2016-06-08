@@ -21,7 +21,8 @@ type Config struct {
 }
 
 type ApplicationConfig struct {
-	Debug bool
+	Debug  bool
+	Loaded bool
 }
 
 type RunnerConfig struct {
@@ -49,11 +50,11 @@ type AndroidConfig struct {
 }
 
 func init() {
-
+	conf.Application.Loaded = false
 }
 
 func Get() (Config, error) {
-	if &conf == nil {
+	if conf.Application.Loaded == false {
 		fmt.Println("Trying to load config.toml")
 		conf, err := Load()
 		if err != nil {
@@ -65,8 +66,6 @@ func Get() (Config, error) {
 }
 
 func Load() (Config, error) {
-	var conf Config
-
 	fileFullPath, err := filepath.Abs("./config.toml")
 	if err != nil {
 		return conf, errors.New("Could not create absolute path" + err.Error())
@@ -77,13 +76,11 @@ func Load() (Config, error) {
 		return conf, err
 	}
 
+	conf.Application.Loaded = true
 	return conf, nil
 }
 
 func LoadFile(fileName string) (Config, error) {
-
-	var conf Config
-
 	// See if a TOML file is available in this folder
 	tomlBytes, err := utils.ReadIfFileExists(fileName)
 	if err != nil {
