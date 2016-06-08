@@ -167,6 +167,7 @@ func loadTask(task string) (int, bool) {
 	// case "androidDeploy":
 	default:
 		utils.LogError("It's sad, but we don't know how to " + c.Underline + "handle this effing case" + c.Default + "\nYou should try upshift -v to find out what do we support")
+		return 1, true
 	}
 	return 0, true
 }
