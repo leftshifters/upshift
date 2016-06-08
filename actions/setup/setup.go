@@ -21,6 +21,9 @@ func init() {
 
 }
 
+//
+// Install cocoapods
+//
 func InstallPods() (int, bool) {
 	podsPath, _ := filepath.Abs("Podfile")
 	podsExist := utils.FileExists(podsPath)

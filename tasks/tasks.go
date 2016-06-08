@@ -82,8 +82,8 @@ func findTask(job string, action string) taskList {
 		}
 	case "setup", "Setup", "s":
 		switch action {
-		case "clone":
-			return taskList{actions: []string{"gitClone"}}
+		// case "clone":
+		// 	return taskList{actions: []string{"gitClone"}}
 		case "config":
 			return taskList{actions: []string{"setupConfig"}}
 		default:
@@ -111,8 +111,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"upgradeScript"}}
 		case "gitPull":
 			return taskList{actions: []string{"gitPull"}}
-		case "gitClone":
-			return taskList{actions: []string{"gitClone"}}
+		// case "gitClone":
+		// 	return taskList{actions: []string{"gitClone"}}
 		case "gitSubmodules":
 			return taskList{actions: []string{"gitSubmodules"}}
 		case "installPods":
@@ -162,7 +162,7 @@ func loadTask(task string) (int, bool) {
 		return setup.GitPull()
 	case "gitSubmodules":
 		return setup.GitSubmodules()
-	// case "gitClone":
+	// SKIP case "gitClone":
 	case "installPods":
 		return setup.InstallPods()
 	// case "iosBuild":
