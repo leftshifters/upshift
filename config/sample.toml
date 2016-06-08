@@ -6,7 +6,7 @@ RootPassword = "testPassword"
 
 [Build]
 GitRepoURL = "testRepo"
-GitRepoBranch = "testBranch"
+GitRepoRemote = "origin"
 CleanBeforeBuild = false
 UninstallOlderBuilds = false
 

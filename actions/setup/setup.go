@@ -9,6 +9,7 @@ import (
 	"upshift/basher"
 	c "upshift/colours"
 	"upshift/command"
+	"upshift/config"
 	"upshift/utils"
 )
 
@@ -18,6 +19,81 @@ import (
 func init() {
 
 }
+
+//
+//
+//
+func GitPull() (int, bool) {
+
+	// If you are running on a CI, we don't need to worry about this, just skip and take up the next thing
+	if utils.IsCI() == true {
+		fmt.Println("It seems you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
+		return 0, false
+	}
+
+	// Find out which repo and branch are they on
+	out, err := command.RunWithoutStdout([]string{"git", "status"}, "")
+	if err != nil {
+		fmt.Println("Either this is not a git repository, or you don't even have git installed.")
+		return 1, true
+	}
+
+	// Read the first row of git sttus which says 'on branch xyz'
+	gitStatusOutputRows := strings.Split(out, "\n")
+	var firstRow string
+	if len(gitStatusOutputRows) > 0 {
+		firstRow = gitStatusOutputRows[0]
+	} else {
+		fmt.Println("You are probably not in a git repository. Quit messing around.")
+		return 1, true
+	}
+
+	// Alright find the correct branch and show it to the user
+	currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
+	fmt.Println("We suspect that you are on branch " + c.Blue + currentBranch + c.Default)
+
+	// Check if the user has one or more remotes
+	// If they have one, just use it
+	// If they have more
+	// 		Show them the remotes, and ask them to specify it in config.toml
+
+	conf, err := config.Get()
+
+	return 1, true
+}
+
+//   # Make a TIMESHTAMP for log file
+//   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+//   # Check if the branch name is defined
+//   if [ "${gitRepositoryBranch}" != "" ]; then
+
+//     printf "Alright, let's ${greenColour}pull${noColour} the ${gitRepositoryBranch} branch for this repo\n\n"
+
+//     # Alright, let's pull
+//     git pull origin ${gitRepositoryBranch} 2>&1 | tee "git-pull-${TIMESHTAMP}.log"
+
+//     # Load up the results to see if there were any errors
+//     PULL_RESULTS=$(<"git-pull-${TIMESHTAMP}.log")
+//     PULL_RESULTS_FATAL=$(grep "fatal:" -c <<< "${PULL_RESULTS}")
+//     PULL_RESULTS_ERROR=$(grep "error:" -c <<< "${PULL_RESULTS}")
+//     # If there was a fatal error, tell the user there's something wrong
+//     if [ "${PULL_RESULTS_FATAL}" -gt "0" ] || [ "${PULL_RESULTS_ERROR}" -gt "0" ]; then
+//       ShowError
+//       printf "Something went wrong with the pull, you should look this up\n\n"
+//       next=false
+//     else
+//       # All done
+//       printf "\nAll done ${greenColour}baby${noColour}! 🍺.\n\n"
+//     fi
+
+//   else
+//     # The user hasn't added the required keys
+//     ShowError
+//     printf "Dude, you need to add the ${blueColour}gitRepositoryBranch${noColour} for this to work\nYou can get a sample config by running upshift setup config\n\n"
+//     next=false
+//   fi
+// }
 
 //
 // Show help, so that the user knows what to do
@@ -75,6 +151,10 @@ func ShowHelp() (int, bool) {
 	return 0, false
 }
 
+//
+// If Xcpretty is not setup, we go ahead and do it
+// It formats the output from xcode so that you can make sense of what is going wrong
+//
 func SetupXcpretty() (int, bool) {
 	// Check which version of Xcpretty was installed
 	version, err := command.RunWithoutStdout([]string{"xcpretty", "--version"}, "")
@@ -174,7 +254,7 @@ RootPassword = "testPassword"
 
 [Build]
 GitRepoURL = "testRepo"
-GitRepoBranch = "testBranch"
+GitRepoRemote = "origin"
 CleanBeforeBuild = false
 UninstallOlderBuilds = false
 

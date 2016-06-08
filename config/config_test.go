@@ -19,9 +19,9 @@ func TestConfig(t *testing.T) {
 		t.Fail()
 		t.Log("conf.Build.GitRepoURL Failed")
 	}
-	if conf.Build.GitRepoBranch != "testBranch" {
+	if conf.Build.GitRepoRemote != "origin" {
 		t.Fail()
-		t.Log("conf.Build.GitRepoBranch Failed")
+		t.Log("conf.Build.GitRepoRemote Failed")
 	}
 	if conf.Build.CleanBeforeBuild != false {
 		t.Fail()

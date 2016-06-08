@@ -155,7 +155,8 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupConfig()
 	// case "setupScript":
 	// case "setupSsh":
-	// case "gitPull":
+	case "gitPull":
+		return setup.GitPull()
 	// case "gitSubmodules":
 	// case "gitClone":
 	// case "iosBuild":

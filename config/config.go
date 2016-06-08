@@ -31,7 +31,7 @@ type RunnerConfig struct {
 
 type BuildConfig struct {
 	GitRepoURL           string
-	GitRepoBranch        string
+	GitRepoRemote        string
 	CleanBeforeBuild     bool
 	UninstallOlderBuilds bool
 }
