@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"upshift/basher"
 	c "upshift/colours"
+	"upshift/command"
 	"upshift/utils"
 )
 
@@ -71,6 +73,45 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
 
 	return 0, false
+}
+
+func SetupXcpretty() (int, bool) {
+	// Check which version of Xcpretty was installed
+	version, err := command.RunWithoutStdout([]string{"xcpretty", "--version"}, "")
+	if err == nil {
+		fmt.Println("Xcpretty is pretty much setup on this system. You are on version " + version)
+		return 0, false
+	}
+
+	// Check if the command was not found
+	if strings.Contains(err.Error(), "executable file not found") == true {
+		// Alright, so Xcpretty was not found, go ahead and install it
+		fmt.Println("Xcpretty was not found, installing it")
+
+		var RootPassword string
+
+		if utils.IsCI() == true {
+			// We are on CI, we need to enter password programatically
+			RootPassword, err = utils.GetRootPassword()
+			if err != nil {
+				utils.LogError(err.Error())
+				return 1, true
+			}
+		}
+		// else we are not on CI, ask the user to enter the password
+
+		status, err := basher.Run("SetupXcpretty", []string{strconv.FormatBool(utils.IsCI()), RootPassword})
+		if err != nil {
+			utils.LogError("We couldn't install xcpretty, you will get shitty outout from Xcode - \n" + err.Error())
+			return status, false
+		}
+
+		fmt.Println("Xcpretty has been setup on your machine. Have fun.")
+		return 0, false
+	}
+
+	fmt.Println("There was a problem installing xcpretty - " + err.Error())
+	return 1, true
 }
 
 //

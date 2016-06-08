@@ -2,7 +2,6 @@ package ios
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	c "upshift/colours"
 	"upshift/command"
@@ -56,9 +55,10 @@ func SetupXcode() (int, bool) {
 
 	if utils.IsCI() == true {
 		// We are on CI, we need to enter password programatically
-		RootPassword := os.Getenv("RootPassword")
-		if RootPassword == "" {
-			fmt.Println("We can't do this without the root password, you need to set it up in your environment")
+
+		RootPassword, err := utils.GetRootPassword()
+		if err != nil {
+			utils.LogError(err.Error())
 			return 1, true
 		}
 

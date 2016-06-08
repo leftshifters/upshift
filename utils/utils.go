@@ -26,6 +26,16 @@ func LogError(message string) {
 	fmt.Println(message + "\n")
 }
 
+// Get RootPassword
+func GetRootPassword() (string, error) {
+	RootPassword := os.Getenv("RootPassword")
+	if RootPassword == "" {
+		return "", errors.New("We can't do this without the root password, you need to set it up in your environment")
+	}
+
+	return RootPassword, nil
+}
+
 // Check if the currect script is running in a CI
 func IsCI() bool {
 	// Inspiration

@@ -147,7 +147,8 @@ func loadTask(task string) (int, bool) {
 		return setup.ShowHelp()
 	case "setupXcode":
 		return ios.SetupXcode()
-	// case "setupXcpretty":
+	case "setupXcpretty":
+		return setup.SetupXcpretty()
 	// case "setupPods":
 	// case "setupGradle":
 	case "setupConfig":

@@ -37,7 +37,7 @@ func RunWithoutStdout(params []string, input string) (string, error) {
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		return out.String(), errors.New("We were unable to run this command" + err.Error())
+		return out.String(), errors.New("We were unable to run this command\n" + err.Error())
 	}
 
 	return out.String(), nil
