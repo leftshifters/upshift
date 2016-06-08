@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	colours "upshift/colours"
+	c "upshift/colours"
 )
 
 // Get the App Version
@@ -16,13 +16,13 @@ func GetAppVersion() string {
 
 // Log Information, this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + colours.Green.Format + colours.Bold.Format + "Maybe should " + colours.Underline.Format + "know this" + colours.Default.Format)
+	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe should " + c.Underline + "know this" + c.Default)
 	fmt.Println(message + "\n")
 }
 
 // Log an error, show them this shit in color, red most probably
 func LogError(message string) {
-	fmt.Println("☎️  " + colours.Red.Format + colours.Bold.Format + "Shit! Something broke" + colours.Default.Format)
+	fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
 	fmt.Println(message + "\n")
 }
 

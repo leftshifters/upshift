@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"upshift/basher"
-	colours "upshift/colours"
+	c "upshift/colours"
 	"upshift/utils"
 )
 
@@ -16,14 +16,14 @@ func init() {
 
 func ShowHelp() (int, bool) {
 	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
-	fmt.Println(colours.Bold.Format + "\nNAME" + colours.Default.Format)
+	fmt.Println(c.Bold + "\nNAME" + c.Default)
 	fmt.Println("\tupshift -- the creative mobile app builder")
-	fmt.Println(colours.Bold.Format + "\nSYNOPSIS" + colours.Default.Format)
-	fmt.Println("\tupshift " + colours.Underline.Format + "job" + colours.Default.Format + " " + colours.Underline.Format + "action" + colours.Default.Format)
-	fmt.Println(colours.Bold.Format + "\nDESCRIPTION" + colours.Default.Format)
+	fmt.Println(c.Bold + "\nSYNOPSIS" + c.Default)
+	fmt.Println("\tupshift " + c.Underline + "job" + c.Default + " " + c.Underline + "action" + c.Default)
+	fmt.Println(c.Bold + "\nDESCRIPTION" + c.Default)
 	fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
 
-	fmt.Println(colours.Bold.Format + "\nOPTIONS (job queues)" + colours.Default.Format)
+	fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
 	fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do\n")
 	fmt.Println("\tupshift ios build\n\t\tto build your iOS project\n")
 	fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator\n")
@@ -36,7 +36,7 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
 	fmt.Println("\tupshift -v\n\t\tto view the version number\n")
 
-	fmt.Println(colours.Bold.Format + "\nOPTIONS (specific actions)" + colours.Default.Format)
+	fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
 	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
 	fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
 	fmt.Println("\tupshift action setupScript -- to setup this very script")
@@ -60,9 +60,9 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\tupshift action androidRun -- to run an android project")
 	fmt.Println("\tupshift action androidDeploy -- to deploy an android project")
 
-	fmt.Println(colours.Bold.Format + "\nCOMPATIBILITY" + colours.Default.Format)
+	fmt.Println(c.Bold + "\nCOMPATIBILITY" + c.Default)
 	fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
-	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + colours.Underline.Format + "https://leftshift.io\n" + colours.Default.Format)
+	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
 
 	return 0, false
 }

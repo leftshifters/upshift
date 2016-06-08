@@ -1,22 +1,17 @@
-package logColours
+package colours
 
-type Color struct {
-	name   string
-	Format string
-}
-
-var Red, Green, Yellow, Blue, Gray, White, Default, Bold, Light, Underline Color
+var Red, Green, Yellow, Blue, Gray, White, Default, Bold, Light, Underline string
 
 func init() {
-	Red = Color{name: "red", Format: "\033[0;31m"}
-	Green = Color{name: "green", Format: "\033[0;32m"}
-	Yellow = Color{name: "yellow", Format: "\033[0;33m"}
-	Blue = Color{name: "blue", Format: "\033[0;34m"}
-	Gray = Color{name: "gray", Format: "\033[0;90m"}
-	White = Color{name: "white", Format: "\033[0;97m"}
-	Default = Color{name: "default", Format: "\033[0m"}
+	Red = "\033[0;31m"
+	Green = "\033[0;32m"
+	Yellow = "\033[0;33m"
+	Blue = "\033[0;34m"
+	Gray = "\033[0;90m"
+	White = "\033[0;97m"
+	Default = "\033[0m"
 
-	Bold = Color{name: "bold", Format: "\033[1m"}
-	Light = Color{name: "light", Format: "\033[2m"}
-	Underline = Color{name: "underline", Format: "\033[4m"}
+	Bold = "\033[1m"
+	Light = "\033[2m"
+	Underline = "\033[4m"
 }

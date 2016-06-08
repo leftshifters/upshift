@@ -1,4 +1,4 @@
-package logColours
+package colours
 
 import (
 	"fmt"

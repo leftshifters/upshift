@@ -8,7 +8,7 @@ import (
 	"strings"
 	"upshift/actions/ios"
 	"upshift/actions/setup"
-	colours "upshift/colours"
+	c "upshift/colours"
 	// "upshift/config"
 	"upshift/utils"
 )
@@ -36,8 +36,8 @@ func Setup() {
 	tasks := findTask(job, action)
 
 	for i, action := range tasks.actions {
-		fmt.Println(colours.Blue.Format + colours.Bold.Format + "\n🛢  Starting " + colours.Underline.Format + strings.ToUpper(action) + colours.Default.Format + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
-		loadTask(i+1, len(tasks.actions), action)
+		fmt.Println(c.Blue + c.Bold + "\n🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
+		loadTask(action)
 	}
 }
 
@@ -123,7 +123,7 @@ func findTask(job string, action string) taskList {
 	return taskList{actions: []string{"showHelp"}}
 }
 
-func loadTask(count int, total int, task string) bool {
+func loadTask(task string) bool {
 	switch task {
 	case "upgradeScript":
 		setup.UpgradeScript()
@@ -151,7 +151,7 @@ func loadTask(count int, total int, task string) bool {
 	// case "androidEmulator":
 	// case "androidDeploy":
 	default:
-		utils.LogError("It's sad, but we don't know how to " + colours.Underline.Format + "handle this effing case" + colours.Default.Format + "\nYou should try upshift -v to find out what do we support")
+		utils.LogError("It's sad, but we don't know how to " + c.Underline + "handle this effing case" + c.Default + "\nYou should try upshift -v to find out what do we support")
 	}
 	return true
 }
