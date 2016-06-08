@@ -157,7 +157,8 @@ func loadTask(task string) (int, bool) {
 	// case "setupSsh":
 	case "gitPull":
 		return setup.GitPull()
-	// case "gitSubmodules":
+	case "gitSubmodules":
+		return setup.GitSubmodules()
 	// case "gitClone":
 	// case "iosBuild":
 	// case "iosRun":

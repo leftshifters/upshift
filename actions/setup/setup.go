@@ -21,6 +21,76 @@ func init() {
 
 }
 
+func GitSubmodules() (int, bool) {
+	submodulePath, _ := filepath.Abs(".gitmodules")
+	submodulesExist := utils.FileExists(submodulePath)
+
+	if submodulesExist == false {
+		fmt.Println("It looks like this project doesn't use submodules")
+		return 0, false
+	}
+
+	// So git submodules exist
+	fmt.Println("It looks like this project uses git submodules, let me try and set them up")
+
+	utils.LogMessage("git submodule init")
+	initLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-init.log")
+	status, err := basher.Run("GitSubmoduleInit", []string{initLogFileFullPath})
+	if err != nil {
+		utils.LogError("We couldn't initialise submodules\n" + err.Error())
+		return status, true
+	}
+
+	utils.LogMessage("git submodule update")
+	updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
+	status, err = basher.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
+	if err != nil {
+		utils.LogError("We couldn't update submodules\n" + err.Error())
+		return status, true
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(updateLogFileFullPath, 500)
+	if err != nil {
+		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+		return status, true
+	}
+
+	if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
+		utils.LogError("Something went wrong with submodule update, you need to look at this.")
+		return 1, true
+	}
+
+	fmt.Println("We were able to successfully setup submodules, moving on")
+	return 0, false
+}
+
+// function GitSubmodules {
+
+//   # Make a TIMESHTAMP for log file
+//   TIMESHTAMP=$(date +%Y%m%d%H%M%S)
+
+//   # Check if .gitmodules exists
+//   if [ -f ".gitmodules" ]; then
+//     # If the file exists, we need to run init and update and catch errors
+//     git submodule init 2>&1 | tee "git-submodule-init-${TIMESHTAMP}.log"
+//     git submodule update 2>&1 | tee "git-submodule-update-${TIMESHTAMP}.log"
+
+//     SUBMODULE_RESULTS=$(<"git-submodule-update-${TIMESHTAMP}.log")
+
+//     if [ $(echo "${SUBMODULE_RESULTS}" | grep "fatal:" -c) -gt 0 ] || [ $(echo "${SUBMODULE_RESULTS}" | grep "error:" -c) -gt 0 ]; then
+//       ShowError
+//       printf "Damn, initializing submodules was ${redColour}not successful${noColour}. You should check this up.\n\n"
+//       next=false
+//     else
+//       printf "\nSubmodules are now ${greenColour}setup${noColour}, one less thing to think about! 🍺\n\n"
+//     fi
+//     # Else Quietly ignore
+//   else
+//     printf "\nIt looks like this project doesn't use ${greenColour}submodules${noColour}.\n\n"
+//   fi
+// }
+
 //
 //
 //
@@ -102,7 +172,7 @@ func GitPull() (int, bool) {
 
 	utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
 	// Now we have both, a remote and a branch, let's pull
-	logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull-123.log")
+	logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull.log")
 	status, err := basher.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
 	if err != nil {
 		utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
