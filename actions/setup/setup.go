@@ -21,6 +21,24 @@ func init() {
 
 }
 
+//     # https://guides.cocoapods.org/using/pod-install-vs-update.html
+//     # We want to keep pods on their own version, hence not updating
+//     pod install 2>&1 | tee "pod-install-${TIMESHTAMP}.log"
+//     POD_INSTALL=$(<"pod-install-${TIMESHTAMP}.log")
+//     POD_INSTALL_FAILED=$(grep "Invalid" -c <<< "${POD_INSTALL}")
+
+//     if [ "${POD_INSTALL_FAILED}" -gt 0 ]; then
+//       ShowError
+//       printf "Damn, pod install ${redColour}not successful${noColour}. You should check this up.\n\n"
+//       next=false
+//     else
+//       printf "\nPods are now ${greenColour}up to date${noColour}, one less thing to think about! 🍺\n\n"
+//     fi
+//   else
+//     printf "\nIt looks like this project doesn't use ${greenColour}pods${noColour}. You're awesome!\n\n"
+//   fi
+// }
+
 //
 // Initialize submodules in a project
 //
@@ -229,21 +247,35 @@ func ShowHelp() (int, bool) {
 }
 
 //
+// If cocoapods is not setup, we go ahead and do it
+//
+func SetupPods() (int, bool) {
+	return SetupGem("cocoapods", "pod")
+}
+
+//
 // If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
 //
 func SetupXcpretty() (int, bool) {
-	// Check which version of Xcpretty was installed
-	version, err := command.RunWithoutStdout([]string{"xcpretty", "--version"}, "")
+	return SetupGem("xcpretty", "xcpretty")
+}
+
+//
+// General script to setup a gem
+//
+func SetupGem(gem string, gemName string) (int, bool) {
+	// Check which version of the gem was installed
+	version, err := command.RunWithoutStdout([]string{gemName, "--version"}, "")
 	if err == nil {
-		fmt.Println("Xcpretty is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
+		fmt.Println(gem + " is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
 		return 0, false
 	}
 
 	// Check if the command was not found
 	if strings.Contains(err.Error(), "executable file not found") == true {
-		// Alright, so Xcpretty was not found, go ahead and install it
-		fmt.Println("Xcpretty was not found, installing it")
+		// Alright, so the gem was not found, go ahead and install it
+		fmt.Println(gem + " was not found, installing it")
 
 		var RootPassword string
 
@@ -257,17 +289,17 @@ func SetupXcpretty() (int, bool) {
 		}
 		// else we are not on CI, ask the user to enter the password
 
-		status, err := basher.Run("SetupXcpretty", []string{strconv.FormatBool(utils.IsCI()), RootPassword})
+		status, err := basher.Run("SetupGem", []string{gem, strconv.FormatBool(utils.IsCI()), RootPassword})
 		if err != nil {
-			utils.LogError("We couldn't install xcpretty, you will get shitty outout from Xcode - \n" + err.Error())
+			utils.LogError("We couldn't install " + gem + "\n" + err.Error())
 			return status, false
 		}
 
-		fmt.Println("Xcpretty has been setup on your machine. Have fun.")
+		fmt.Println(gem + " has been setup on your machine. Have fun.")
 		return 0, false
 	}
 
-	fmt.Println("There was a problem installing xcpretty - " + err.Error())
+	fmt.Println("There was a problem installing " + gem + "\n" + err.Error())
 	return 1, true
 }
 

@@ -2,21 +2,22 @@ UpgradeScript() {
 	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install && rm upshift.temp
 }
 
-SetupXcpretty() {
-	CI=$1
-	RootPassword=$2
+SetupGem() {
+	GEM=$1
+	CI=$2
+	RootPassword=$3
 
-	if [ "${CI}" == "true" ]; then
+	if [ "$2" == "true" ]; then
 		# CI is true, we now need password
-		if [ "${RootPassword}" != "" ]; then
-			echo -e "${RootPassword}" | sudo -S gem install xcpretty
+		if [ "$3" != "" ]; then
+			echo -e "$3" | sudo -S gem install $1
 			exit 0
 		else
 			exit 1
 		fi
 	else
 		# User should type in the password
-		sudo -S gem install xcpretty
+		sudo -S gem install $1
 		exit 0
 	fi
 }
