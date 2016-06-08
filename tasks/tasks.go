@@ -9,7 +9,7 @@ import (
 	"upshift/actions/ios"
 	"upshift/actions/setup"
 	colours "upshift/colours"
-	"upshift/config"
+	// "upshift/config"
 	"upshift/utils"
 )
 
@@ -21,7 +21,7 @@ func init() {
 
 }
 
-func Setup(conf config.Config) {
+func Setup() {
 
 	var job, action string
 
@@ -36,7 +36,7 @@ func Setup(conf config.Config) {
 	tasks := findTask(job, action)
 
 	for i, action := range tasks.actions {
-		fmt.Println(colours.Blue.Format + colours.Bold.Format + "🛢  Starting " + colours.Underline.Format + strings.ToUpper(action) + colours.Default.Format + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
+		fmt.Println(colours.Blue.Format + colours.Bold.Format + "\n🛢  Starting " + colours.Underline.Format + strings.ToUpper(action) + colours.Default.Format + colours.Light.Format + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default.Format)
 		loadTask(i+1, len(tasks.actions), action)
 	}
 }

@@ -6,6 +6,6 @@ gradleTasks() {
 	gradle tasks 2>&1 | tee ./this-file-$1
 }
 
-upgradeScript() {
+UpgradeScript() {
 	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install && rm upshift.temp
 }

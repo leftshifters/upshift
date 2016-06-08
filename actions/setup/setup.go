@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"upshift/bash"
+	"upshift/basher"
 	colours "upshift/colours"
 	"upshift/utils"
 )
@@ -70,14 +70,14 @@ func ShowHelp() (int, bool) {
 func UpgradeScript() (int, bool) {
 	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
 	if err != nil {
-		fmt.Println("We were unable to find out the latest version", err.Error())
+		fmt.Println("We couldn't connect to the internet :(", err.Error())
 		return 1, false
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("We were unable to read the data from the server", err.Error())
+		fmt.Println("We were unable to figure out what is the latest version on the server, next time maybe", err.Error())
 		return 1, false
 	}
 
@@ -85,18 +85,19 @@ func UpgradeScript() (int, bool) {
 	latestVersion = strings.TrimSpace(latestVersion)
 
 	if latestVersion == utils.GetAppVersion() {
-		fmt.Println("You are already at the latest version", utils.GetAppVersion())
+		fmt.Println("Your powers (and version) are already at the top. You're running v", utils.GetAppVersion())
 		return 0, false
 	}
 
-	fmt.Println("We are now going to upgrade you to the latest version of upshift")
+	fmt.Println("Get ready to feel the power at your fingertips")
 
-	status, err := bash.Run("upgradeScript", []string{})
+	status, err := basher.Run("UpgradeScript", []string{})
 	if err != nil {
-		fmt.Println("We were unable to upgrade you", err.Error())
+		fmt.Println("Your fingertips will suck for some more time, we couldn't upgrade you because of this - ", err.Error())
 		return status, false
 	}
 
+	fmt.Println("You are now awesome. The new version of awesomeness is v", utils.GetAppVersion())
 	return 0, false
 }
 
