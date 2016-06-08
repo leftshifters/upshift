@@ -3,8 +3,8 @@ UpgradeScript() {
 }
 
 SetupXcpretty() {
-	CI = $1
-	RootPassword = $2
+	CI=$1
+	RootPassword=$2
 
 	if [ "${CI}" == "true" ]; then
 		# CI is true, we now need password
