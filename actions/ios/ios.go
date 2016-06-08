@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
 	"upshift/utils"
@@ -32,14 +33,12 @@ func SetupXcode() (int, bool) {
 	}
 
 	fmt.Println("We are currently using Xcode-" + currentXcodeVersion)
-	currentXcodeVersion = "7.3"
 
 	conf, err := config.Get()
 	if err != nil {
 		fmt.Println("We were unable to load the config file", err.Error())
 		return 1, true
 	}
-	fmt.Println(conf)
 
 	requiredXcodeVersion := conf.IOS.Xcode
 
@@ -48,14 +47,14 @@ func SetupXcode() (int, bool) {
 		return 0, false
 	}
 
-	fmt.Println("Alright, so we will try and switch the Xcode version now")
+	fmt.Println("Alright, so we will try and switch the Xcode version now to " + requiredXcodeVersion)
 
 	if utils.FileExists("/Applications/Xcode-"+requiredXcodeVersion+".app/") == false {
 		fmt.Println("It seems you don't have /Applications/Xcode-" + requiredXcodeVersion + ".app/")
 		return 1, true
 	}
 
-	if utils.IsCI() != true {
+	if utils.IsCI() == true {
 		// We are on CI, we need to enter password programatically
 		RootPassword := os.Getenv("RootPassword")
 		if RootPassword == "" {
@@ -78,6 +77,8 @@ func SetupXcode() (int, bool) {
 			fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
 			return 1, true
 		}
+
+		fmt.Println("We are now on the " + c.Underline + "Xcode-" + requiredXcodeVersion + c.Default)
 
 		fmt.Println(out)
 	}
