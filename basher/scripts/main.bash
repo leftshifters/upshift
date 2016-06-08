@@ -47,3 +47,7 @@ PodInstall() {
 	mkdir -p .upshift/logs/
 	pod install 2>&1 | tee $1	
 }
+
+SetupGradleW() {
+	gradle wrapper
+}

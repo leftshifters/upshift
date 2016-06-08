@@ -22,6 +22,38 @@ func init() {
 }
 
 //
+// Setup Gradle Wrapper
+//
+func SetupGradleW() (int, bool) {
+	// Run gradle -v to figure out if it is install
+	_, err := command.RunWithoutStdout([]string{"gradle", "-v"}, "")
+	if err != nil {
+		utils.LogError("Gradle itself is not installed, can't install wrapper.")
+		return 1, true
+	}
+
+	gradlewPath, _ := filepath.Abs("./gradlew")
+	gradlewExist := utils.FileExists(gradlewPath)
+
+	if gradlewExist == true {
+		fmt.Println("You already have gradle wrapper installed, moving on.")
+		return 0, false
+	}
+
+	// So, gradle is installed, just need to install wrapper [SetupGradleW]
+	// I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
+	utils.LogMessage("$ gradle wraper")
+	status, err := basher.Run("SetupGradleW", []string{})
+	if err != nil {
+		utils.LogError("We couldn't initialise gradle wrapper\n" + err.Error())
+		return status, true
+	}
+
+	fmt.Println("Gradle wrapper has been successfully setup")
+	return 0, false
+}
+
+//
 // Install cocoapods
 //
 func InstallPods() (int, bool) {
@@ -242,14 +274,14 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
 	fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
 	fmt.Println("\tupshift action setupScript -- to setup this very script")
-	fmt.Println("\tupshift action setupGradle -- to setup gradle on your machine")
+	fmt.Println("\tupshift action setupGradleW -- to setup gradle on your machine")
 	fmt.Println("\tupshift action setupPods -- to setup cocoapods on your machine")
 	fmt.Println("\tupshift action setupXcode -- to choose the correct xcode version for the project")
 	fmt.Println("\tupshift action setupXcpretty -- to setup xcpretty for build output which doesn't suck")
 	fmt.Println("\tupshift action upgradeScript -- to upgrade this script")
 
 	fmt.Println("\tupshift action gitPull -- to pull from code from a repo")
-	fmt.Println("\tupshift action gitClone -- to clone a repo")
+	// fmt.Println("\tupshift action gitClone -- to clone a repo")
 	fmt.Println("\tupshift action gitSubmodules -- to setup git modules in the project")
 
 	fmt.Println("\tupshift action iosSimulator -- to start the iOS simulator")

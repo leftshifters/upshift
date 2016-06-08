@@ -72,9 +72,9 @@ func findTask(job string, action string) taskList {
 	case "android", "Android", "a":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradle", "androidBuild"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradle", "androidEmulator", "androidRun"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		default:
@@ -99,8 +99,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupSsh"}}
 		case "setupScript":
 			return taskList{actions: []string{"setupScript"}}
-		case "setupGradle":
-			return taskList{actions: []string{"setupGradle"}}
+		case "setupGradleW":
+			return taskList{actions: []string{"setupGradleW"}}
 		case "setupPods":
 			return taskList{actions: []string{"setupPods"}}
 		case "setupXcode":
@@ -153,7 +153,8 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupXcpretty()
 	case "setupPods":
 		return setup.SetupPods()
-	// case "setupGradle":
+	case "setupGradleW":
+		return setup.SetupGradleW()
 	case "setupConfig":
 		return setup.SetupConfig()
 	// case "setupScript":
