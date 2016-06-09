@@ -22,6 +22,14 @@ func init() {
 }
 
 //
+// Show the version of the current app
+//
+func ShowVersion() (int, bool) {
+	fmt.Println(utils.GetAppVersion())
+	return 0, false
+}
+
+//
 // Setup Gradle Wrapper
 //
 func SetupGradleW() (int, bool) {

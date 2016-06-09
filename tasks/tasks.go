@@ -150,7 +150,8 @@ func loadTask(task string) (int, bool) {
 	switch task {
 	case "upgradeScript":
 		return setup.UpgradeScript()
-	// case "showVersion":
+	case "showVersion":
+		return setup.ShowVersion()
 	case "showHelp":
 		return setup.ShowHelp()
 	case "setupXcode":
