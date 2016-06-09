@@ -78,7 +78,53 @@ func IosBuild() (int, bool) {
 		return 1, true
 	}
 
+	err = exportIPAForIOS(projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	err = addProvisioningProfiles()
+	if err != nil {
+		utils.LogError(err.Error())
+	}
+
 	return 0, false
+}
+
+func addProvisioningProfiles() error {
+	fmt.Println("Trying to move your provisioning profiles to the system")
+	status, err := basher.Run("PopulateProvisioningProfiles", []string{})
+	if err != nil {
+		return errors.New("We couldn't add your provisioning profiles")
+	}
+	if status == 1 {
+		return errors.New("Something went wrong. We couldn't add your provisioning profiles")
+	}
+	fmt.Println("We have successfully added your profiles to this machine, woohoo")
+	return nil
+}
+
+func exportIPAForIOS(projectName string) error {
+	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/" + projectName + ".ipa")
+	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
+	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
+	if err != nil {
+		return errors.New("We could not export IPA\n" + err.Error())
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to see what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	if err != nil {
+		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+	}
+
+	if strings.Contains(tailData, "EXPORT SUCCEEDED") == false {
+		return errors.New("Something went wrong while exporting the IPA, you need to look at this.")
+	}
+
+	fmt.Println("We were able to archive successfully, awesome")
+	return nil
 }
 
 func archiveForIOS(projectType string, projectPath string, scheme string, projectName string) error {
@@ -102,12 +148,6 @@ func archiveForIOS(projectType string, projectPath string, scheme string, projec
 	fmt.Println("We were able to archive successfully, awesome")
 	return nil
 }
-
-// ## Archive iOS
-// set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -derivedDataPath build -archivePath "build/${projectName}.xcarchive" archive | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
-
-// ARCHIVE_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log");
-// ARCHIVE_SUCCEDED=$(grep "ARCHIVE SUCCEEDED" -c <<< "${ARCHIVE_RESULTS}")
 
 func compileForIOS(projectType string, projectPath string, scheme string, device string) error {
 	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" -derivedDataPath .upshift/build")

@@ -78,3 +78,45 @@ ArchiveIOS() {
 	mkdir -p .upshift/build/
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -derivedDataPath .upshift/build -archivePath .upshift/$4.xcarchive archive | tee "$5" | xcpretty
 }
+
+ExportIOS() {
+	PROJECT_NAME=$1
+	LOG_PATH=$2
+	mkdir -p .upshift/logs/
+	mkdir -p .upshift/build/
+	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/$1.ipa 2>&1 | tee "$2" | xcpretty
+}
+
+
+# // set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist "profiles/export.plist" -archivePath "build/${projectName}.xcarchive" -exportPath "build/${projectName}.ipa" 2>&1 | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
+
+PopulateProvisioningProfiles() {
+	# Get the UUID from .private
+	# https://gist.github.com/mxpr/8208289a63ca4e3a35a4
+	# Loop through all files, if you get a UDID, add them to the list of profiles
+	if [ -d "./.private/" ]; then
+		# The .private folder exists
+		foundProfiles=false
+		for profileName in .private/*.mobileprovision; do
+			uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< $(security cms -D -i "${profileName}" 2>/dev/null))
+
+			# If a UUID exist, then copy it, if it hasn't already been copied
+			if [ "${uuid}" != "" ]; then
+				# Copy file to UUID folder
+				`cp -f ${profileName} ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision`
+				printf "Transporting file ${uuid}.mobileprovision from .private to Library\n"
+				foundProfiles=true
+			fi
+		done
+
+		if [ "$foundProfiles" == true ]; then
+			exit 0
+		else
+			printf "Dude, You need to add some provisioning profiles in .private\n"
+			exit 1
+		fi
+	else
+		printf "Hey, you need to add your provisioning profiles in .private\n"
+		exit 1
+	fi
+}
