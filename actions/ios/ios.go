@@ -66,6 +66,7 @@ func IosBuild() (int, bool) {
 	projectPath := projectName + projectExtension
 	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
 	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
 
 	err = compileForIOS(projectType, projectPath, projectScheme, projectDevice)
 	if err != nil {
@@ -73,11 +74,17 @@ func IosBuild() (int, bool) {
 		return 1, true
 	}
 
-	// err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
-	// if err != nil {
-	// 	utils.LogError(err.Error())
-	// 	return 1, true
-	// }
+	err = deployToSimulator(projectName, projectBundleIdentifier)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
 
 	err = addProvisioningProfiles()
 	if err != nil {
@@ -92,6 +99,32 @@ func IosBuild() (int, bool) {
 
 	return 0, false
 }
+
+func deployToSimulator(projectName string, projectBundleIdentifier string) error {
+	builtFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
+	fileExits := utils.FileExists(builtFile)
+	if fileExits == false {
+		return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+	}
+
+	// If file exists, push it to the simulator
+	fmt.Println("Installing the app in the simulator")
+	_, err := command.RunWithoutStdout([]string{"xcrun", "simctl", "install", "booted", builtFile}, "")
+	if err != nil {
+		return errors.New("We could not deploy the app to the simulator\n" + err.Error())
+	}
+
+	// Start the app
+	fmt.Println("Starting the app in the simulator")
+	_, err = command.RunWithoutStdout([]string{"xcrun", "simctl", "launch", "booted", projectBundleIdentifier}, "")
+	if err != nil {
+		return errors.New("We could not deploy the app to the simulator\n" + err.Error())
+	}
+
+	return nil
+}
+
+// xcrun simctl launch booted "${productBundleIdentifier}"
 
 func SetupExportPlist() (int, bool) {
 	configExits := utils.FileExists(".private/export.plist")
