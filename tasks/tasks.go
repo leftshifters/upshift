@@ -54,6 +54,8 @@ func Setup() {
 	if status > 0 {
 		os.Exit(status)
 	}
+
+	fmt.Println("🍻  " + c.Yellow + "All done!" + c.Default)
 }
 
 func findTask(job string, action string) taskList {
