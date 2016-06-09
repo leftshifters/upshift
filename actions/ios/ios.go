@@ -72,11 +72,11 @@ func IosBuild() (int, bool) {
 		return 1, true
 	}
 
-	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
+	// err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	// if err != nil {
+	// 	utils.LogError(err.Error())
+	// 	return 1, true
+	// }
 
 	err = exportIPAForIOS(projectName)
 	if err != nil {
@@ -106,6 +106,15 @@ func addProvisioningProfiles() error {
 }
 
 func exportIPAForIOS(projectName string) error {
+	// Check if .private/export.plist exists, we can't do shit without it
+	exportPlistPath, _ := filepath.Abs(".private/export.plist")
+	exportPlistExists := utils.FileExists(exportPlistPath)
+
+	if exportPlistExists == false {
+		return errors.New("It looks like you dont have an exports.plist file in your .private folder.\nWe need that to sign an IPA.\nIf you're not sure how to get one,\njust run " + c.Red + "upshift setup exportPlist" + c.Default + " and we'll set up a sample there")
+	}
+
+	// Fire the export IPA bash script
 	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/" + projectName + ".ipa")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
 	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
