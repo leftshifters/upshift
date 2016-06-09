@@ -99,7 +99,7 @@ func LoadFile(fileName string) (Config, error) {
 	}
 	// xcodeVersion="7.3"
 	if conf.IOS.Xcode == "" {
-		conf.IOS.Xcode = "7.3.1"
+		conf.IOS.Xcode = utils.GetDefaultXcodeVersion()
 	}
 
 	return conf, nil

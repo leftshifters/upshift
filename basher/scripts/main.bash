@@ -51,3 +51,19 @@ PodInstall() {
 SetupGradleW() {
 	gradle wrapper
 }
+
+StartSimulator() {
+	DEVICE=$1
+	xcrun instruments -w "$1" 1>/dev/null 2>&1
+}
+
+CompileIOS() {
+	PROJECT_TYPE=$1
+	PROJECT_PATH=$2
+	SCHEME=$3
+	DEVICE=$4
+	LOG_PATH=$5
+	mkdir -p .upshift/logs/
+	mkdir -p .upshift/build/
+	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
+}
