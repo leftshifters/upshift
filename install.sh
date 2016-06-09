@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 7. Application Version
-version="0.7.3"
+version="0.8.0"
 
 # Check which OS are we on and download the appropriate binary
 OS=$(uname)
