@@ -3,9 +3,9 @@ package tasks
 import (
 	"fmt"
 	"os"
-	// "upshift/actions/android"
 	"strconv"
 	"strings"
+	"upshift/actions/android"
 	"upshift/actions/ios"
 	"upshift/actions/setup"
 	c "upshift/colours"
@@ -179,7 +179,8 @@ func loadTask(task string) (int, bool) {
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":
-	// case "androidBuild":
+	case "androidBuild":
+		return android.AndroidBuild()
 	// case "androidRun":
 	// case "androidEmulator":
 	// case "androidDeploy":
