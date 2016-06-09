@@ -4,7 +4,7 @@ The upshift utility helps you clone, build and test your iOS and Android project
 # Installation
 You can install upshift by running the following command on your mac
 ```
-curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install
+curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm ./upshift.temp
 ```
 
 # Docker
@@ -16,38 +16,25 @@ The following options are currently available
 ### upshift android build
 This command pulls the latest code, checks and install submodules and finally builds the Android project.
 
-### upshift android emulator
-This command starts up the emulator on the system, pulls the latest code, installs the git submodules and installs the app on the emulator.
-
 ### upshift ios build
 This command checks if you are building on the correct Xcode version, pulls the code, installs submodules, installs pods, build the latest iOS project and deploys it on the iOS simulator
-
-### upshift setup clone
-This command helps you clone a new repository, install submodules and installs pods.
 
 ### upshift setup config
 This command will create an empty config file in the current folder that you are in. Config files are setup in the main folder and are called config.ci . The variable defined in this file gets more priority than the ones defined inside upshift
 
-### upshift install
-This command installs this script on your machine
-
-
-### upshift action SetupSSH
-### upshift action InstallOnAndroid
-### upshift action GitPull
-### upshift action GitClone
-### upshift action StartEmulator
-### upshift action AndroidDevices
-### upshift action AssembleAndroid
-### upshift action GitSubmodules
-### upshift action SetupPods
-### upshift action XCodeVersion
-### upshift action XCPretty
-### upshift action BuildiOS
-### upshift action DeployiOSSimulator
-### upshift action SetupScript
-### upshift action SetupGradlepSSH
-### upshift action UpgradeVersion
+### upshift action androidBuild
+### upshift action iosBuild
+### upshift action installPods
+### upshift action gitSubmodules
+### upshift action gitPull
+### upshift action setupExportPlist
+### upshift action setupConfig
+### upshift action setupGradleW
+### upshift action setupPods
+### upshift action setupXcpretty
+### upshift action setupXcode
+### upshift action showHelp
+### upshift action upgradeScript
 
 These commands will allow you to run each specific action separately
 
