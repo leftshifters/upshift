@@ -169,7 +169,7 @@ func exportIPAForIOS(projectName string) error {
 		return errors.New("Something went wrong while exporting the IPA, you need to look at this.")
 	}
 
-	fmt.Println("We were able to archive successfully, awesome")
+	fmt.Println("We were able to export an IPA successfully, awesome")
 	return nil
 }
 
