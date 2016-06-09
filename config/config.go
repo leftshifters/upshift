@@ -81,6 +81,7 @@ func LoadFile(fileName string) (Config, error) {
 	// See if a TOML file is available in this folder
 	tomlBytes, err := utils.ReadIfFileExists(fileName)
 	if err != nil {
+		loadConfDefaults()
 		return conf, errors.New("You should have a config file at " + c.Red + fileName + c.Default + "\nIf you would like to create one, go run " + c.Blue + "upshift setup config" + c.Default)
 	}
 
@@ -91,6 +92,10 @@ func LoadFile(fileName string) (Config, error) {
 		return conf, errors.New("Crap, we couldn't really " + c.Red + "understand" + c.Default + " what was written in your toml file.\nYou should go and check it again")
 	}
 
+	return conf, nil
+}
+
+func loadConfDefaults() {
 	// Add Default Values
 
 	// iPhone="iPhone 6"
@@ -101,6 +106,4 @@ func LoadFile(fileName string) (Config, error) {
 	if conf.IOS.Xcode == "" {
 		conf.IOS.Xcode = utils.GetDefaultXcodeVersion()
 	}
-
-	return conf, nil
 }
