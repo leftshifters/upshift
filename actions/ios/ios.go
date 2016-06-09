@@ -1,7 +1,9 @@
 package ios
 
 import (
+	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 	c "upshift/colours"
 	"upshift/command"
@@ -9,8 +11,76 @@ import (
 	"upshift/utils"
 )
 
+var projectSettings map[string]string
+
 func init() {
 
+}
+
+func IosBuild() (int, bool) {
+	xcodeBuildSettings()
+	projectName := projectSettings["PROJECT_NAME"]
+	fullProductName := projectSettings["FULL_PRODUCT_NAME"]
+	productBundleId := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+	fmt.Println(projectName, fullProductName, productBundleId)
+
+	getProjectPath()
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	fmt.Println(projectName + projectExtension)
+
+	// isSimulatorRunning()
+
+	return 1, true
+}
+
+// Is Simulator running
+func isSimulatorRunning() bool {
+	process, err := command.RunWithoutStdout([]string{"pgrep", "-f", "Simulator.app"}, "")
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// # Load Simulator
+// OUTPUT=$(ps -aef | grep "Simulator.app" -c)
+// if [ "${OUTPUT}" -gt 1 ]; then
+
+// Get Project Path
+func getProjectPath() {
+	conf, _ := config.Get()
+
+	useWorkspace := conf.IOS.UseWorkspace
+	podFileFullPath, _ := filepath.Abs("Podfile")
+	podfileExists := utils.FileExists(podFileFullPath)
+
+	if useWorkspace || podfileExists {
+		projectSettings["UP_PROJECT_TYPE"] = "workspace"
+		projectSettings["UP_PROJECT_EXTENSION"] = ".xcworkspace"
+	} else {
+		projectSettings["UP_PROJECT_TYPE"] = "project"
+		projectSettings["UP_PROJECT_EXTENSION"] = ".xcodeproj"
+	}
+}
+
+// Read values from xcodebuild settings
+func xcodeBuildSettings() error {
+	projectSettings = make(map[string]string)
+	version, err := command.RunWithoutStdout([]string{"xcodebuild", "-showBuildSettings"}, "")
+	if err != nil {
+		return errors.New(("We were unable to read xcodebuild settings\n" + err.Error()))
+	}
+
+	settingsRows := strings.Split(version, "\n")
+	for _, row := range settingsRows {
+		settingsKeys := strings.Split(row, "=")
+		if len(settingsKeys) == 2 {
+			key := strings.TrimSpace(settingsKeys[0])
+			value := strings.TrimSpace(settingsKeys[1])
+			projectSettings[key] = value
+		}
+	}
+	return nil
 }
 
 //
@@ -56,35 +126,23 @@ func SetupXcode() (int, bool) {
 		return 1, true
 	}
 
+	var RootPassword string
 	if utils.IsCI() == true {
 		// We are on CI, we need to enter password programatically
-
-		RootPassword, err := utils.GetRootPassword()
+		RootPassword, err = utils.GetRootPassword()
 		if err != nil {
 			utils.LogError(err.Error())
 			return 1, true
 		}
-
-		out, err := command.RunWithoutStdout([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
-		if err != nil {
-			fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
-			return 1, true
-		}
-
-		fmt.Println(out)
-
-	} else {
-		// We are not on CI, ask the user to enter the password
-		out, err := command.RunWithoutStdout([]string{"sudo", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, "")
-		if err != nil {
-			fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
-			return 1, true
-		}
-
-		fmt.Println("We are now on the " + c.Underline + "Xcode-" + requiredXcodeVersion + c.Default)
-
-		fmt.Println(out)
 	}
+
+	out, err := command.RunWithoutStdout([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
+	if err != nil {
+		fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
+		return 1, true
+	}
+	fmt.Println(out)
+	fmt.Println("We are now on the " + c.Underline + "Xcode-" + requiredXcodeVersion + c.Default)
 
 	return 0, false
 }

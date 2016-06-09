@@ -166,7 +166,8 @@ func loadTask(task string) (int, bool) {
 	// SKIP case "gitClone":
 	case "installPods":
 		return setup.InstallPods()
-	// case "iosBuild":
+	case "iosBuild":
+		return ios.IosBuild()
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":
