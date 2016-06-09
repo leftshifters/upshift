@@ -4,7 +4,7 @@ MakeFolders() {
 }
 
 UpgradeScript() {
-	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/upshift > upshift.temp && chmod +x upshift.temp && ./upshift.temp install && rm upshift.temp
+	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm upshift.temp
 }
 
 SetupGem() {
