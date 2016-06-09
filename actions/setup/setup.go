@@ -186,7 +186,6 @@ func GitPull() (int, bool) {
 
 	var currentRemote string
 	gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
-	fmt.Println("gitRemotes", gitRemoteOutputRows)
 	switch len(gitRemoteOutputRows) {
 	case 0:
 		utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
@@ -215,7 +214,7 @@ func GitPull() (int, bool) {
 			}
 		} else {
 			// They haven't defined a remote in config, screw them
-			utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from")
+			utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
 			return 1, true
 		}
 	}

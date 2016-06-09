@@ -147,6 +147,12 @@ AndroidAssemble() {
 	./gradlew assemble --stacktrace 2>&1 | tee $1
 }
 
+AndroidLint() {
+	LOG_PATH=$1
+	MakeFolders
+	./gradlew lint 2>&1 | tee $1
+}
+
 AndroidStartActivity() {
 	PACKAGE=$1
 	MAIN_ACTIVITY=$2
@@ -165,7 +171,7 @@ AndroidLaunchEmulator() {
 
 	EMULATOR_NAME=$1
 	LOG_PATH=$2
-	emulator -avd $1 2>&1 | tee $2
+	EMULATOR_RESULTS=$(nohup "$ANDROID_HOME/tools/emulator" -avd "$1" 2>$2 1>$2 &)
 
 	# TODO : This is a big #HACK, only errors are returned in the first two seconds, I suck and I don't know a way out
 	sleep 2

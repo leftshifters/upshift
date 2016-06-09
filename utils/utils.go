@@ -46,6 +46,30 @@ func GetRootPassword() (string, error) {
 	return RootPassword, nil
 }
 
+// Create a string array from an bash output
+func CreateList(data string, ignore []string) []string {
+	rows := strings.Split(data, "\n")
+	var items []string
+	for _, row := range rows {
+		for _, ign := range ignore {
+			row = strings.TrimSpace(strings.Replace(row, ign, "", 1))
+		}
+		if row != "" {
+			items = append(items, row)
+		}
+	}
+	return items
+}
+
+// deviceRows := strings.Split(out, "\n")
+// var devices []string
+// for _, row := range deviceRows {
+// 	row = strings.TrimSpace(strings.Replace(row, "List of devices attached", "", 1))
+// 	if row != "" {
+// 		devices = append(devices, row)
+// 	}
+// }
+
 // Check if the currect script is running in a CI
 func IsCI() bool {
 	// Inspiration
