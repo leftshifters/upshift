@@ -67,3 +67,14 @@ CompileIOS() {
 	mkdir -p .upshift/build/
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
 }
+
+ArchiveIOS() {
+	PROJECT_TYPE=$1
+	PROJECT_PATH=$2
+	SCHEME=$3
+	PROJECT_NAME=$4
+	LOG_PATH=$5
+	mkdir -p .upshift/logs/
+	mkdir -p .upshift/build/
+	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -derivedDataPath .upshift/build -archivePath .upshift/$4.xcarchive archive | tee "$5" | xcpretty
+}

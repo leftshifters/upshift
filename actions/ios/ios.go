@@ -72,12 +72,45 @@ func IosBuild() (int, bool) {
 		return 1, true
 	}
 
+	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
 	return 0, false
 }
 
+func archiveForIOS(projectType string, projectPath string, scheme string, projectName string) error {
+	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -derivedDataPath .upshift/build -archivePath .upshift/" + projectName + ".xcarchive archive")
+	logPath, _ := filepath.Abs(".upshift/logs/xcode-archive.log")
+	_, err := basher.Run("ArchiveIOS", []string{projectType, projectPath, scheme, projectName, logPath})
+	if err != nil {
+		return errors.New("We could not archive for iOS\n" + err.Error())
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	if err != nil {
+		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+	}
+
+	if strings.Contains(tailData, "ARCHIVE SUCCEEDED") == false {
+		return errors.New("Something went wrong with the archive, you need to look at this.")
+	}
+
+	fmt.Println("We were able to archive successfully, awesome")
+	return nil
+}
+
+// ## Archive iOS
+// set -o pipefail && xcodebuild -"${PROJECT_TYPE}" "${PROJECT_PATH}" -scheme "${scheme}" -derivedDataPath build -archivePath "build/${projectName}.xcarchive" archive | tee "xcode-archive-${TIMESHTAMP}.log" | xcpretty
+
+// ARCHIVE_RESULTS=$(<"xcode-archive-${TIMESHTAMP}.log");
+// ARCHIVE_SUCCEDED=$(grep "ARCHIVE SUCCEEDED" -c <<< "${ARCHIVE_RESULTS}")
+
 func compileForIOS(projectType string, projectPath string, scheme string, device string) error {
-	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" -derivcedDataPath .upshift/build")
-	// set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
+	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" -derivedDataPath .upshift/build")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-build.log")
 	_, err := basher.Run("CompileIOS", []string{projectType, projectPath, scheme, device, logPath})
 	if err != nil {
