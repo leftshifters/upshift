@@ -51,10 +51,14 @@ func CreateList(data string, ignore []string) []string {
 	rows := strings.Split(data, "\n")
 	var items []string
 	for _, row := range rows {
+		ignoredRow := false
 		for _, ign := range ignore {
+			if strings.Contains(row, ign) == true {
+				ignoredRow = true
+			}
 			row = strings.TrimSpace(strings.Replace(row, ign, "", 1))
 		}
-		if row != "" {
+		if row != "" && ignoredRow == false {
 			items = append(items, row)
 		}
 	}

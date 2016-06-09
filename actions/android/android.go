@@ -8,6 +8,7 @@ import (
 	"upshift/basher"
 	c "upshift/colours"
 	"upshift/command"
+	"upshift/config"
 	"upshift/utils"
 )
 
@@ -17,7 +18,8 @@ func init() {
 
 func AndroidBuild() (int, bool) {
 
-	cleanOnStart := false
+	conf, _ := config.Get()
+	cleanOnStart := conf.Build.CleanBeforeBuild
 
 	if cleanOnStart == true {
 		// Clean the project first, we might not ALWAYS want to do this
@@ -142,7 +144,8 @@ func devicesConnected() []string {
 		return []string{}
 	}
 
-	devices := utils.CreateList(out, []string{"List of devices attached", "* daemon not running. starting it now on port 5037 *", "* daemon started successfully *"})
+	devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
+	fmt.Println("devices", devices)
 
 	return devices
 }
