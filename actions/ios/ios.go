@@ -79,15 +79,15 @@ func IosBuild() (int, bool) {
 	// 	return 1, true
 	// }
 
+	err = addProvisioningProfiles()
+	if err != nil {
+		utils.LogError(err.Error())
+	}
+
 	err = exportIPAForIOS(projectName)
 	if err != nil {
 		utils.LogError(err.Error())
 		return 1, true
-	}
-
-	err = addProvisioningProfiles()
-	if err != nil {
-		utils.LogError(err.Error())
 	}
 
 	return 0, false

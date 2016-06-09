@@ -185,7 +185,8 @@ func GitPull() (int, bool) {
 	}
 
 	var currentRemote string
-	gitRemoteOutputRows := strings.Split(out, "\n")
+	gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
+	fmt.Println("gitRemotes", gitRemoteOutputRows)
 	switch len(gitRemoteOutputRows) {
 	case 0:
 		utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
@@ -200,7 +201,7 @@ func GitPull() (int, bool) {
 		if conf.Build.GitRepoRemote != "" {
 			// Alright, so they have defined a remote, let's check if it exits in our list of remotes
 			for _, row := range gitRemoteOutputRows {
-				if strings.TrimSpace(conf.Build.GitRepoRemote) == row {
+				if strings.TrimSpace(conf.Build.GitRepoRemote) == strings.TrimSpace(row) {
 					currentRemote = row
 				}
 			}
