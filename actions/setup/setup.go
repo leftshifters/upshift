@@ -267,6 +267,7 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric\n")
 	fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml\n")
 	fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder\n")
+	fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project\n")
 	fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
 	fmt.Println("\tupshift -v\n\t\tto view the version number\n")
 

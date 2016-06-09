@@ -86,6 +86,8 @@ func findTask(job string, action string) taskList {
 		// 	return taskList{actions: []string{"gitClone"}}
 		case "config":
 			return taskList{actions: []string{"setupConfig"}}
+		case "export.plist":
+			return taskList{actions: []string{"setupExportPlist"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -107,6 +109,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupXcode"}}
 		case "setupXcpretty":
 			return taskList{actions: []string{"setupXcpretty"}}
+		case "setupExportPlist":
+			return taskList{actions: []string{"setupExportPlist"}}
 		case "upgradeScript":
 			return taskList{actions: []string{"upgradeScript"}}
 		case "gitPull":
@@ -159,6 +163,8 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupConfig()
 	// case "setupScript":
 	// case "setupSsh":
+	case "setupExportPlist":
+		return ios.SetupExportPlist()
 	case "gitPull":
 		return setup.GitPull()
 	case "gitSubmodules":

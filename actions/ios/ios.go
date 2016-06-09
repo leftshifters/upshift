@@ -3,6 +3,7 @@ package ios
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -90,6 +91,42 @@ func IosBuild() (int, bool) {
 	}
 
 	return 0, false
+}
+
+func SetupExportPlist() (int, bool) {
+	configExits := utils.FileExists(".private/export.plist")
+	if configExits == true {
+		fmt.Println("It looks like .private/export.plist is already here, skipping this step")
+		return 1, false
+	} else {
+		// export.Plist does not exist
+		// Create a new export.plist in this directory in .private
+
+		sampleExportPlist := `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>method</key>
+        <string>ad-hoc</string>
+        <key>uploadSymbols</key>
+        <true/>
+	<key>uploadBitcode</key>
+	<true/>
+</dict>
+</plist>"`
+
+		exportPlistBytes := []byte(sampleExportPlist)
+
+		err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
+		if err != nil {
+			utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
+			return 1, true
+		}
+	}
+
+	fmt.Println("We just added a sample file to .private/export.plist!")
+	return 0, false
+
 }
 
 func addProvisioningProfiles() error {
