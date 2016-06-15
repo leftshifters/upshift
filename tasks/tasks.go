@@ -73,10 +73,11 @@ func findTask(job string, action string) taskList {
 		}
 	case "android", "Android", "a":
 		switch action {
+		// Dont' add Android upgrade or install here. Their update is broken and it keep redownloading packaging
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "upgradeAndroid", "androidBuild"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "upgradeAndroid", "androidEmulator", "androidRun"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		case "update":
