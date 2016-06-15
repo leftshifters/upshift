@@ -161,7 +161,7 @@ func loadTask(task string) (int, bool) {
 	case "setupXcpretty":
 		return setup.SetupXcpretty()
 	case "setupPods":
-		return setup.SetupPods()
+		return setup.SetupPods(false)
 	case "setupGradleW":
 		return setup.SetupGradleW()
 	case "setupConfig":

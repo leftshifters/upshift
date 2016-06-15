@@ -1,16 +1,19 @@
 package setup
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"upshift/basher"
 	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
+	g "upshift/global"
 	"upshift/utils"
 )
 
@@ -76,6 +79,12 @@ func InstallPods() (int, bool) {
 	// So pods exist, damn
 	fmt.Println("It looks like this project uses pods, let me try and set them up")
 
+	err := runPodRepoUpdate()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
 	utils.LogMessage("$ pod install")
 	podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
 	status, err := basher.Run("PodInstall", []string{podInstallLogFullPath})
@@ -99,6 +108,52 @@ func InstallPods() (int, bool) {
 	fmt.Println("We were able to successfully setup cocoapods, moving on")
 	return 0, false
 
+}
+
+func runPodRepoUpdate() error {
+
+	// Check if it's been a while since we ran `pod repo update` and if yes, run it
+	globalConf, _ := g.Get()
+	difference := int32(time.Now().Unix()) - globalConf.AndroidSDKUpdatedTime
+
+	// Run this if last update was never done or more than a month ago
+	if globalConf.AndroidSDKUpdatedTime == 0 || difference > 3600*24*30 {
+		// This means we have never come here.
+		utils.LogMessage("$ pod repo update --verbose")
+		podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-repo-update.log")
+		_, err := basher.Run("PodRepoUpdate", []string{podInstallLogFullPath})
+		if err != nil {
+			return err
+		}
+
+		// Read the last 500 bytes from the whole message, we just want to what happened at the end
+		tailData, err := utils.ReadTailIfFileExists(podInstallLogFullPath, 500)
+		if err != nil {
+			return err
+		}
+
+		if strings.Contains(tailData, "error") == true {
+			return err
+		}
+
+		// When an upgrade is available, they say
+		// CocoaPods 1.0.1 is available.
+		// To update use: `sudo gem install cocoapods`
+		// Until we reach version 1.0 the features of CocoaPods can and will change.
+		// We strongly recommend that you use the latest version at all times.
+		if strings.Contains(tailData, "sudo gem install cocoapods") == true {
+			// This means that an update is available, run cocoapods update
+			status, _ := SetupPods(true)
+			if status > 0 {
+				return errors.New("We couldn't update to the new version of cocoapods")
+			}
+			fmt.Println("Updated cocoapods to the latest version")
+		}
+
+		globalConf.AndroidSDKUpdatedTime = int32(time.Now().Unix())
+		g.Set(globalConf)
+	}
+	return nil
 }
 
 //
@@ -313,8 +368,8 @@ func ShowHelp() (int, bool) {
 //
 // If cocoapods is not setup, we go ahead and do it
 //
-func SetupPods() (int, bool) {
-	return SetupGem("cocoapods", "pod")
+func SetupPods(force bool) (int, bool) {
+	return SetupGem("cocoapods", "pod", force)
 }
 
 //
@@ -322,24 +377,32 @@ func SetupPods() (int, bool) {
 // It formats the output from xcode so that you can make sense of what is going wrong
 //
 func SetupXcpretty() (int, bool) {
-	return SetupGem("xcpretty", "xcpretty")
+	return SetupGem("xcpretty", "xcpretty", false)
 }
 
 //
 // General script to setup a gem
 //
-func SetupGem(gem string, gemName string) (int, bool) {
+func SetupGem(gem string, gemName string, force bool) (int, bool) {
 	// Check which version of the gem was installed
+	// force will be true when you want to force running sudo install gem irrespective of if it is installed or not
 	version, err := command.RunWithoutStdout([]string{gemName, "--version"}, "")
-	if err == nil {
-		fmt.Println(gem + " is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
-		return 0, false
+	if force == false {
+		if err == nil {
+			fmt.Println(gem + " is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
+			return 0, false
+		}
 	}
 
 	// Check if the command was not found
-	if strings.Contains(err.Error(), "executable file not found") == true {
+	var errorString string
+	if err != nil {
+		errorString = err.Error()
+	}
+
+	if strings.Contains(errorString, "executable file not found") == true || force == true {
 		// Alright, so the gem was not found, go ahead and install it
-		fmt.Println(gem + " was not found, installing it")
+		fmt.Println("Latest " + gem + " was not found, installing it")
 
 		var RootPassword string
 

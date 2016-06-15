@@ -7,7 +7,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"io/ioutil"
 	"os"
-	"time"
+	// "time"
 	"upshift/basher"
 	"upshift/utils"
 )
@@ -31,7 +31,7 @@ func Get() (Config, error) {
 	filePath := os.Getenv("HOME") + "/.upshift/config"
 	tomlBytes, err := utils.ReadIfFileExists(filePath)
 	if err != nil {
-		fmt.Println("No data was saved previously")
+		fmt.Println("The global config seems empty, this machine isn't used much it seems")
 	}
 
 	// If you get data, try to decode it and save into our conf object
@@ -55,7 +55,7 @@ func Set(c Config) error {
 	// Create a byte buffer
 	var tomlBuffer bytes.Buffer
 	e := toml.NewEncoder(&tomlBuffer)
-	err := e.Encode(conf)
+	err := e.Encode(c)
 	if err != nil {
 		return err
 	}

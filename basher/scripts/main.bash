@@ -53,6 +53,12 @@ PodInstall() {
 	pod install 2>&1 | tee $1	
 }
 
+PodRepoUpdate() {
+	LOGFILE=$1
+	UpshiftConfig
+	pod repo update --verbose 2>&1 | tee $1	
+}
+
 SetupGradleW() {
 	MakeFolders
 	gradle wrapper
