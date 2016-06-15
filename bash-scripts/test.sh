@@ -45,6 +45,10 @@
 # https://github.com/ainoya/docker-android-project/blob/master/Dockerfile
 # https://github.com/gfx/docker-android-project/blob/master/Dockerfile
 
+docker-machine create --driver virtualbox default
+
+docker run -it ubuntu bash
+
 docker run -d -P -v $HOME/gocode/bin:/usr/local/upshift/bin --name upshift ubuntu:16.04 /usr/local/upshift/bin/upshift -v
 docker run -P -v $HOME/gocode/bin:/usr/local/upshift/bin -it --name upshift ubuntu:16.04 /bin/bash
 docker rm upshift

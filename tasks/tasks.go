@@ -74,9 +74,9 @@ func findTask(job string, action string) taskList {
 	case "android", "Android", "a":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidBuild"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "upgradeAndroid", "androidBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "upgradeAndroid", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		case "update":
@@ -117,6 +117,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupExportPlist"}}
 		case "upgradeScript":
 			return taskList{actions: []string{"upgradeScript"}}
+		case "upgradeAndroid":
+			return taskList{actions: []string{"upgradeAndroid"}}
 		case "gitPull":
 			return taskList{actions: []string{"gitPull"}}
 		// case "gitClone":
@@ -152,6 +154,8 @@ func loadTask(task string) (int, bool) {
 	switch task {
 	case "upgradeScript":
 		return setup.UpgradeScript()
+	case "upgradeAndroid":
+		return android.UpgradeAndroid()
 	case "showVersion":
 		return setup.ShowVersion()
 	case "showHelp":

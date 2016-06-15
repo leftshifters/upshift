@@ -225,6 +225,12 @@ AndroidLaunchEmulator() {
 }
 
 AndroidUpgradeSDK() {
+	# Copied from here - http://stackoverflow.com/a/31900427/57914
+	# I still don't know how does this work
+	( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --no-ui
+}
+
+AndroidInstallSDK() {
 	echo y | android update sdk --all --no-ui --filter "android-23"
 	echo y | android update sdk --all --no-ui --filter "android-22"
 	echo y | android update sdk --all --no-ui --filter "android-21"

@@ -16,9 +16,20 @@ func init() {
 
 }
 
-func SetupAndroid() (int, bool) {
+func UpgradeAndroid() (int, bool) {
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
 	_, err := basher.Run("AndroidUpgradeSDK", []string{logPath})
+	if err != nil {
+		utils.LogError("We could not start upgrading android.\n" + err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func SetupAndroid() (int, bool) {
+	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
+	_, err := basher.Run("AndroidInstallSDK", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start upgrading android.\n" + err.Error())
 		return 1, true
@@ -156,7 +167,6 @@ func devicesConnected() []string {
 	}
 
 	devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
-	fmt.Println("devices", devices)
 
 	return devices
 }
