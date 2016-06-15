@@ -79,6 +79,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
+		case "update":
+			return taskList{actions: []string{"setupAndroid"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -168,6 +170,8 @@ func loadTask(task string) (int, bool) {
 	// case "setupSsh":
 	case "setupExportPlist":
 		return ios.SetupExportPlist()
+	case "setupAndroid":
+		return android.SetupAndroid()
 	case "gitPull":
 		return setup.GitPull()
 	case "gitSubmodules":

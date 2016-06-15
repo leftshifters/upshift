@@ -16,6 +16,17 @@ func init() {
 
 }
 
+func SetupAndroid() (int, bool) {
+	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
+	_, err := basher.Run("AndroidUpgradeSDK", []string{logPath})
+	if err != nil {
+		utils.LogError("We could not start upgrading android.\n" + err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
 func AndroidBuild() (int, bool) {
 
 	conf, _ := config.Get()

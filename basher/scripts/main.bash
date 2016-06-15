@@ -217,3 +217,19 @@ AndroidLaunchEmulator() {
 	fi
 
 }
+
+AndroidUpgradeSDK() {
+	echo y | android update sdk --all --no-ui --filter "android-23"
+	echo y | android update sdk --all --no-ui --filter "android-22"
+	echo y | android update sdk --all --no-ui --filter "android-21"
+	echo y | android update sdk --all --no-ui --filter "android-20"
+	echo y | android update sdk --all --no-ui --filter "android-19"
+	echo y | android update sdk --all --no-ui --filter "android-18"
+	echo y | android update sdk --all --no-ui --filter "android-17"
+	echo y | android update sdk --all --no-ui --filter "android-16"
+	echo y | android update sdk --all --no-ui --filter "tools"
+	echo y | android update sdk --all --no-ui --filter "platform-tools"
+	echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"
+	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
+	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
+}
