@@ -233,3 +233,8 @@ AndroidUpgradeSDK() {
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
 	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
 }
+
+UpshiftConfig() {
+	mkdir -p ~/.upshift
+	touch ~/.upshift/config.toml
+}
