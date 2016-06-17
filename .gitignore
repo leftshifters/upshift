@@ -3,5 +3,5 @@ config.ci
 config.toml
 .gradle
 
-upshift-linux
-upshift-darwin
+upshift-linux*
+upshift-darwin*
