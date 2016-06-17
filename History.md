@@ -1,4 +1,17 @@
 
+0.8.1 / 2016-06-17
+==================
+
+  * Removed upshift.sh [19m0s]
+  * Removed android actions because google sucks [16m0s]
+  * Setup a new action for upgrade android, Removed unwated logs [57m0s]
+  * Run a pod repo update if it has never been run before of if has been over a month. If pod repo update says you need to update cocoapods, it updates it too. [12m0s]
+  * Added a way to save defaults for upshift as a whole
+  * Added action to update android sdk
+  * created a makefile for cross compilation [23m0s]
+  * Follow through redirects in install.sh [7m0s]
+  * Fixed type in simulator loading [26m0s]
+
 0.8.0 / 2016-06-10
 ==================
 

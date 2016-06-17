@@ -73,12 +73,15 @@ func findTask(job string, action string) taskList {
 		}
 	case "android", "Android", "a":
 		switch action {
+		// Dont' add Android upgrade or install here. Their update is broken and it keep redownloading packaging
 		case "build":
 			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidBuild"}}
 		case "run":
 			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
+		case "update":
+			return taskList{actions: []string{"setupAndroid"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -115,6 +118,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupExportPlist"}}
 		case "upgradeScript":
 			return taskList{actions: []string{"upgradeScript"}}
+		case "upgradeAndroid":
+			return taskList{actions: []string{"upgradeAndroid"}}
 		case "gitPull":
 			return taskList{actions: []string{"gitPull"}}
 		// case "gitClone":
@@ -150,6 +155,8 @@ func loadTask(task string) (int, bool) {
 	switch task {
 	case "upgradeScript":
 		return setup.UpgradeScript()
+	case "upgradeAndroid":
+		return android.UpgradeAndroid()
 	case "showVersion":
 		return setup.ShowVersion()
 	case "showHelp":
@@ -159,7 +166,7 @@ func loadTask(task string) (int, bool) {
 	case "setupXcpretty":
 		return setup.SetupXcpretty()
 	case "setupPods":
-		return setup.SetupPods()
+		return setup.SetupPods(false)
 	case "setupGradleW":
 		return setup.SetupGradleW()
 	case "setupConfig":
@@ -168,6 +175,8 @@ func loadTask(task string) (int, bool) {
 	// case "setupSsh":
 	case "setupExportPlist":
 		return ios.SetupExportPlist()
+	case "setupAndroid":
+		return android.SetupAndroid()
 	case "gitPull":
 		return setup.GitPull()
 	case "gitSubmodules":

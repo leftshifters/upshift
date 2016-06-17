@@ -43,7 +43,7 @@ func IosBuild() (int, bool) {
 		} else {
 			fmt.Println("It sure is available, lets start up the simulator")
 			startSimulator(deviceForSimulator)
-			fmt.Println("You shoudl see a simulator loading in the background")
+			fmt.Println("You should see a simulator loading in the background")
 		}
 	} else {
 		// Device not found, can't start the simulator

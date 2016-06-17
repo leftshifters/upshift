@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 7. Application Version
-version="0.8.0"
+version="0.8.1"
 
 # Check which OS are we on and download the appropriate binary
 OS=$(uname)
@@ -13,7 +13,7 @@ else
   INSTALL_URL="https://github.com/leftshifters/upshift/releases/download/${version}/upshift-linux-${version}"
 fi
 
-INSTALL=$(curl -sS "${INSTALL_URL}" > upshift.temp)
+INSTALL=$(curl -sSL "${INSTALL_URL}" > upshift.temp)
 
 # Only these are available in $PATH on a fresh system
 # /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
