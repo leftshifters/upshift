@@ -37,6 +37,7 @@ if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
   fi
 
   sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
+  sudo chmod +x /usr/local/bin/upshift
 
   printf "Installation has been ${greenColour}successfully${noColour} completed\n"
 else
