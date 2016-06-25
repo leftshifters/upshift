@@ -101,10 +101,21 @@ func IosBuild() (int, bool) {
 }
 
 func deployToSimulator(projectName string, projectBundleIdentifier string) error {
-	builtFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
-	fileExits := utils.FileExists(builtFile)
+	builtFile := ""
+	debugFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
+	releaseFile, _ := filepath.Abs(".upshift/build/Build/Products/Release-iphonesimulator/" + projectName + ".app")
+	fileExits := utils.FileExists(debugFile)
 	if fileExits == false {
-		return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+		fileExits = utils.FileExists(releaseFile)
+		if fileExits == false {
+			return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+		} else {
+			// we found the release file
+			builtFile = releaseFile
+		}
+	} else {
+		// we found the debug file
+		builtFile = debugFile
 	}
 
 	// If file exists, push it to the simulator
