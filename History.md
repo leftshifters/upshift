@@ -1,4 +1,13 @@
 
+0.8.2 / 2016-06-25
+==================
+
+  * Make upshift executable and changed instructions on home screen
+  * Fixed the install script [32m0s]
+  * Merged with 0.8.1 [2m0s]
+  * Merge branch 'release0.8.0'
+  * Fixed issue with finding simulator path after building an archive [1h42m0s]
+
 0.8.1 / 2016-06-17
 ==================
 
