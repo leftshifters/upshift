@@ -63,9 +63,9 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupSigh", "setupPods", "installPods", "iosBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosSimulator", "iosRun"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupSigh", "setupPods", "installPods", "iosSimulator", "iosRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		default:
@@ -110,6 +110,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupGradleW"}}
 		case "setupPods":
 			return taskList{actions: []string{"setupPods"}}
+		case "setupSigh":
+			return taskList{actions: []string{"setupSigh"}}
 		case "setupXcode":
 			return taskList{actions: []string{"setupXcode"}}
 		case "setupXcpretty":
@@ -167,6 +169,8 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupXcpretty()
 	case "setupPods":
 		return setup.SetupPods(false)
+	case "setupSigh":
+		return setup.SetupSigh(false)
 	case "setupGradleW":
 		return setup.SetupGradleW()
 	case "setupConfig":
