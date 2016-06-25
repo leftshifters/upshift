@@ -21,6 +21,54 @@ func init() {
 }
 
 func IosBuild() (int, bool) {
+
+	status, next := iosPrepare()
+	if status > 0 {
+		return status, next
+	}
+
+	// Try the build now
+	projectType := projectSettings["UP_PROJECT_TYPE"]
+	projectName := projectSettings["PROJECT_NAME"]
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	projectPath := projectName + projectExtension
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	err := compileForIOS(projectType, projectPath, projectScheme, projectDevice)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	err = deployToSimulator(projectName, projectBundleIdentifier)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	err = addProvisioningProfiles()
+	if err != nil {
+		utils.LogError(err.Error())
+	}
+
+	err = exportIPAForIOS(projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func iosPrepare() (int, bool) {
 	fmt.Println("We will now try and load your xcode settings")
 	err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
 	if err != nil {
@@ -59,45 +107,7 @@ func IosBuild() (int, bool) {
 		return 1, false
 	}
 
-	// Try the build now
-	projectType := projectSettings["UP_PROJECT_TYPE"]
-	projectName := projectSettings["PROJECT_NAME"]
-	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
-	projectPath := projectName + projectExtension
-	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
-	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
-	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
-
-	err = compileForIOS(projectType, projectPath, projectScheme, projectDevice)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = deployToSimulator(projectName, projectBundleIdentifier)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = addProvisioningProfiles()
-	if err != nil {
-		utils.LogError(err.Error())
-	}
-
-	err = exportIPAForIOS(projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	return 0, false
+	return 0, true
 }
 
 func deployToSimulator(projectName string, projectBundleIdentifier string) error {
