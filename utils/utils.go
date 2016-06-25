@@ -11,7 +11,7 @@ import (
 
 // Get the App Version
 func GetAppVersion() string {
-	return "0.8.1"
+	return "0.8.2"
 }
 
 // Get the default Xcode version
