@@ -366,10 +366,10 @@ func ShowHelp() (int, bool) {
 }
 
 //
-// If sigh from fastlane.tools is not setup, we go ahead and do it
+// If fastlane.tools if is not setup, we go ahead and do it
 //
-func SetupSigh(force bool) (int, bool) {
-	return SetupGem("sigh", "sigh", force)
+func SetupFastlane(force bool) (int, bool) {
+	return SetupGem("fastlane", "fastlane", force)
 }
 
 //
