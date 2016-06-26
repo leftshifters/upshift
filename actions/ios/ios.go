@@ -213,7 +213,7 @@ func SetupProfiles() (int, bool) {
 }
 
 func addProvisioningProfiles() error {
-	fmt.Println("Trying to move your provisioning profiles to the system")
+	utils.LogMessage("Trying to move your provisioning profiles to the system")
 	status, err := basher.Run("PopulateProvisioningProfiles", []string{})
 	if err != nil {
 		return errors.New("We couldn't add your provisioning profiles")
