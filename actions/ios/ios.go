@@ -231,7 +231,7 @@ func exportIPAForIOS(projectName string) error {
 	exportPlistExists := utils.FileExists(exportPlistPath)
 
 	if exportPlistExists == false {
-		return errors.New("It looks like you dont have an exports.plist file in your .private folder.\nWe need that to sign an IPA.\nIf you're not sure how to get one,\njust run " + c.Red + "upshift setup exportPlist" + c.Default + " and we'll set up a sample there")
+		return errors.New("It looks like you dont have an exports.plist file in your .private folder.\nWe need that to sign an IPA.\nIf you're not sure how to get one,\njust run " + c.Red + "upshift setup export.plist" + c.Default + " and we'll set up a sample there")
 	}
 
 	// Fire the export IPA bash script
