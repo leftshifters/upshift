@@ -94,7 +94,7 @@ ExportIOS() {
 	PROJECT_NAME=$1
 	LOG_PATH=$2
 	MakeFolders
-	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/$1.ipa 2>&1 | tee "$2" | xcpretty
+	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/ 2>&1 | tee "$2" | xcpretty
 }
 
 FetchAndRepairProvisioningProfiles() {
