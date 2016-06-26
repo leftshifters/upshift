@@ -19,6 +19,7 @@ type Config struct {
 	// Save when was android sdk last updated
 	AndroidSDKUpdatedTime int32
 	IOSDeveloperAccounts  string
+	IOSCertificatePath    string
 }
 
 // conf.AndroidSDKUpdated = int32(time.Now().Unix())

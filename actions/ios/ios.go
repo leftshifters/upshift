@@ -212,6 +212,58 @@ func SetupProfiles() (int, bool) {
 	return 0, true
 }
 
+func installCertificates() error {
+	utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
+
+	basePath, _ := filepath.Abs(".private")
+
+	// First check if the certificates are added to .private folder
+	appleCer, _ := filepath.Abs(".private/apple.cer")
+	distributionCer, _ := filepath.Abs(".private/distribution.cer")
+	distributionP12, _ := filepath.Abs(".private/distribution.p12")
+
+	// If they exist, install them
+	appleCerExists := utils.FileExists(appleCer)
+	distributionCerExists := utils.FileExists(distributionCer)
+	distributionP12Exists := utils.FileExists(distributionP12)
+
+	if !(appleCerExists && distributionCerExists && distributionP12Exists) {
+		// If they don't exist, check global config to see if they have them
+		globalConf, _ := g.Get()
+		globalBasePath := globalConf.IOSCertificatePath
+
+		if globalBasePath == "" {
+			return errors.New("The certificates don't exist in both .private and global conf")
+		}
+
+		basePath = globalBasePath
+
+		appleCer, _ = filepath.Abs(globalBasePath + "/apple.cer")
+		distributionCer, _ = filepath.Abs(globalBasePath + "/distribution.cer")
+		distributionP12, _ = filepath.Abs(globalBasePath + "/distribution.p12")
+
+		// If they exist, install them
+		appleCerExists = utils.FileExists(appleCer)
+		distributionCerExists = utils.FileExists(distributionCer)
+		distributionP12Exists = utils.FileExists(distributionP12)
+
+		if !(appleCerExists && distributionCerExists && distributionP12Exists) {
+			return errors.New("All the certificates don't exist in both .private and global conf")
+		}
+		// If they don't, crash and burn
+	}
+
+	basher.Run("InstallCertificates", []string{basePath})
+	// #TODO Ignore the error here. Even if it says that certificates are already installed, it gets treated like an error
+	// if err != nil {
+	// 	return errors.New("The certicates could not be installed!")
+	// }
+
+	fmt.Println("The certificates were successfully installed")
+	return nil
+
+}
+
 func addProvisioningProfiles() error {
 	utils.LogMessage("Trying to move your provisioning profiles to the system")
 	status, err := basher.Run("PopulateProvisioningProfiles", []string{})

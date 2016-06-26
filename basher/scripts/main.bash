@@ -267,3 +267,10 @@ UpshiftConfig() {
 	mkdir -p ~/.upshift
 	touch ~/.upshift/config
 }
+
+InstallCertificates() {
+	BASE_PATH=$1
+	security import $1/apple.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
+	security import $1/distribution.p12 -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security -P ""
+	security import $1/distribution.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
+}
