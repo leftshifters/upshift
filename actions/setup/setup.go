@@ -511,6 +511,7 @@ UseWorkspace = false
 Scheme = "testScheme"
 TestDevice = "iPhone 6"
 Xcode = "7.3.1"
+DeveloperAccount = ""
 
 [Android]
 PackageName = "testPackage"

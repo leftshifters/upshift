@@ -109,6 +109,12 @@ FetchAndRepairProvisioningProfiles() {
 	PopulateProvisioningProfiles
 }
 
+FindProvisioningProfile() {
+	DEVELOPER_ACCOUNT=$1
+	BUNDLE_IDENTIFIER=$2
+	sigh -u $1 -a $2 --adhoc
+}
+
 PopulateProvisioningProfiles() {
 	# Get the UUID from .private
 	# https://gist.github.com/mxpr/8208289a63ca4e3a35a4

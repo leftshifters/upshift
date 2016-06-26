@@ -274,18 +274,41 @@ func installCertificates() error {
 
 	fmt.Println("The certificates were successfully installed")
 	return nil
-
 }
 
 func addProvisioningProfiles() error {
-	utils.LogMessage("Trying to move your provisioning profiles to the system")
-	status, err := basher.Run("PopulateProvisioningProfiles", []string{})
+	utils.LogMessage("We will now try to find the provisioning profile")
+
+	// Get the username which will need to login
+	// Highest priority to local config
+	conf, _ := config.Get()
+	developerAccount := conf.IOS.DeveloperAccount
+
+	if developerAccount == "" {
+		// Second priority to machine config
+		developerAccounts, err := getDeveloperAccounts()
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		// If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+		if len(developerAccounts) > 1 {
+			return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+		}
+
+		if len(developerAccounts) == 1 {
+			developerAccount = developerAccounts[0]
+		}
+	}
+
+	// Get the bundle identifier for this project
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	_, err := basher.Run("FindProvisioningProfile", []string{developerAccount, projectBundleIdentifier})
 	if err != nil {
-		return errors.New("We couldn't add your provisioning profiles")
+		return errors.New("We could not find your provisioning profile")
 	}
-	if status == 1 {
-		return errors.New("Something went wrong. We couldn't add your provisioning profiles")
-	}
+
 	fmt.Println("We have successfully added your profiles to this machine, woohoo")
 	return nil
 }
