@@ -235,7 +235,7 @@ func exportIPAForIOS(projectName string) error {
 	}
 
 	// Fire the export IPA bash script
-	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/" + projectName + ".ipa")
+	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
 	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
 	if err != nil {
