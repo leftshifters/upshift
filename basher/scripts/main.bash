@@ -248,5 +248,5 @@ AndroidInstallSDK() {
 
 UpshiftConfig() {
 	mkdir -p ~/.upshift
-	touch ~/.upshift/config.toml
+	touch ~/.upshift/config
 }
