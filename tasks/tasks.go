@@ -63,7 +63,7 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosBuild", "iosDeploySimulator", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
 		case "run":
 			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosSimulator", "iosRun"}}
 		case "deploy":
@@ -138,6 +138,20 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"androidEmulator"}}
 		case "iosBuild":
 			return taskList{actions: []string{"iosBuild"}}
+		case "iosDeploySimulator":
+			return taskList{actions: []string{"iosDeploySimulator"}}
+		case "iosProvisioning":
+			return taskList{actions: []string{"iosProvisioning"}}
+		case "iosCertificates":
+			return taskList{actions: []string{"iosCertificates"}}
+		case "iosArchive":
+			return taskList{actions: []string{"iosArchive"}}
+		case "iosExportIPA":
+			return taskList{actions: []string{"iosExportIPA"}}
+		case "iosCreateApp":
+			return taskList{actions: []string{"iosCreateApp"}}
+		case "iosUploadBuild":
+			return taskList{actions: []string{"iosUploadBuild"}}
 		case "androidBuild":
 			return taskList{actions: []string{"androidBuild"}}
 		case "iosRun":
@@ -194,6 +208,20 @@ func loadTask(task string) (int, bool) {
 		return setup.InstallPods()
 	case "iosBuild":
 		return ios.IosBuild()
+	case "iosDeploySimulator":
+		return ios.IosDeploySimulator()
+	case "iosProvisioning":
+		return ios.IosProvisioning()
+	case "iosCertificates":
+		return ios.IosCertificates()
+	case "iosArchive":
+		return ios.IosArchive()
+	case "iosExportIPA":
+		return ios.IosExportIPA()
+	case "iosCreateApp":
+		return ios.IosCreateApp()
+	case "iosUploadBuild":
+		return ios.IosUploadBuild()
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":

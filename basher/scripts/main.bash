@@ -1,6 +1,7 @@
 MakeFolders() {
 	mkdir -p .upshift/logs/
 	mkdir -p .upshift/build/
+	mkdir -p .private
 }
 
 UpgradeScript() {

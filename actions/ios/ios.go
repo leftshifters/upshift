@@ -21,6 +21,88 @@ func init() {
 
 }
 
+func IosUploadBuild() (int, bool) {
+	err := uploadBuildToItunes()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosCreateApp() (int, bool) {
+	err := createAppOniTunes()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosExportIPA() (int, bool) {
+	// Try the build now
+	projectName := projectSettings["PROJECT_NAME"]
+
+	err := exportIPAForIOS(projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosArchive() (int, bool) {
+	projectType := projectSettings["UP_PROJECT_TYPE"]
+	projectName := projectSettings["PROJECT_NAME"]
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	projectPath := projectName + projectExtension
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+
+	err := archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosCertificates() (int, bool) {
+	err := installCertificates()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosProvisioning() (int, bool) {
+	err := addProvisioningProfiles()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosDeploySimulator() (int, bool) {
+	projectName := projectSettings["PROJECT_NAME"]
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	err := deployToSimulator(projectName, projectBundleIdentifier)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
 func IosBuild() (int, bool) {
 
 	status, next := iosPrepare()
@@ -35,44 +117,8 @@ func IosBuild() (int, bool) {
 	projectPath := projectName + projectExtension
 	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
 	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
-	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
 
 	err := compileForIOS(projectType, projectPath, projectScheme, projectDevice)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = deployToSimulator(projectName, projectBundleIdentifier)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = addProvisioningProfiles()
-	if err != nil {
-		utils.LogError(err.Error())
-	}
-
-	err = exportIPAForIOS(projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = createAppOniTunes()
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = uploadBuildToItunes()
 	if err != nil {
 		utils.LogError(err.Error())
 		return 1, true
