@@ -287,3 +287,9 @@ CreateAppOnItunes() {
 	PROJECT_NAME=$3
 	produce -u $1 -a $2 --app_name "$3"
 }
+
+UploadIPAoniTunes() {
+	DEVELOPER_ACCOUNT=$1
+	IPA_PATH=$2
+	pilot upload -u $1 -i "$2" pi--verbose
+}

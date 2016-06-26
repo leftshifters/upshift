@@ -72,6 +72,12 @@ func IosBuild() (int, bool) {
 		return 1, true
 	}
 
+	err = uploadBuildToItunes()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
 	return 0, false
 }
 
@@ -282,6 +288,43 @@ func installCertificates() error {
 	return nil
 }
 
+func uploadBuildToItunes() error {
+	utils.LogMessage("Upload the IPA on iTunesConnect")
+
+	// Get the username which will need to login
+	// Highest priority to local config
+	conf, _ := config.Get()
+	developerAccount := conf.IOS.DeveloperAccount
+
+	if developerAccount == "" {
+		// Second priority to machine config
+		developerAccounts, err := getDeveloperAccounts()
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		// If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+		if len(developerAccounts) > 1 {
+			return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+		}
+
+		if len(developerAccounts) == 1 {
+			developerAccount = developerAccounts[0]
+		}
+	}
+
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+	status, err := basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	fmt.Println("status", status)
+	if err != nil {
+		fmt.Println("err", err.Error())
+		return errors.New("We could not upload the IPA on iTunes")
+	}
+
+	fmt.Println("We have successfully uploaded this IPA on iTunes, it's all yours now")
+	return nil
+}
+
 func createAppOniTunes() error {
 	utils.LogMessage("Creat an app on iTunesConnect if it doesn't exist")
 
@@ -314,11 +357,9 @@ func createAppOniTunes() error {
 	// And add your shit to it
 	projectName := projectSettings["PROJECT_NAME"] + " Beta by Upshift"
 
-	status, err := basher.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
-	fmt.Println("status", status)
+	_, err := basher.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
 	if err != nil {
-		fmt.Println("err", err.Error())
-		return errors.New("We could not create the app on iTunes")
+		return errors.New("We could not create the app on iTunes\n" + err.Error())
 	}
 
 	fmt.Println("We have successfully added this app on iTunes, woohoo")
