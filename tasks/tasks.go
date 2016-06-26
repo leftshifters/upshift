@@ -118,6 +118,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupXcpretty"}}
 		case "setupExportPlist":
 			return taskList{actions: []string{"setupExportPlist"}}
+		case "setupProfiles":
+			return taskList{actions: []string{"setupProfiles"}}
 		case "upgradeScript":
 			return taskList{actions: []string{"upgradeScript"}}
 		case "upgradeAndroid":
@@ -175,6 +177,8 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupGradleW()
 	case "setupConfig":
 		return setup.SetupConfig()
+	case "setupProfiles":
+		return ios.SetupProfiles()
 	// case "setupScript":
 	// case "setupSsh":
 	case "setupExportPlist":

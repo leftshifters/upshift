@@ -97,6 +97,18 @@ ExportIOS() {
 	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/$1.ipa 2>&1 | tee "$2" | xcpretty
 }
 
+FetchAndRepairProvisioningProfiles() {
+	# this uses sigh
+	# download all into .private folder
+	# and then run the function PopulateProvisioningProfiles
+	ACCOUNT_EMAIL=$1
+	sigh repair -u $1
+	sigh download_all -u $1
+	mkdir -p ./.private
+	mv *.mobileprovision .private
+	PopulateProvisioningProfiles
+}
+
 PopulateProvisioningProfiles() {
 	# Get the UUID from .private
 	# https://gist.github.com/mxpr/8208289a63ca4e3a35a4

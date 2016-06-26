@@ -11,6 +11,7 @@ import (
 	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
+	g "upshift/global"
 	"upshift/utils"
 )
 
@@ -181,6 +182,34 @@ func SetupExportPlist() (int, bool) {
 	fmt.Println("We just added a sample file to .private/export.plist!")
 	return 0, false
 
+}
+
+//
+// Setup provisioning profiles
+// This will probably be run once in a while
+//
+func SetupProfiles() (int, bool) {
+	globalConf, _ := g.Get()
+
+	if globalConf.IOSDeveloperAccounts == "" {
+		utils.LogError("You need to define the emails of the developer account in the global config")
+		return 1, false
+	}
+
+	developerAccounts := strings.SplitN(globalConf.IOSDeveloperAccounts, ",", -1)
+	for _, email := range developerAccounts {
+		email = strings.TrimSpace(email)
+
+		if email != "" {
+			fmt.Println("Trying to repair your provisioning profiles and installing new and fixed ones for " + email)
+			_, err := basher.Run("FetchAndRepairProvisioningProfiles", []string{email})
+			if err != nil {
+				utils.LogError("We couldn't fix and install your provisioning profiles")
+				return 1, false
+			}
+		}
+	}
+	return 0, true
 }
 
 func addProvisioningProfiles() error {
