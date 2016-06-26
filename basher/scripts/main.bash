@@ -280,3 +280,10 @@ InstallCertificates() {
 	security import $1/distribution.p12 -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security -P ""
 	security import $1/distribution.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
 }
+
+CreateAppOnItunes() {
+	DEVELOPER_ACCOUNT=$1
+	BUNDLE_IDENTIFIER=$2
+	PROJECT_NAME=$3
+	produce -u $1 -a $2 --app_name "$3"
+}
