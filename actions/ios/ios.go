@@ -319,11 +319,15 @@ func exportIPAForIOS(projectName string) error {
 	exportPlistExists := utils.FileExists(exportPlistPath)
 
 	if exportPlistExists == false {
-		return errors.New("It looks like you dont have an exports.plist file in your .private folder.\nWe need that to sign an IPA.\nIf you're not sure how to get one,\njust run " + c.Red + "upshift setup export.plist" + c.Default + " and we'll set up a sample there")
+		// If export.plist doesn't exist, create it
+		status, next := SetupExportPlist()
+		if status != 0 || next == true {
+			return errors.New("We could not add an export.plist to your .private folder")
+		}
 	}
 
 	// Fire the export IPA bash script
-	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/")
+	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
 	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
 	if err != nil {
