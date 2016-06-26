@@ -26,7 +26,7 @@ func LogMessage(message string) {
 
 // Log Information, this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe should " + c.Underline + "know this" + c.Default)
+	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
 	fmt.Println(message)
 }
 
