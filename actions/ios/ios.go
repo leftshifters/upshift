@@ -189,14 +189,13 @@ func SetupExportPlist() (int, bool) {
 // This will probably be run once in a while
 //
 func SetupProfiles() (int, bool) {
-	globalConf, _ := g.Get()
 
-	if globalConf.IOSDeveloperAccounts == "" {
-		utils.LogError("You need to define the emails of the developer account in the global config")
+	developerAccounts, err := getDeveloperAccounts()
+	if err != nil {
+		utils.LogError(err.Error())
 		return 1, false
 	}
 
-	developerAccounts := strings.SplitN(globalConf.IOSDeveloperAccounts, ",", -1)
 	for _, email := range developerAccounts {
 		email = strings.TrimSpace(email)
 
@@ -210,6 +209,20 @@ func SetupProfiles() (int, bool) {
 		}
 	}
 	return 0, true
+}
+
+func getDeveloperAccounts() ([]string, error) {
+
+	var developerAccounts []string
+
+	globalConf, _ := g.Get()
+
+	if globalConf.IOSDeveloperAccounts == "" {
+		return developerAccounts, errors.New("You should define the emails of the developer account in the global config")
+	}
+
+	developerAccounts = strings.SplitN(globalConf.IOSDeveloperAccounts, ",", -1)
+	return developerAccounts, nil
 }
 
 func installCertificates() error {
