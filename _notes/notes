@@ -74,3 +74,158 @@ sudo docker run --detach \
     --volume /srv/gitlab/logs:/var/log/gitlab \
     --volume /srv/gitlab/data:/var/opt/gitlab \
     gitlab/gitlab-ce:latest
+
+
+
+
+
+
+
+[10:31:20]: To not be asked about this value, you can specify it using 'username'
+Your Apple ID Username: ci@leftshift.io
+[10:31:31]: Starting login with user 'ci@leftshift.io'
+[10:31:37]: Successfully logged in
+[10:31:41]: There are no local code signing identities found. You can run `security find-identity -v -p codesigning` to get this output. This Stack Overflow thread has more information: http://stackoverflow.com/q/35390072/774. (Check in Keychain Access for an expired WWDR certificate: http://stackoverflow.com/a/35409835/774 has more info.)
+[10:31:41]: Certificate 6298MMM9PJ (Leftshift Technologies Pvt Ltd) can't be found on your local computer
+[10:31:42]: There are no local code signing identities found. You can run `security find-identity -v -p codesigning` to get this output. This Stack Overflow thread has more information: http://stackoverflow.com/q/35390072/774. (Check in Keychain Access for an expired WWDR certificate: http://stackoverflow.com/a/35409835/774 has more info.)
+[10:31:42]: Certificate NQUPQX936H (Leftshift Technologies Pvt Ltd) can't be found on your local computer
+[10:31:42]: Couldn't find an existing certificate... creating a new one
+[10:31:46]: $ security import /Users/sudhanshuraheja/Code/seqhack-ios/SequoiaHack/9ZYYC4F8H2.p12 -k '/Users/sudhanshuraheja/Library/Keychains/login.keychain' -T /usr/bin/codesign -T /usr/bin/security
+[10:31:46]: ▸ 1 key imported.
+[10:31:46]: $ security import /Users/sudhanshuraheja/Code/seqhack-ios/SequoiaHack/9ZYYC4F8H2.cer -k '/Users/sudhanshuraheja/Library/Keychains/login.keychain' -T /usr/bin/codesign -T /usr/bin/security
+[10:31:46]: ▸ 1 certificate imported.
+[10:31:46]: Successfully generated 9ZYYC4F8H2 which was imported to the local machine.
+[10:31:46]: Verifying the certificated is properly installed locally...
+[10:31:46]: Successfully installed certificate 9ZYYC4F8H2
+
+
+
+
+cert -u ci@leftshift.io
+->
+
++---------------+---------------------------------------------------------+
+|                         Summary for cert 1.4.1                          |
++---------------+---------------------------------------------------------+
+| username      | ci@leftshift.io                                         |
+| development   | false                                                   |
+| force         | false                                                   |
+| keychain_path | /Users/sudhanshuraheja/Library/Keychains/login.keychain |
++---------------+---------------------------------------------------------+
+
+[13:43:25]: Starting login with user 'ci@leftshift.io'
+[13:43:31]: Successfully logged in
+[13:43:34]: Found the certificate 6298MMM9PJ (Leftshift Technologies Pvt Ltd) which is installed on the local machine. Using this one.
+[13:43:34]: Verifying the certificated is properly installed locally...
+[13:43:34]: Successfully installed certificate 6298MMM9PJ
+
+security import .private/apple.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign
+-> security: SecKeychainItemImport: The specified item already exists in the keychain.
+
+security import .private/distribution.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign
+-> 1 certificate imported.
+
+security import .private/distribution.p12 -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign
+-> 2 identities imported.
+
+cert -u ci@leftshift.io
+->
+
++---------------+---------------------------------------------------------+
+|                         Summary for cert 1.4.1                          |
++---------------+---------------------------------------------------------+
+| username      | ci@leftshift.io                                         |
+| development   | false                                                   |
+| force         | false                                                   |
+| keychain_path | /Users/sudhanshuraheja/Library/Keychains/login.keychain |
++---------------+---------------------------------------------------------+
+
+[13:43:25]: Starting login with user 'ci@leftshift.io'
+[13:43:31]: Successfully logged in
+[13:43:34]: Found the certificate 6298MMM9PJ (Leftshift Technologies Pvt Ltd) which is installed on the local machine. Using this one.
+[13:43:34]: Verifying the certificated is properly installed locally...
+[13:43:34]: Successfully installed certificate 6298MMM9PJ
+
+
+Moving .private/seqhack-adhoc.mobileprovision [67dc79e9-6d2d-4db5-8636-9e40c89698db] to Library
+
+
+sigh -u ci@leftshift.io -a com.leftshift.SequoiaHack --adhoc
+
++-------------------------------------+---------------------------+
+|                     Summary for sigh 1.8.0                      |
++-------------------------------------+---------------------------+
+| username                            | ci@leftshift.io           |
+| app_identifier                      | com.leftshift.SequoiaHack |
+| adhoc                               | true                      |
+| skip_install                        | false                     |
+| development                         | false                     |
+| force                               | false                     |
+| ignore_profiles_with_different_name | false                     |
+| skip_fetch_profiles                 | false                     |
+| skip_certificate_verification       | false                     |
++-------------------------------------+---------------------------+
+
+[14:45:47]: Starting login with user 'ci@leftshift.io'
+[14:45:51]: Successfully logged in
+[14:45:51]: Fetching profiles...
+[14:46:12]: Found 1 matching profile(s)
+[14:46:12]: Downloading provisioning profile...
+[14:46:13]: Successfully downloaded provisioning profile...
+[14:46:13]: Installing provisioning profile...
+/Users/sudhanshuraheja/Code/seqhack-ios/SequoiaHack/AdHoc_com.leftshift.SequoiaHack.mobileprovision
+
+
+produce -u ci@leftshift.io -a com.leftshift.SequoiaHack --app_name SequoiaHackBeta
+
++----------------+---------------------------+
+|         Summary for produce 1.1.2          |
++----------------+---------------------------+
+| username       | ci@leftshift.io           |
+| app_identifier | com.leftshift.SequoiaHack |
+| app_name       | SequoiaHackBeta           |
+| sku            | 1466932803                |
+| language       | English                   |
+| skip_itc       | false                     |
+| skip_devcenter | false                     |
++----------------+---------------------------+
+
+[14:50:10]: [DevCenter] App 'com.leftshift.SequoiaHack' already exists, nothing to do on the Dev Center
+[14:50:16]: Creating new app 'SequoiaHackBeta' on iTunes Connect
+[14:50:19]: Successfully created new app 'SequoiaHackBeta' on iTunes Connect with ID 1128190716
+1128190716
+
+produce -u ci@leftshift.io -a com.leftshift.SequoiaHack --app_name SequoiaHackBeta
+
++----------------+---------------------------+
+|         Summary for produce 1.1.2          |
++----------------+---------------------------+
+| username       | ci@leftshift.io           |
+| app_identifier | com.leftshift.SequoiaHack |
+| app_name       | SequoiaHackBeta           |
+| sku            | 1466932863                |
+| language       | English                   |
+| skip_itc       | false                     |
+| skip_devcenter | false                     |
++----------------+---------------------------+
+
+[14:51:10]: [DevCenter] App 'com.leftshift.SequoiaHack' already exists, nothing to do on the Dev Center
+[14:51:16]: [iTC] App 'com.leftshift.SequoiaHack' already exists (1128190716), nothing to do on iTunes Connect
+1128190716
+
+
+pilot upload -u ci@leftshift.io -i .upshift/SequoiaHack.ipa/SequoiaHack.ipa -w "Heres what happened"
+[14:57:44]: Login to iTunes Connect (ci@leftshift.io)
+[14:57:50]: Login successful
+[14:57:51]: Ready to upload new build to TestFlight (App: 1128190716)...
+[14:57:52]: Going to upload updated app to iTunes Connect
+[14:57:52]: This might take a few minutes, please don't interrupt the script
+[15:05:23]: [Transporter Error Output]: ERROR ITMS-90022: "Missing required icon file. The bundle does not contain an app icon for iPhone / iPod Touch of exactly '120x120' pixels, in .png format for iOS versions >= 7.0."
+[15:05:24]: Transporter transfer failed.
+[15:05:24]:
+[15:05:24]: ERROR ITMS-90022: "Missing required icon file. The bundle does not contain an app icon for iPhone / iPod Touch of exactly '120x120' pixels, in .png format for iOS versions >= 7.0."
+[15:05:24]: ERROR ITMS-90022: "Missing required icon file. The bundle does not contain an app icon for iPhone / iPod Touch of exactly '120x120' pixels, in .png format for iOS versions >= 7.0."
+Return status of iTunes Transporter was 1: ERROR ITMS-90022: "Missing required icon file. The bundle does not contain an app icon for iPhone / iPod Touch of exactly '120x120' pixels, in .png format for iOS versions >= 7.0."
+The call to the iTMSTransporter completed with a non-zero exit status: 1. This indicates a failure.
+
+[!] Error uploading ipa file, for more information see above
