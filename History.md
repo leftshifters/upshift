@@ -1,4 +1,33 @@
 
+0.8.2 / 2016-06-26
+==================
+
+  * Split build functions into separate actions
+  * Added the final action to upload IPA to iTunesConnect
+  * Created a new action to create the app on iTunes connect if it doesn't exist there
+  * If the export.plist file is missing, set it up
+  * We now fetch provisioning profiles via sigh
+  * Get developer accounts from machine config is now a common function
+  * Finished the flow to install certificates from either .private or a path defined in the global upshift config.
+  * Found out how to upload a binary to test flight for iOS
+  * Added file upshift to gitignore
+  * Changed sigh setup to fast lane setup
+  * Changed path of IPA creation in the bash script
+  * Changed path of IPA creation on iOS
+  * Fixed issue with wrong command in suggestions to the user
+  * Distinguish this message from the bunch in iOS build
+  * Moved script to notes
+  * Created SetupProfiles to download and install all profiles from a developer account
+  * Added iosDeveloperAccounts to globalConfig
+  * Fixed code to copy provisioning profiles correctly
+  * Fixed issue with global config. We are now saving data to config file instead of config.toml
+  * Fixed copy for config message
+  * Install sigh if it is not installed
+  * preparing for build, test and deploy is now a common step [0]
+  * For iOS, check both the debug and release modes because any of them could be built [5m0s]
+  * Merge branch 'go'
+  * Bumped up version number to 0.8.2
+
 0.8.2 / 2016-06-25
 ==================
 
