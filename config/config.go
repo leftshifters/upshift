@@ -36,11 +36,12 @@ type BuildConfig struct {
 }
 
 type IOSConfig struct {
-	ProjectName  string
-	UseWorkspace bool
-	Scheme       string
-	TestDevice   string
-	Xcode        string
+	ProjectName      string
+	UseWorkspace     bool
+	Scheme           string
+	TestDevice       string
+	Xcode            string
+	DeveloperAccount string
 }
 
 type AndroidConfig struct {

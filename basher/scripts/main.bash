@@ -1,6 +1,7 @@
 MakeFolders() {
 	mkdir -p .upshift/logs/
 	mkdir -p .upshift/build/
+	mkdir -p .private
 }
 
 UpgradeScript() {
@@ -94,7 +95,25 @@ ExportIOS() {
 	PROJECT_NAME=$1
 	LOG_PATH=$2
 	MakeFolders
-	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/$1.ipa 2>&1 | tee "$2" | xcpretty
+	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/ 2>&1 | tee "$2" | xcpretty
+}
+
+FetchAndRepairProvisioningProfiles() {
+	# this uses sigh
+	# download all into .private folder
+	# and then run the function PopulateProvisioningProfiles
+	ACCOUNT_EMAIL=$1
+	sigh repair -u $1
+	sigh download_all -u $1
+	mkdir -p ./.private
+	mv *.mobileprovision .private
+	PopulateProvisioningProfiles
+}
+
+FindProvisioningProfile() {
+	DEVELOPER_ACCOUNT=$1
+	BUNDLE_IDENTIFIER=$2
+	sigh -u $1 -a $2 --adhoc
 }
 
 PopulateProvisioningProfiles() {
@@ -110,9 +129,14 @@ PopulateProvisioningProfiles() {
 
 			# If a UUID exist, then copy it, if it hasn't already been copied
 			if [ "${uuid}" != "" ]; then
-				# Copy file to UUID folder
-				`cp -f ${profileName} ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision`
-				printf "Transporting file ${uuid}.mobileprovision from .private to Library\n"
+				if [ -f ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision ]; then
+					# Silently ignore
+					printf "${profileName} exists in the Library\n"
+				else
+					# Copy file to UUID folder
+					cp -f "${profileName}" ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision
+					printf "Moving ${profileName} [${uuid}] to Library\n"
+				fi
 				foundProfiles=true
 			fi
 		done
@@ -248,5 +272,25 @@ AndroidInstallSDK() {
 
 UpshiftConfig() {
 	mkdir -p ~/.upshift
-	touch ~/.upshift/config.toml
+	touch ~/.upshift/config
+}
+
+InstallCertificates() {
+	BASE_PATH=$1
+	security import $1/apple.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
+	security import $1/distribution.p12 -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security -P ""
+	security import $1/distribution.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
+}
+
+CreateAppOnItunes() {
+	DEVELOPER_ACCOUNT=$1
+	BUNDLE_IDENTIFIER=$2
+	PROJECT_NAME=$3
+	produce -u $1 -a $2 --app_name "$3"
+}
+
+UploadIPAoniTunes() {
+	DEVELOPER_ACCOUNT=$1
+	IPA_PATH=$2
+	pilot upload -u $1 -i "$2" pi--verbose
 }

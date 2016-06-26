@@ -11,7 +11,7 @@ import (
 
 // Get the App Version
 func GetAppVersion() string {
-	return "0.8.2"
+	return "0.8.3"
 }
 
 // Get the default Xcode version
@@ -26,7 +26,7 @@ func LogMessage(message string) {
 
 // Log Information, this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe should " + c.Underline + "know this" + c.Default)
+	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
 	fmt.Println(message)
 }
 

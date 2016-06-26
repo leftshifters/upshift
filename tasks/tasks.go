@@ -63,9 +63,9 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosBuild", "iosDeploySimulator", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosSimulator", "iosRun"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosSimulator", "iosRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
 		default:
@@ -110,12 +110,16 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupGradleW"}}
 		case "setupPods":
 			return taskList{actions: []string{"setupPods"}}
+		case "setupFastlane":
+			return taskList{actions: []string{"setupFastlane"}}
 		case "setupXcode":
 			return taskList{actions: []string{"setupXcode"}}
 		case "setupXcpretty":
 			return taskList{actions: []string{"setupXcpretty"}}
 		case "setupExportPlist":
 			return taskList{actions: []string{"setupExportPlist"}}
+		case "setupProfiles":
+			return taskList{actions: []string{"setupProfiles"}}
 		case "upgradeScript":
 			return taskList{actions: []string{"upgradeScript"}}
 		case "upgradeAndroid":
@@ -134,6 +138,20 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"androidEmulator"}}
 		case "iosBuild":
 			return taskList{actions: []string{"iosBuild"}}
+		case "iosDeploySimulator":
+			return taskList{actions: []string{"iosDeploySimulator"}}
+		case "iosProvisioning":
+			return taskList{actions: []string{"iosProvisioning"}}
+		case "iosCertificates":
+			return taskList{actions: []string{"iosCertificates"}}
+		case "iosArchive":
+			return taskList{actions: []string{"iosArchive"}}
+		case "iosExportIPA":
+			return taskList{actions: []string{"iosExportIPA"}}
+		case "iosCreateApp":
+			return taskList{actions: []string{"iosCreateApp"}}
+		case "iosUploadBuild":
+			return taskList{actions: []string{"iosUploadBuild"}}
 		case "androidBuild":
 			return taskList{actions: []string{"androidBuild"}}
 		case "iosRun":
@@ -167,10 +185,14 @@ func loadTask(task string) (int, bool) {
 		return setup.SetupXcpretty()
 	case "setupPods":
 		return setup.SetupPods(false)
+	case "setupFastlane":
+		return setup.SetupFastlane(false)
 	case "setupGradleW":
 		return setup.SetupGradleW()
 	case "setupConfig":
 		return setup.SetupConfig()
+	case "setupProfiles":
+		return ios.SetupProfiles()
 	// case "setupScript":
 	// case "setupSsh":
 	case "setupExportPlist":
@@ -186,6 +208,20 @@ func loadTask(task string) (int, bool) {
 		return setup.InstallPods()
 	case "iosBuild":
 		return ios.IosBuild()
+	case "iosDeploySimulator":
+		return ios.IosDeploySimulator()
+	case "iosProvisioning":
+		return ios.IosProvisioning()
+	case "iosCertificates":
+		return ios.IosCertificates()
+	case "iosArchive":
+		return ios.IosArchive()
+	case "iosExportIPA":
+		return ios.IosExportIPA()
+	case "iosCreateApp":
+		return ios.IosCreateApp()
+	case "iosUploadBuild":
+		return ios.IosUploadBuild()
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":

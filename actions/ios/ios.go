@@ -11,6 +11,7 @@ import (
 	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
+	g "upshift/global"
 	"upshift/utils"
 )
 
@@ -20,7 +21,113 @@ func init() {
 
 }
 
+func IosUploadBuild() (int, bool) {
+	err := uploadBuildToItunes()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosCreateApp() (int, bool) {
+	err := createAppOniTunes()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosExportIPA() (int, bool) {
+	// Try the build now
+	projectName := projectSettings["PROJECT_NAME"]
+
+	err := exportIPAForIOS(projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosArchive() (int, bool) {
+	projectType := projectSettings["UP_PROJECT_TYPE"]
+	projectName := projectSettings["PROJECT_NAME"]
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	projectPath := projectName + projectExtension
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+
+	err := archiveForIOS(projectType, projectPath, projectScheme, projectName)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosCertificates() (int, bool) {
+	err := installCertificates()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosProvisioning() (int, bool) {
+	err := addProvisioningProfiles()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func IosDeploySimulator() (int, bool) {
+	projectName := projectSettings["PROJECT_NAME"]
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	err := deployToSimulator(projectName, projectBundleIdentifier)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
 func IosBuild() (int, bool) {
+
+	status, next := iosPrepare()
+	if status > 0 {
+		return status, next
+	}
+
+	// Try the build now
+	projectType := projectSettings["UP_PROJECT_TYPE"]
+	projectName := projectSettings["PROJECT_NAME"]
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	projectPath := projectName + projectExtension
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+
+	err := compileForIOS(projectType, projectPath, projectScheme, projectDevice)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
+	}
+
+	return 0, false
+}
+
+func iosPrepare() (int, bool) {
 	fmt.Println("We will now try and load your xcode settings")
 	err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
 	if err != nil {
@@ -59,52 +166,25 @@ func IosBuild() (int, bool) {
 		return 1, false
 	}
 
-	// Try the build now
-	projectType := projectSettings["UP_PROJECT_TYPE"]
-	projectName := projectSettings["PROJECT_NAME"]
-	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
-	projectPath := projectName + projectExtension
-	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
-	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
-	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
-
-	err = compileForIOS(projectType, projectPath, projectScheme, projectDevice)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = deployToSimulator(projectName, projectBundleIdentifier)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = archiveForIOS(projectType, projectPath, projectScheme, projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	err = addProvisioningProfiles()
-	if err != nil {
-		utils.LogError(err.Error())
-	}
-
-	err = exportIPAForIOS(projectName)
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1, true
-	}
-
-	return 0, false
+	return 0, true
 }
 
 func deployToSimulator(projectName string, projectBundleIdentifier string) error {
-	builtFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
-	fileExits := utils.FileExists(builtFile)
+	builtFile := ""
+	debugFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
+	releaseFile, _ := filepath.Abs(".upshift/build/Build/Products/Release-iphonesimulator/" + projectName + ".app")
+	fileExits := utils.FileExists(debugFile)
 	if fileExits == false {
-		return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+		fileExits = utils.FileExists(releaseFile)
+		if fileExits == false {
+			return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+		} else {
+			// we found the release file
+			builtFile = releaseFile
+		}
+	} else {
+		// we found the debug file
+		builtFile = debugFile
 	}
 
 	// If file exists, push it to the simulator
@@ -162,15 +242,209 @@ func SetupExportPlist() (int, bool) {
 
 }
 
-func addProvisioningProfiles() error {
-	fmt.Println("Trying to move your provisioning profiles to the system")
-	status, err := basher.Run("PopulateProvisioningProfiles", []string{})
+//
+// Setup provisioning profiles
+// This will probably be run once in a while
+//
+func SetupProfiles() (int, bool) {
+
+	developerAccounts, err := getDeveloperAccounts()
 	if err != nil {
-		return errors.New("We couldn't add your provisioning profiles")
+		utils.LogError(err.Error())
+		return 1, false
 	}
-	if status == 1 {
-		return errors.New("Something went wrong. We couldn't add your provisioning profiles")
+
+	for _, email := range developerAccounts {
+		email = strings.TrimSpace(email)
+
+		if email != "" {
+			fmt.Println("Trying to repair your provisioning profiles and installing new and fixed ones for " + email)
+			_, err := basher.Run("FetchAndRepairProvisioningProfiles", []string{email})
+			if err != nil {
+				utils.LogError("We couldn't fix and install your provisioning profiles")
+				return 1, false
+			}
+		}
 	}
+	return 0, true
+}
+
+func getDeveloperAccounts() ([]string, error) {
+
+	var developerAccounts []string
+
+	globalConf, _ := g.Get()
+
+	if globalConf.IOSDeveloperAccounts == "" {
+		return developerAccounts, errors.New("You should define the emails of the developer account in the global config")
+	}
+
+	developerAccounts = strings.SplitN(globalConf.IOSDeveloperAccounts, ",", -1)
+	return developerAccounts, nil
+}
+
+func installCertificates() error {
+	utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
+
+	basePath, _ := filepath.Abs(".private")
+
+	// First check if the certificates are added to .private folder
+	appleCer, _ := filepath.Abs(".private/apple.cer")
+	distributionCer, _ := filepath.Abs(".private/distribution.cer")
+	distributionP12, _ := filepath.Abs(".private/distribution.p12")
+
+	// If they exist, install them
+	appleCerExists := utils.FileExists(appleCer)
+	distributionCerExists := utils.FileExists(distributionCer)
+	distributionP12Exists := utils.FileExists(distributionP12)
+
+	if !(appleCerExists && distributionCerExists && distributionP12Exists) {
+		// If they don't exist, check global config to see if they have them
+		globalConf, _ := g.Get()
+		globalBasePath := globalConf.IOSCertificatePath
+
+		if globalBasePath == "" {
+			return errors.New("The certificates don't exist in both .private and global conf")
+		}
+
+		basePath = globalBasePath
+
+		appleCer, _ = filepath.Abs(globalBasePath + "/apple.cer")
+		distributionCer, _ = filepath.Abs(globalBasePath + "/distribution.cer")
+		distributionP12, _ = filepath.Abs(globalBasePath + "/distribution.p12")
+
+		// If they exist, install them
+		appleCerExists = utils.FileExists(appleCer)
+		distributionCerExists = utils.FileExists(distributionCer)
+		distributionP12Exists = utils.FileExists(distributionP12)
+
+		if !(appleCerExists && distributionCerExists && distributionP12Exists) {
+			return errors.New("All the certificates don't exist in both .private and global conf")
+		}
+		// If they don't, crash and burn
+	}
+
+	basher.Run("InstallCertificates", []string{basePath})
+	// #TODO Ignore the error here. Even if it says that certificates are already installed, it gets treated like an error
+	// if err != nil {
+	// 	return errors.New("The certicates could not be installed!")
+	// }
+
+	fmt.Println("The certificates were successfully installed")
+	return nil
+}
+
+func uploadBuildToItunes() error {
+	utils.LogMessage("Upload the IPA on iTunesConnect")
+
+	// Get the username which will need to login
+	// Highest priority to local config
+	conf, _ := config.Get()
+	developerAccount := conf.IOS.DeveloperAccount
+
+	if developerAccount == "" {
+		// Second priority to machine config
+		developerAccounts, err := getDeveloperAccounts()
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		// If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+		if len(developerAccounts) > 1 {
+			return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+		}
+
+		if len(developerAccounts) == 1 {
+			developerAccount = developerAccounts[0]
+		}
+	}
+
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+	status, err := basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	fmt.Println("status", status)
+	if err != nil {
+		fmt.Println("err", err.Error())
+		return errors.New("We could not upload the IPA on iTunes")
+	}
+
+	fmt.Println("We have successfully uploaded this IPA on iTunes, it's all yours now")
+	return nil
+}
+
+func createAppOniTunes() error {
+	utils.LogMessage("Creat an app on iTunesConnect if it doesn't exist")
+
+	// Get the username which will need to login
+	// Highest priority to local config
+	conf, _ := config.Get()
+	developerAccount := conf.IOS.DeveloperAccount
+
+	if developerAccount == "" {
+		// Second priority to machine config
+		developerAccounts, err := getDeveloperAccounts()
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		// If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+		if len(developerAccounts) > 1 {
+			return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+		}
+
+		if len(developerAccounts) == 1 {
+			developerAccount = developerAccounts[0]
+		}
+	}
+
+	// Get the bundle identifier for this project
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	// Get the name of the project
+	// And add your shit to it
+	projectName := projectSettings["PROJECT_NAME"] + " Beta by Upshift"
+
+	_, err := basher.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
+	if err != nil {
+		return errors.New("We could not create the app on iTunes\n" + err.Error())
+	}
+
+	fmt.Println("We have successfully added this app on iTunes, woohoo")
+	return nil
+}
+
+func addProvisioningProfiles() error {
+	utils.LogMessage("We will now try to find the provisioning profile")
+
+	// Get the username which will need to login
+	// Highest priority to local config
+	conf, _ := config.Get()
+	developerAccount := conf.IOS.DeveloperAccount
+
+	if developerAccount == "" {
+		// Second priority to machine config
+		developerAccounts, err := getDeveloperAccounts()
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		// If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+		if len(developerAccounts) > 1 {
+			return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+		}
+
+		if len(developerAccounts) == 1 {
+			developerAccount = developerAccounts[0]
+		}
+	}
+
+	// Get the bundle identifier for this project
+	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+	_, err := basher.Run("FindProvisioningProfile", []string{developerAccount, projectBundleIdentifier})
+	if err != nil {
+		return errors.New("We could not find your provisioning profile")
+	}
+
 	fmt.Println("We have successfully added your profiles to this machine, woohoo")
 	return nil
 }
@@ -181,11 +455,15 @@ func exportIPAForIOS(projectName string) error {
 	exportPlistExists := utils.FileExists(exportPlistPath)
 
 	if exportPlistExists == false {
-		return errors.New("It looks like you dont have an exports.plist file in your .private folder.\nWe need that to sign an IPA.\nIf you're not sure how to get one,\njust run " + c.Red + "upshift setup exportPlist" + c.Default + " and we'll set up a sample there")
+		// If export.plist doesn't exist, create it
+		status, next := SetupExportPlist()
+		if status != 0 || next == true {
+			return errors.New("We could not add an export.plist to your .private folder")
+		}
 	}
 
 	// Fire the export IPA bash script
-	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift/" + projectName + ".ipa")
+	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
 	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
 	if err != nil {

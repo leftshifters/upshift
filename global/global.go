@@ -18,6 +18,8 @@ var conf Config
 type Config struct {
 	// Save when was android sdk last updated
 	AndroidSDKUpdatedTime int32
+	IOSDeveloperAccounts  string
+	IOSCertificatePath    string
 }
 
 // conf.AndroidSDKUpdated = int32(time.Now().Unix())
@@ -29,6 +31,7 @@ func Get() (Config, error) {
 
 	// See if a TOML file is available in this folder
 	filePath := os.Getenv("HOME") + "/.upshift/config"
+	fmt.Println("Reading the global config file at " + filePath)
 	tomlBytes, err := utils.ReadIfFileExists(filePath)
 	if err != nil {
 		fmt.Println("The global config seems empty, this machine isn't used much it seems")

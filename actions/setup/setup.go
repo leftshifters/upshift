@@ -366,6 +366,13 @@ func ShowHelp() (int, bool) {
 }
 
 //
+// If fastlane.tools if is not setup, we go ahead and do it
+//
+func SetupFastlane(force bool) (int, bool) {
+	return SetupGem("fastlane", "fastlane", force)
+}
+
+//
 // If cocoapods is not setup, we go ahead and do it
 //
 func SetupPods(force bool) (int, bool) {
@@ -389,7 +396,11 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 	version, err := command.RunWithoutStdout([]string{gemName, "--version"}, "")
 	if force == false {
 		if err == nil {
-			fmt.Println(gem + " is pretty much setup on this system. You are on version " + strings.TrimSpace(version))
+			// Remove the name of the gem if it is part of the version string
+			version = strings.Replace(version, gemName, "", 1)
+			// Now trim whatever is left
+			version = strings.TrimSpace(version)
+			fmt.Println(gem + " is pretty much setup on this system. You are on version " + version)
 			return 0, false
 		}
 	}
@@ -500,6 +511,7 @@ UseWorkspace = false
 Scheme = "testScheme"
 TestDevice = "iPhone 6"
 Xcode = "7.3.1"
+DeveloperAccount = ""
 
 [Android]
 PackageName = "testPackage"
