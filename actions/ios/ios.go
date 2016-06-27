@@ -360,10 +360,18 @@ func uploadBuildToItunes() error {
 	}
 
 	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
-	status, err := basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	projectName := projectSettings["PROJECT_NAME"]
+
+	// Add SwitSources if required - AddSwiftSources
+	status, err := basher.Run("AddSwiftSources", []string{projectName, projectScheme})
 	fmt.Println("status", status)
 	if err != nil {
 		fmt.Println("err", err.Error())
+		return errors.New("We could not add SwiftSources to the IPA")
+	}
+
+	status, err = basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	if err != nil {
 		return errors.New("We could not upload the IPA on iTunes")
 	}
 

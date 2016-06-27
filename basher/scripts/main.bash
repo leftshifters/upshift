@@ -294,3 +294,20 @@ UploadIPAoniTunes() {
 	IPA_PATH=$2
 	pilot upload -u $1 -i "$2" pi--verbose
 }
+
+AddSwiftSources() {
+	ARCHIVE_NAME=$1
+	IPA_NAME=$1
+	printf "$1\n"
+	printf "$2\n"
+	if [ -d ".upshift/$1.xcarchive/SwiftSupport/" ]; then
+		printf "Adding SwiftSources to the IPA"
+		unzip -q .upshift/$2.ipa -d .upshift/tmp
+		rm .upshift/$2.ipa
+		cp -rf .upshift/$1.xcarchive/SwiftSupport .upshift/tmp/SwiftSupport
+		cd .upshift/tmp
+		zip -q -r ../../.upshift/$2.ipa .
+		cd ../..
+		rm -rf .upshift/tmp
+	fi
+}
