@@ -113,7 +113,7 @@ FetchAndRepairProvisioningProfiles() {
 FindProvisioningProfile() {
 	DEVELOPER_ACCOUNT=$1
 	BUNDLE_IDENTIFIER=$2
-	sigh -u $1 -a $2 --adhoc
+	sigh -u $1 -a $2
 }
 
 PopulateProvisioningProfiles() {
@@ -292,5 +292,43 @@ CreateAppOnItunes() {
 UploadIPAoniTunes() {
 	DEVELOPER_ACCOUNT=$1
 	IPA_PATH=$2
-	pilot upload -u $1 -i "$2" pi--verbose
+	pilot upload --username $1 --ipa "$2" --skip_waiting_for_build_processing true --verbose 
+}
+
+AddSwiftSources() {
+	ARCHIVE_NAME=$1
+	IPA_NAME=$1
+	if [ -d ".upshift/$1.xcarchive/SwiftSupport/" ]; then
+		printf "Adding SwiftSources to the IPA for $1\n"
+		unzip -q .upshift/$2.ipa -d .upshift/tmp
+		rm .upshift/$2.ipa
+		mkdir -r .upshift/tmp/SwiftSupport/iphoneos
+		cp -rf .upshift/$1.xcarchive/SwiftSupport/iphoneos/*.dylib .upshift/tmp/SwiftSupport/iphoneos/*.dylib
+		cd .upshift/tmp
+		zip -r ../$2.ipa .
+		cd ../..
+		rm -rf .upshift/tmp
+	fi
+}
+
+IOSIncrementBuildNumber() {
+	PROJECT_NAME=$1
+
+	commitCount=$(git rev-list --all --count)
+	currentBuildNumber=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $1/Info.plist)
+
+	newBuildNumber=""
+	if [ "$commitCount" -gt "$currentBuildNumber" ]; then
+		newBuildNumber=$commitCount
+	else
+		newBuildNumber=$(($currentBuildNumber+1))
+	fi
+
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $newBuildNumber" "$1/Info.plist"
+
+	# Add ITSAppUsesNonExemptEncryption as false if it isn't set
+	answerToEncryption=$(/usr/libexec/PlistBuddy -c "Print ITSAppUsesNonExemptEncryption" "$1/Info.plist")
+	if [[ $answerToEncryption == *"Does Not Exist"* ]]; then
+		/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$1/Info.plist"
+	fi
 }

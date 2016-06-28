@@ -166,7 +166,23 @@ func iosPrepare() (int, bool) {
 		return 1, false
 	}
 
+	// Increment the build number
+	err = incrementBuildNumber()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, false
+	}
+
 	return 0, true
+}
+
+func incrementBuildNumber() error {
+	projectName := projectSettings["PROJECT_NAME"]
+	_, err := basher.Run("IOSIncrementBuildNumber", []string{projectName})
+	if err != nil {
+		return errors.New("We couldn't incremenet the build number")
+	}
+	return nil
 }
 
 func deployToSimulator(projectName string, projectBundleIdentifier string) error {
@@ -360,10 +376,18 @@ func uploadBuildToItunes() error {
 	}
 
 	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
-	status, err := basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	projectName := projectSettings["PROJECT_NAME"]
+
+	// Add SwitSources if required - AddSwiftSources
+	status, err := basher.Run("AddSwiftSources", []string{projectName, projectScheme})
 	fmt.Println("status", status)
 	if err != nil {
 		fmt.Println("err", err.Error())
+		return errors.New("We could not add SwiftSources to the IPA")
+	}
+
+	status, err = basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	if err != nil {
 		return errors.New("We could not upload the IPA on iTunes")
 	}
 
@@ -372,7 +396,7 @@ func uploadBuildToItunes() error {
 }
 
 func createAppOniTunes() error {
-	utils.LogMessage("Creat an app on iTunesConnect if it doesn't exist")
+	utils.LogMessage("Create an app on iTunesConnect if it doesn't exist")
 
 	// Get the username which will need to login
 	// Highest priority to local config

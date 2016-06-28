@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # 7. Application Version
-version="0.8.3"
+version="0.8.4"
 
 # Check which OS are we on and download the appropriate binary
 OS=$(uname)
@@ -38,6 +38,7 @@ if [ ! -f "/usr/local/upshift/${version}/upshift" ]; then
 
   sudo ln -s /usr/local/upshift/${version}/upshift /usr/local/bin
   sudo chmod +x /usr/local/bin/upshift
+  rm upshift
 
   printf "Installation has been ${greenColour}successfully${noColour} completed\n"
 else
