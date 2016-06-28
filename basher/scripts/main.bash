@@ -311,3 +311,8 @@ AddSwiftSources() {
 		rm -rf .upshift/tmp
 	fi
 }
+
+IOSIncrementBuildNumber() {
+	PROJECT_NAME=$1
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(git rev-list --all --count)" "$1/Info.plist"
+}
