@@ -1,5 +1,18 @@
 
-0.8.2 / 2016-06-26
+0.8.4 / 2016-06-28
+==================
+
+  * Ensuring that upshift file is deleted after install
+  * Moved from adhoc to appstore provisioning for upload
+  * Upload skips waiting for processing
+  * fixed issues with making IPA by copying swift sources
+  * add NonExemptEncryption by default
+  * Increment build number via git commits
+  * Added a way to add swift sources when you upload an IPA
+  * Merge branch 'master' into go
+  * Merge branch 'release/0.8.3' into go
+
+0.8.3 / 2016-06-26
 ==================
 
   * Split build functions into separate actions
