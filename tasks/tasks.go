@@ -65,7 +65,7 @@ func findTask(job string, action string) taskList {
 		case "build":
 			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosBuild"}}
 		case "test":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosTest"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXctool", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosTest"}}
 		case "run":
 			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosPrepare", "iosBuild", "iosDeploySimulator"}}
 		case "deploy":
@@ -118,6 +118,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"setupXcode"}}
 		case "setupXcpretty":
 			return taskList{actions: []string{"setupXcpretty"}}
+		case "setupXctool":
+			return taskList{actions: []string{"setupXctool"}}
 		case "setupExportPlist":
 			return taskList{actions: []string{"setupExportPlist"}}
 		case "setupProfiles":
@@ -189,6 +191,8 @@ func loadTask(task string) (int, bool) {
 		return ios.SetupXcode()
 	case "setupXcpretty":
 		return setup.SetupXcpretty()
+	case "setupXctool":
+		return setup.SetupXctool()
 	case "setupPods":
 		return setup.SetupPods(false)
 	case "setupFastlane":

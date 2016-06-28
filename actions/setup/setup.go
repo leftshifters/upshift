@@ -365,6 +365,51 @@ func ShowHelp() (int, bool) {
 	return 0, false
 }
 
+// Install xctool via brew
+func SetupXctool() (int, bool) {
+	return SetupBrew("xctool")
+}
+
+//
+// Common function to setup tools via brew
+//
+func SetupBrew(tool string) (int, bool) {
+	// Check which version of the brew was installed
+	version, err := command.RunWithoutStdout([]string{tool, "--version"}, "")
+	if err == nil {
+		// Remove the name of the tool if it is part of the version string
+		version = strings.Replace(version, tool, "", 1)
+		// Now trim whatever is left
+		version = strings.TrimSpace(version)
+		fmt.Println(tool + " is pretty much setup on this system. You are on version " + version)
+		return 0, false
+	}
+
+	// Check if the command was not found
+	var errorString string
+	if err != nil {
+		errorString = err.Error()
+	}
+
+	if strings.Contains(errorString, "executable file not found") == true {
+		// Alright, so the tool was not found, go ahead and install it
+		fmt.Println("Latest " + tool + " was not found, installing it")
+
+		// Brew cowardly refuses to use sudo, hell yeah
+		status, err := basher.Run("SetupBrewTool", []string{tool})
+		if err != nil {
+			utils.LogError("We couldn't install " + tool + "\n" + err.Error())
+			return status, false
+		}
+
+		fmt.Println(tool + " has been setup on your machine. Have fun.")
+		return 0, false
+	}
+
+	fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
+	return 1, true
+}
+
 //
 // If fastlane.tools if is not setup, we go ahead and do it
 //

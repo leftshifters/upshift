@@ -8,6 +8,12 @@ UpgradeScript() {
 	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm upshift.temp
 }
 
+SetupBrewTool() {
+	TOOL=$1
+	brew install $1
+	exit 0
+}
+
 SetupGem() {
 	GEM=$1
 	CI=$2
