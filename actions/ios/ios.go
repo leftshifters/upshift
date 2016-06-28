@@ -103,12 +103,25 @@ func IosDeploySimulator() (int, bool) {
 	return 0, false
 }
 
-func IosBuild() (int, bool) {
+func IosTest() (int, bool) {
 
-	status, next := iosPrepare()
-	if status > 0 {
-		return status, next
+	projectType := projectSettings["UP_PROJECT_TYPE"]
+	projectName := projectSettings["PROJECT_NAME"]
+	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+	projectPath := projectName + projectExtension
+	projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+	projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+
+	err := testForIOS(projectType, projectPath, projectScheme, projectDevice)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1, true
 	}
+
+	return 0, false
+}
+
+func IosBuild() (int, bool) {
 
 	// Try the build now
 	projectType := projectSettings["UP_PROJECT_TYPE"]
@@ -527,6 +540,28 @@ func archiveForIOS(projectType string, projectPath string, scheme string, projec
 	}
 
 	fmt.Println("We were able to archive successfully, awesome")
+	return nil
+}
+
+func testForIOS(projectType string, projectPath string, scheme string, device string) error {
+	utils.LogMessage("$ xctool -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" test")
+	logPath, _ := filepath.Abs(".upshift/logs/xcode-test.log")
+	_, err := basher.Run("TestIOS", []string{projectType, projectPath, scheme, device, logPath})
+	if err != nil {
+		return errors.New("We could not run tests for iOS\n" + err.Error())
+	}
+
+	// Read the last 500 bytes from the whole message, we just want to what happened at the end
+	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	if err != nil {
+		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+	}
+
+	if strings.Contains(tailData, "BUILD SUCCEEDED") == false {
+		return errors.New("Something went wrong with the build, you need to look at this.")
+	}
+
+	fmt.Println("We were able to run all tests successfully, awesome")
 	return nil
 }
 

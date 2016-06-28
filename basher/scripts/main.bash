@@ -81,6 +81,16 @@ CompileIOS() {
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
 }
 
+TestIOS() {
+	PROJECT_TYPE=$1
+	PROJECT_PATH=$2
+	SCHEME=$3
+	DEVICE=$4
+	LOG_PATH=$5
+	MakeFolders
+	xctool -"$1" "$2" -scheme "$3" -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" test | tee "$5"
+}
+
 ArchiveIOS() {
 	PROJECT_TYPE=$1
 	PROJECT_PATH=$2

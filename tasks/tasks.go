@@ -138,6 +138,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"androidEmulator"}}
 		case "iosBuild":
 			return taskList{actions: []string{"iosBuild"}}
+		case "iosTest":
+			return taskList{actions: []string{"iosTest"}}
 		case "iosDeploySimulator":
 			return taskList{actions: []string{"iosDeploySimulator"}}
 		case "iosProvisioning":
@@ -208,6 +210,8 @@ func loadTask(task string) (int, bool) {
 		return setup.InstallPods()
 	case "iosBuild":
 		return ios.IosBuild()
+	case "iosTest":
+		return ios.IosTest()
 	case "iosDeploySimulator":
 		return ios.IosDeploySimulator()
 	case "iosProvisioning":
