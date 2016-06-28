@@ -63,11 +63,13 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosBuild", "iosDeploySimulator", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosBuild"}}
+		case "test":
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosTest"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosSimulator", "iosRun"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosPrepare", "iosBuild", "iosDeploySimulator"}}
 		case "deploy":
-			return taskList{actions: []string{"showHelp"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosPrepare", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -138,6 +140,8 @@ func findTask(job string, action string) taskList {
 			return taskList{actions: []string{"androidEmulator"}}
 		case "iosBuild":
 			return taskList{actions: []string{"iosBuild"}}
+		case "iosPrepare":
+			return taskList{actions: []string{"iosPrepare"}}
 		case "iosTest":
 			return taskList{actions: []string{"iosTest"}}
 		case "iosDeploySimulator":
@@ -210,6 +214,8 @@ func loadTask(task string) (int, bool) {
 		return setup.InstallPods()
 	case "iosBuild":
 		return ios.IosBuild()
+	case "iosPrepare":
+		return ios.IosPrepare()
 	case "iosTest":
 		return ios.IosTest()
 	case "iosDeploySimulator":

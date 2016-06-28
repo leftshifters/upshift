@@ -140,12 +140,12 @@ func IosBuild() (int, bool) {
 	return 0, false
 }
 
-func iosPrepare() (int, bool) {
+func IosPrepare() (int, bool) {
 	fmt.Println("We will now try and load your xcode settings")
 	err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
 	if err != nil {
 		utils.LogError("We could not read your xcode settings, it this an iOS repo?\n" + err.Error())
-		return 1, false
+		return 1, true
 	}
 
 	getProjectPath()             // Gets UP_PROJECT_EXTENSION, UP_PROJECT_TYPE in projectSettings
@@ -176,17 +176,17 @@ func iosPrepare() (int, bool) {
 	err = findAvailableSchemes()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, false
+		return 1, true
 	}
 
 	// Increment the build number
 	err = incrementBuildNumber()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, false
+		return 1, true
 	}
 
-	return 0, true
+	return 0, false
 }
 
 func incrementBuildNumber() error {
