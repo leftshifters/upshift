@@ -5,11 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"upshift/actions/android"
-	"upshift/actions/ios"
-	"upshift/actions/setup"
+	"upshift/actions"
 	c "upshift/colours"
-	// "upshift/config"
 	"upshift/utils"
 )
 
@@ -180,67 +177,67 @@ func findTask(job string, action string) taskList {
 func loadTask(task string) (int, bool) {
 	switch task {
 	case "upgradeScript":
-		return setup.UpgradeScript()
+		return actions.UpgradeScript()
 	case "upgradeAndroid":
-		return android.UpgradeAndroid()
+		return actions.UpgradeAndroid()
 	case "showVersion":
-		return setup.ShowVersion()
+		return actions.ShowVersion()
 	case "showHelp":
-		return setup.ShowHelp()
+		return actions.ShowHelp()
 	case "setupXcode":
-		return ios.SetupXcode()
+		return actions.SetupXcode()
 	case "setupXcpretty":
-		return setup.SetupXcpretty()
+		return actions.SetupXcpretty()
 	case "setupXctool":
-		return setup.SetupXctool()
+		return actions.SetupXctool()
 	case "setupPods":
-		return setup.SetupPods(false)
+		return actions.SetupPods(false)
 	case "setupFastlane":
-		return setup.SetupFastlane(false)
+		return actions.SetupFastlane(false)
 	case "setupGradleW":
-		return setup.SetupGradleW()
+		return actions.SetupGradleW()
 	case "setupConfig":
-		return setup.SetupConfig()
+		return actions.SetupConfig()
 	case "setupProfiles":
-		return ios.SetupProfiles()
+		return actions.SetupProfiles()
 	// case "setupScript":
 	// case "setupSsh":
 	case "setupExportPlist":
-		return ios.SetupExportPlist()
+		return actions.SetupExportPlist()
 	case "setupAndroid":
-		return android.SetupAndroid()
+		return actions.SetupAndroid()
 	case "gitPull":
-		return setup.GitPull()
+		return actions.GitPull()
 	case "gitSubmodules":
-		return setup.GitSubmodules()
+		return actions.GitSubmodules()
 	// SKIP case "gitClone":
 	case "installPods":
-		return setup.InstallPods()
+		return actions.InstallPods()
 	case "iosBuild":
-		return ios.IosBuild()
+		return actions.IosBuild()
 	case "iosPrepare":
-		return ios.IosPrepare()
+		return actions.IosPrepare()
 	case "iosTest":
-		return ios.IosTest()
+		return actions.IosTest()
 	case "iosDeploySimulator":
-		return ios.IosDeploySimulator()
+		return actions.IosDeploySimulator()
 	case "iosProvisioning":
-		return ios.IosProvisioning()
+		return actions.IosProvisioning()
 	case "iosCertificates":
-		return ios.IosCertificates()
+		return actions.IosCertificates()
 	case "iosArchive":
-		return ios.IosArchive()
+		return actions.IosArchive()
 	case "iosExportIPA":
-		return ios.IosExportIPA()
+		return actions.IosExportIPA()
 	case "iosCreateApp":
-		return ios.IosCreateApp()
+		return actions.IosCreateApp()
 	case "iosUploadBuild":
-		return ios.IosUploadBuild()
+		return actions.IosUploadBuild()
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":
 	case "androidBuild":
-		return android.AndroidBuild()
+		return actions.AndroidBuild()
 	// case "androidRun":
 	// case "androidEmulator":
 	// case "androidDeploy":

@@ -1,4 +1,4 @@
-package ios
+package actions
 
 import (
 	"errors"
