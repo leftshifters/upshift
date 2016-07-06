@@ -80,3 +80,18 @@ func Test_PrepareSettings(t *testing.T) {
 	assert.Equal(t, "testDeveloperAccount", c.settings.IOSDeveloperAccount)
 	assert.Equal(t, "iPhone 6", c.settings.IOSTestDevice)
 }
+
+func Test_WriteRepoConfig(t *testing.T) {
+	var c Config
+	_ = c.ReadRepoConfig()
+
+	// Change XcodeVersion to 8.0
+	c.repo.IOSXcodeVersion = "8.0"
+	_ = c.WriteRepoConfig()
+	// Reset local value
+	c.repo.IOSXcodeVersion = "7.3.1"
+
+	// Read config again to check
+	_ = c.ReadRepoConfig()
+	assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
+}

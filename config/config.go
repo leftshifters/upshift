@@ -160,6 +160,27 @@ func (c *Config) WriteMachineConfig() error {
 	return nil
 }
 
+func (c *Config) WriteRepoConfig() error {
+	// Create the file path
+	path, err := filepath.Abs("config.toml")
+
+	// Create a byte buffer
+	var buffer bytes.Buffer
+	e := toml.NewEncoder(&buffer)
+	err = e.Encode(c.repo)
+	if err != nil {
+		return err
+	}
+
+	// Write to disk
+	err = ioutil.WriteFile(path, []byte(buffer.String()), 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Config) readConfig(file string) error {
 	// Get the absolute path
 	path, err := filepath.Abs(file)
