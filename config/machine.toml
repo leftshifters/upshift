@@ -1,0 +1,4 @@
+Password = "testPassword"
+IOSDeveloperAccount = "testDeveloperAccount"
+IOSCertificatePath = "testCertificatePath"
+AndroidSDKUpdateTime = 5

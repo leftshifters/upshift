@@ -1,62 +1,82 @@
 package config
 
 import (
+	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
-func TestConfig(t *testing.T) {
-	conf, _ := Load("sample.toml")
+func Test_readConfig(t *testing.T) {
+	var c Config
+	_ = c.readConfig("machine.toml")
+	assert.Equal(t, "testPassword", c.machine.Password)
+	assert.Equal(t, "testDeveloperAccount", c.machine.IOSDeveloperAccount)
+	assert.Equal(t, "testCertificatePath", c.machine.IOSCertificatePath)
+	assert.Equal(t, 5.0, float64(c.machine.AndroidSDKUpdateTime))
 
-	if conf.Application.Debug != false {
-		t.Fail()
-		t.Log("conf.Application.Debug Failed")
-	}
-	if conf.Runner.RootPassword != "testPassword" {
-		t.Fail()
-		t.Log("conf.Runner.RootPassword Failed")
-	}
-	if conf.Build.GitRepoURL != "testRepo" {
-		t.Fail()
-		t.Log("conf.Build.GitRepoURL Failed")
-	}
-	if conf.Build.GitRepoRemote != "origin" {
-		t.Fail()
-		t.Log("conf.Build.GitRepoRemote Failed")
-	}
-	if conf.Build.CleanBeforeBuild != false {
-		t.Fail()
-		t.Log("conf.Build.CleanBeforeBuild Failed")
-	}
-	if conf.Build.UninstallOlderBuilds != false {
-		t.Fail()
-		t.Log("conf.Build.UninstallOlderBuilds Failed")
-	}
-	if conf.IOS.ProjectName != "testProject" {
-		t.Fail()
-		t.Log("conf.IOS.ProjectName Failed")
-	}
-	if conf.IOS.UseWorkspace != false {
-		t.Fail()
-		t.Log("conf.IOS.UseWorkspace Failed")
-	}
-	if conf.IOS.Scheme != "testScheme" {
-		t.Fail()
-		t.Log("conf.IOS.Scheme Failed")
-	}
-	if conf.IOS.TestDevice != "iPhone 6" {
-		t.Fail()
-		t.Log("conf.IOS.TestDevice Failed")
-	}
-	if conf.IOS.Xcode != "7.3.1" {
-		t.Fail()
-		t.Log("conf.IOS.Xcode Failed")
-	}
-	if conf.Android.PackageName != "testPackage" {
-		t.Fail()
-		t.Log("conf.Android.PackageName Failed")
-	}
-	if conf.Android.MainActivityName != "testActivity" {
-		t.Fail()
-		t.Log("conf.Android.MainActivityName Failed")
-	}
+	_ = c.readConfig("repo.toml")
+	assert.Equal(t, "testGitURL", c.repo.URL)
+	assert.Equal(t, "testGitRemote", c.repo.Remote)
+	assert.Equal(t, true, c.repo.CleanBeforeBuild)
+	assert.Equal(t, true, c.repo.UninstallOlderBuilds)
+	assert.Equal(t, "testDeveloperAccount", c.repo.IOSDeveloperAccount)
+	assert.Equal(t, "testCertificatePath", c.repo.IOSCertificatePath)
+	assert.Equal(t, "testProjectName", c.repo.IOSProjectName)
+	assert.Equal(t, true, c.repo.IOSUseWorkspace)
+	assert.Equal(t, "testScheme", c.repo.IOSScheme)
+	assert.Equal(t, "testDevice", c.repo.IOSTestDevice)
+	assert.Equal(t, "7.3.1", c.repo.IOSXcodeVersion)
+	assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
+	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
+
+	err := c.readConfig("fileDoesNotExist")
+	assert.Equal(t, "File does not exist "+os.Getenv("GOPATH")+"/src/upshift/config/fileDoesNotExist", err.Error())
+
+	err = c.readConfig("invalid.toml")
+	assert.Contains(t, err.Error(), "Damn, we couldn't understand your TOML file")
+}
+
+func Test_ReadRepoConfig(t *testing.T) {
+	var c Config
+	_ = c.ReadRepoConfig()
+	assert.Equal(t, "testGitURL", c.repo.URL)
+	assert.Equal(t, "testGitRemote", c.repo.Remote)
+	assert.Equal(t, true, c.repo.CleanBeforeBuild)
+	assert.Equal(t, true, c.repo.UninstallOlderBuilds)
+	assert.Equal(t, "testDeveloperAccount", c.repo.IOSDeveloperAccount)
+	assert.Equal(t, "testCertificatePath", c.repo.IOSCertificatePath)
+	assert.Equal(t, "testProjectName", c.repo.IOSProjectName)
+	assert.Equal(t, true, c.repo.IOSUseWorkspace)
+	assert.Equal(t, "testScheme", c.repo.IOSScheme)
+	assert.Equal(t, "testDevice", c.repo.IOSTestDevice)
+	assert.Equal(t, "7.3.1", c.repo.IOSXcodeVersion)
+	assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
+	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
+}
+
+func Test_ReadMachineConfig(t *testing.T) {
+	var c Config
+	_ = c.ReadMachineConfig()
+	assert.Equal(t, os.Getenv("HOME")+"/code/ios-distribution-certificates", c.machine.IOSCertificatePath)
+}
+
+func Test_WriteMachineConfig(t *testing.T) {
+	var c Config
+	_ = c.ReadMachineConfig()
+
+	// Change android sdk update time to 100
+	c.machine.AndroidSDKUpdateTime = 100
+	_ = c.WriteMachineConfig()
+
+	// Read config again to check
+	_ = c.ReadMachineConfig()
+	assert.Equal(t, 100.0, float64(c.machine.AndroidSDKUpdateTime))
+}
+
+func Test_PrepareSettings(t *testing.T) {
+	var c Config
+	_ = c.PrepareSettings()
+
+	assert.Equal(t, "testDeveloperAccount", c.settings.IOSDeveloperAccount)
+	assert.Equal(t, "iPhone 6", c.settings.IOSTestDevice)
 }

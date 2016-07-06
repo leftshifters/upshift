@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">upshift/config/config.go (83.8%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package config
+
+import (
+        "bytes"
+        "errors"
+        "github.com/BurntSushi/toml"
+        "io/ioutil"
+        "os"
+        "path/filepath"
+        "upshift/utils"
+)
+
+type Config struct {
+        machine  MachineConfig
+        repo     RepoConfig
+        settings Settings
+}
+
+type Settings struct {
+        Password                string
+        IOSDeveloperAccount     string // Comes from both repo and machine configs
+        IOSCertificatePath      string // Comes from both repo and machine configs
+        AndroidSDKUpdateTime    int32
+        URL                     string
+        Remote                  string
+        CleanBeforeBuild        bool
+        UninstallOlderBuilds    bool
+        IOSProjectName          string
+        IOSUseWorkspace         bool
+        IOSScheme               string
+        IOSTestDevice           string
+        IOSXcodeVersion         string
+        AndroidPackageName      string
+        AndroidMainActivityName string
+}
+
+type MachineConfig struct {
+        Password             string
+        IOSDeveloperAccount  string
+        IOSCertificatePath   string
+        AndroidSDKUpdateTime int32
+}
+
+type RepoConfig struct {
+        URL                     string
+        Remote                  string
+        CleanBeforeBuild        bool
+        UninstallOlderBuilds    bool
+        IOSDeveloperAccount     string
+        IOSCertificatePath      string
+        IOSProjectName          string
+        IOSUseWorkspace         bool
+        IOSScheme               string
+        IOSTestDevice           string
+        IOSXcodeVersion         string
+        AndroidPackageName      string
+        AndroidMainActivityName string
+}
+
+func (c *Config) PrepareSettings() error <span class="cov8" title="1">{
+
+        // Defaults that we will use
+        testDevice := "iPhone 6"
+        xcodeVersion := utils.GetDefaultXcodeVersion()
+
+        // Read the Repo config first
+        err := c.ReadRepoConfig()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Move repo to settings
+        <span class="cov8" title="1">c.settings.URL = c.repo.URL
+        c.settings.Remote = c.repo.Remote
+        c.settings.CleanBeforeBuild = c.repo.CleanBeforeBuild
+        c.settings.UninstallOlderBuilds = c.repo.UninstallOlderBuilds
+        c.settings.IOSDeveloperAccount = c.repo.IOSDeveloperAccount
+        c.settings.IOSCertificatePath = c.repo.IOSCertificatePath
+        c.settings.IOSProjectName = c.repo.IOSProjectName
+        c.settings.IOSUseWorkspace = c.repo.IOSUseWorkspace
+        c.settings.IOSScheme = c.repo.IOSScheme
+        c.settings.IOSTestDevice = c.repo.IOSTestDevice
+        c.settings.IOSXcodeVersion = c.repo.IOSXcodeVersion
+        c.settings.AndroidPackageName = c.repo.AndroidPackageName
+        c.settings.AndroidMainActivityName = c.repo.AndroidMainActivityName
+
+        // Then read the machin config
+        err = c.ReadMachineConfig()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">c.settings.Password = c.machine.Password
+        c.settings.AndroidSDKUpdateTime = c.machine.AndroidSDKUpdateTime
+        if c.settings.IOSDeveloperAccount == "" </span><span class="cov0" title="0">{
+                c.settings.IOSDeveloperAccount = c.machine.IOSDeveloperAccount
+        }</span>
+        <span class="cov8" title="1">if c.settings.IOSCertificatePath == "" </span><span class="cov0" title="0">{
+                c.settings.IOSCertificatePath = c.machine.IOSCertificatePath
+        }</span>
+
+        // Finally add defaults
+        <span class="cov8" title="1">if c.settings.IOSTestDevice == "" || c.settings.IOSTestDevice == "testDevice" </span><span class="cov8" title="1">{
+                c.settings.IOSTestDevice = testDevice
+        }</span>
+        <span class="cov8" title="1">if c.settings.IOSXcodeVersion == "" </span><span class="cov0" title="0">{
+                c.settings.IOSXcodeVersion = xcodeVersion
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *Config) ReadRepoConfig() error <span class="cov8" title="1">{
+        repoPath := "config.toml"
+
+        err := c.readConfig(repoPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *Config) ReadMachineConfig() error <span class="cov8" title="1">{
+        machinePath := filepath.Join(os.Getenv("HOME"), ".upshift", "config")
+
+        err := c.readConfig(machinePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *Config) WriteMachineConfig() error <span class="cov8" title="1">{
+        // Make sure the folder exits
+        machinePath := filepath.Join(os.Getenv("HOME"), ".upshift")
+        err := os.MkdirAll(machinePath, os.ModePerm)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Create the file path
+        <span class="cov8" title="1">machinePath = filepath.Join(machinePath, "config")
+
+        // Create a byte buffer
+        var buffer bytes.Buffer
+        e := toml.NewEncoder(&amp;buffer)
+        err = e.Encode(c.machine)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Write to disk
+        <span class="cov8" title="1">err = ioutil.WriteFile(machinePath, []byte(buffer.String()), 0644)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (c *Config) readConfig(file string) error <span class="cov8" title="1">{
+        // Get the absolute path
+        path, err := filepath.Abs(file)
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not create absolute path\n" + err.Error())
+        }</span>
+
+        // Check if file exists
+        <span class="cov8" title="1">bytes, err := utils.ReadIfFileExists(path)
+        if err != nil </span><span class="cov8" title="1">{
+                return errors.New(err.Error())
+        }</span>
+
+        // Convert data to string
+        <span class="cov8" title="1">data := string(bytes)
+
+        // Read TOML data
+        _, err = toml.Decode(data, &amp;c.machine)
+        _, err = toml.Decode(data, &amp;c.repo)
+
+        if err != nil </span><span class="cov8" title="1">{
+                return errors.New("Damn, we couldn't understand your TOML file\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

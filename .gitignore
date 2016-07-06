@@ -6,3 +6,5 @@ config.toml
 upshift
 upshift-linux*
 upshift-darwin*
+
+cover.out

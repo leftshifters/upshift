@@ -1,0 +1,13 @@
+URL = "testGitURL"
+Remote = "testGitRemote"
+CleanBeforeBuild = true
+UninstallOlderBuilds = true
+IOSDeveloperAccount = "testDeveloperAccount"
+IOSCertificatePath = "testCertificatePath"
+IOSProjectName = "testProjectName"
+IOSUseWorkspace = true
+IOSScheme = "testScheme"
+IOSTestDevice = "testDevice"
+IOSXcodeVersion = "7.3.1"
+AndroidPackageName = "testPackage"
+AndroidMainActivityName = "testActivity"
