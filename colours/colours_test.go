@@ -1,15 +1,14 @@
 package colours
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestLogColours(t *testing.T) {
-	fmt.Println("This", Red.Format, "word", Default.Format, "should be in red")
-	fmt.Println("This", Green.Format, "word", Default.Format, "should be in green")
-	fmt.Println("This", Yellow.Format, "word", Default.Format, "should be in yellow")
-	fmt.Println("This", Blue.Format, "word", Default.Format, "should be in blue")
-	fmt.Println("This", Gray.Format, "word", Default.Format, "should be in gray")
-	fmt.Println("This", White.Format, "word", Default.Format, "should be in white")
+	t.Log("This", Red, "word", Default, "should be in red")
+	t.Log("This", Green, "word", Default, "should be in green")
+	t.Log("This", Yellow, "word", Default, "should be in yellow")
+	t.Log("This", Blue, "word", Default, "should be in blue")
+	t.Log("This", Gray, "word", Default, "should be in gray")
+	t.Log("This", White, "word", Default, "should be in white")
 }
