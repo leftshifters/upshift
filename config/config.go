@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"upshift/utils"
 )
 
@@ -55,6 +56,18 @@ type RepoConfig struct {
 	IOSXcodeVersion         string
 	AndroidPackageName      string
 	AndroidMainActivityName string
+}
+
+// Idiomatic singleton from here - http://marcio.io/2015/07/singleton-pattern-in-go/
+var conf *Config
+var once sync.Once
+
+func Get() *Config {
+	once.Do(func() {
+		conf = &Config{}
+		conf.PrepareSettings()
+	})
+	return conf
 }
 
 func (c *Config) PrepareSettings() error {

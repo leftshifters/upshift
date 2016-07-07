@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/config/config.go (83.3%)</option>
+				<option value="file0">upshift/config/config.go (84.1%)</option>
 				
 				</select>
 			</div>
@@ -77,6 +77,7 @@ import (
         "io/ioutil"
         "os"
         "path/filepath"
+        "sync"
         "upshift/utils"
 )
 
@@ -125,6 +126,18 @@ type RepoConfig struct {
         IOSXcodeVersion         string
         AndroidPackageName      string
         AndroidMainActivityName string
+}
+
+// Idiomatic singleton from here - http://marcio.io/2015/07/singleton-pattern-in-go/
+var conf *Config
+var once sync.Once
+
+func Get() *Config <span class="cov8" title="1">{
+        once.Do(func() </span><span class="cov8" title="1">{
+                conf = &amp;Config{}
+                conf.PrepareSettings()
+        }</span>)
+        <span class="cov8" title="1">return conf</span>
 }
 
 func (c *Config) PrepareSettings() error <span class="cov8" title="1">{

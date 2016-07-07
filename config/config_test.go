@@ -95,3 +95,12 @@ func Test_WriteRepoConfig(t *testing.T) {
 	_ = c.ReadRepoConfig()
 	assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
 }
+
+func Test_Get(t *testing.T) {
+	// Create multiple instances and see if you get the correct one
+	c := Get()
+	c.machine.Password = "fakeTestPassword"
+
+	d := Get()
+	assert.Equal(t, "fakeTestPassword", d.machine.Password)
+}
