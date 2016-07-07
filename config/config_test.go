@@ -49,7 +49,7 @@ func Test_ReadRepoConfig(t *testing.T) {
 	assert.Equal(t, true, c.repo.IOSUseWorkspace)
 	assert.Equal(t, "testScheme", c.repo.IOSScheme)
 	assert.Equal(t, "testDevice", c.repo.IOSTestDevice)
-	assert.Equal(t, "7.3.1", c.repo.IOSXcodeVersion)
+	assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
 	assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
 	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
 }
