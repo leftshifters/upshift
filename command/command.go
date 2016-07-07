@@ -7,11 +7,7 @@ import (
 	"strings"
 )
 
-func init() {
-
-}
-
-func RunWithoutStdout(params []string, input string) (string, error) {
+func Run(params []string, input string) (string, error) {
 	var name string
 	var out bytes.Buffer
 	var args []string
@@ -30,6 +26,7 @@ func RunWithoutStdout(params []string, input string) (string, error) {
 
 	cmd := exec.Command(name, args...)
 
+	// This is to handle stdin
 	if input != "" {
 		cmd.Stdin = strings.NewReader(input)
 	}
