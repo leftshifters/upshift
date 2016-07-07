@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/utils/utils.go (90.7%)</option>
+				<option value="file0">upshift/utils/utils.go (93.0%)</option>
 				
 				</select>
 			</div>
@@ -157,7 +157,7 @@ func FileTail(filePath string, size int64) (string, error) <span class="cov8" ti
 // Read a file if it exists
 func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
         // Check if file exits, if it doesn't just return an error
-        if FileExists(filePath) == false </span><span class="cov0" title="0">{
+        if FileExists(filePath) == false </span><span class="cov8" title="1">{
                 return "", errors.New("File does not exist " + filePath)
         }</span>
 

@@ -44,10 +44,11 @@ func Test_FileTail(t *testing.T) {
 }
 
 func Test_FileRead(t *testing.T) {
-	mainGoFile, err := filepath.Abs("../main.go")
-	_, err = FileRead(mainGoFile)
-	if err != nil {
-		t.Fail()
-		t.Log("main.go should exist in the folder outside")
-	}
+	failTailTest, _ := filepath.Abs("failTailTest")
+	data, err := FileRead(failTailTest)
+	assert.Contains(t, err.Error(), "File does not exist")
+
+	tailTest, _ := filepath.Abs("tailTest")
+	data, _ = FileRead(tailTest)
+	assert.Equal(t, "9876543210", data)
 }
