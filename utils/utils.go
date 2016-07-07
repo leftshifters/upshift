@@ -45,36 +45,6 @@ func CreateList(data string, ignore []string) []string {
 	return items
 }
 
-// Check if the currect script is running in a CI
-func IsCI() bool {
-	// Get GITLAB_CI from the environment
-	isGitlab := os.Getenv("GITLAB_CI")
-	if isGitlab == "true" {
-		return true
-	} else {
-		return false
-	}
-}
-
-// Check if the current script is running in a docker container
-func IsDocker() bool {
-	// To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
-	// We don't need to return an error on this, just a true of false
-	cGroupFile := "/proc/1/cgroup"
-
-	if FileExists(cGroupFile) == false {
-		// File not found, ceratinly not docker or a linux machine
-		return false
-	}
-
-	// Read the file, and then check if the work docker is written inside it
-	// We can read it directly because we know the file exits
-	cGroupBytes, _ := FileRead(cGroupFile)
-	cGroupString := string(cGroupBytes)
-	return strings.Contains(cGroupString, "docker")
-
-}
-
 // Read last few bytes of a file
 func FileTail(filePath string, size int64) (string, error) {
 	// Check if file exits, if it doesn't just return an error

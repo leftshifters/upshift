@@ -18,9 +18,16 @@ func Test_LogError(t *testing.T) {
 	LogError("LogError writes like this")
 }
 
-func Test_IsDocker(t *testing.T) {
-	isDocker := IsDocker()
-	assert.Equal(t, false, isDocker)
+func Test_CreateList(t *testing.T) {
+	testMessage := "On branch go\nYour branch is up-to-date with 'origin/go'.\nnothing to commit, working directory clean"
+
+	// Create an array of all lines
+	testArray := CreateList(testMessage, []string{})
+	assert.Equal(t, 3, len(testArray))
+
+	// Create an array of all lines except the ones with 'nothing to commit'
+	testArray2 := CreateList(testMessage, []string{"nothing to commit"})
+	assert.Equal(t, 2, len(testArray2))
 }
 
 func Test_FileRead(t *testing.T) {

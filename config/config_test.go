@@ -143,3 +143,39 @@ func Test_GetRootPassword(t *testing.T) {
 	// Reset the old password
 	os.Setenv("RootPassword", oldPassword)
 }
+
+func Test_IsCI(t *testing.T) {
+	// Get original state of GITLAB_CI
+	currentCI, exists := os.LookupEnv("GITLAB_CI")
+
+	// Set the variable in env
+	os.Setenv("GITLAB_CI", "true")
+
+	// Check status
+	c := Get()
+	ci := c.IsCI()
+	assert.Equal(t, true, ci)
+
+	// Remove the variable in env
+	os.Unsetenv("GITLAB_CI")
+
+	// Check status
+	ci = c.IsCI()
+	assert.Equal(t, false, ci)
+
+	// Reset
+	if exists == true {
+		os.Setenv("GITLAB_CI", currentCI)
+	} else {
+		os.Unsetenv("GITLAB_CI")
+	}
+}
+
+func Test_IsDocker(t *testing.T) {
+	// Case #1 : Trying on my mac
+	c := Get()
+	docker := c.IsDocker()
+	assert.Equal(t, false, docker)
+
+	// Case #2 : Not sure how to test this on docker
+}

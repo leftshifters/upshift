@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/utils/utils.go (30.2%)</option>
+				<option value="file0">upshift/utils/utils.go (53.5%)</option>
 				
 				</select>
 			</div>
@@ -97,52 +97,22 @@ func LogError(message string) <span class="cov8" title="1">{
 }</span>
 
 // Create a string array from an bash output
-func CreateList(data string, ignore []string) []string <span class="cov0" title="0">{
+func CreateList(data string, ignore []string) []string <span class="cov8" title="1">{
         rows := strings.Split(data, "\n")
         var items []string
-        for _, row := range rows </span><span class="cov0" title="0">{
+        for _, row := range rows </span><span class="cov8" title="1">{
                 ignoredRow := false
-                for _, ign := range ignore </span><span class="cov0" title="0">{
-                        if strings.Contains(row, ign) == true </span><span class="cov0" title="0">{
+                for _, ign := range ignore </span><span class="cov8" title="1">{
+                        if strings.Contains(row, ign) == true </span><span class="cov8" title="1">{
                                 ignoredRow = true
                         }</span>
-                        <span class="cov0" title="0">row = strings.TrimSpace(strings.Replace(row, ign, "", 1))</span>
+                        <span class="cov8" title="1">row = strings.TrimSpace(strings.Replace(row, ign, "", 1))</span>
                 }
-                <span class="cov0" title="0">if row != "" &amp;&amp; ignoredRow == false </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if row != "" &amp;&amp; ignoredRow == false </span><span class="cov8" title="1">{
                         items = append(items, row)
                 }</span>
         }
-        <span class="cov0" title="0">return items</span>
-}
-
-// Check if the currect script is running in a CI
-func IsCI() bool <span class="cov0" title="0">{
-        // Get GITLAB_CI from the environment
-        isGitlab := os.Getenv("GITLAB_CI")
-        if isGitlab == "true" </span><span class="cov0" title="0">{
-                return true
-        }</span><span class="cov0" title="0"> else {
-                return false
-        }</span>
-}
-
-// Check if the current script is running in a docker container
-func IsDocker() bool <span class="cov8" title="1">{
-        // To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
-        // We don't need to return an error on this, just a true of false
-        cGroupFile := "/proc/1/cgroup"
-
-        if FileExists(cGroupFile) == false </span><span class="cov8" title="1">{
-                // File not found, ceratinly not docker or a linux machine
-                return false
-        }</span>
-
-        // Read the file, and then check if the work docker is written inside it
-        // We can read it directly because we know the file exits
-        <span class="cov0" title="0">cGroupBytes, _ := FileRead(cGroupFile)
-        cGroupString := string(cGroupBytes)
-        return strings.Contains(cGroupString, "docker")</span>
-
+        <span class="cov8" title="1">return items</span>
 }
 
 // Read last few bytes of a file
@@ -205,7 +175,7 @@ func FileExists(filepath string) bool <span class="cov8" title="1">{
         _, err := os.Stat(filepath)
         if err == nil </span><span class="cov8" title="1">{
                 return true
-        }</span><span class="cov8" title="1"> else {
+        }</span><span class="cov0" title="0"> else {
                 return false
         }</span>
 }

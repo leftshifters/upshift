@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"upshift/utils"
 )
@@ -238,4 +239,34 @@ func (c *Config) GetRootPassword() (string, error) {
 
 	// Don't have it, throw an error
 	return "", errors.New("We can't do this without the root password, you need to set it up either in your env or the machine config")
+}
+
+// Check if the currect script is running in a CI
+func (c *Config) IsCI() bool {
+	// Get GITLAB_CI from the environment
+	isGitlab := os.Getenv("GITLAB_CI")
+	if isGitlab == "true" {
+		return true
+	} else {
+		return false
+	}
+}
+
+// Check if the current script is running in a docker container
+func (c *Config) IsDocker() bool {
+	// To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
+	// We don't need to return an error on this, just a true of false
+	cGroupFile := "/proc/1/cgroup"
+
+	if utils.FileExists(cGroupFile) == false {
+		// File not found, ceratinly not docker or a linux machine
+		return false
+	}
+
+	// Read the file, and then check if the work docker is written inside it
+	// We can read it directly because we know the file exits
+	cGroupBytes, _ := utils.FileRead(cGroupFile)
+	cGroupString := string(cGroupBytes)
+	return strings.Contains(cGroupString, "docker")
+
 }
