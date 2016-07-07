@@ -1,3 +1,9 @@
+TestScript() {
+	echo $1
+	sleep 1
+	ls -la
+}
+
 MakeFolders() {
 	mkdir -p .upshift/logs/
 	mkdir -p .upshift/build/
