@@ -9,16 +9,6 @@ import (
 	c "upshift/colours"
 )
 
-// Get the App Version
-func GetAppVersion() string {
-	return "0.8.4"
-}
-
-// Get the default Xcode version
-func GetDefaultXcodeVersion() string {
-	return "7.3.1"
-}
-
 // Log Message, this shows up in green and underlined
 func LogMessage(message string) {
 	fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
@@ -65,22 +55,8 @@ func CreateList(data string, ignore []string) []string {
 	return items
 }
 
-// deviceRows := strings.Split(out, "\n")
-// var devices []string
-// for _, row := range deviceRows {
-// 	row = strings.TrimSpace(strings.Replace(row, "List of devices attached", "", 1))
-// 	if row != "" {
-// 		devices = append(devices, row)
-// 	}
-// }
-
 // Check if the currect script is running in a CI
 func IsCI() bool {
-	// Inspiration
-	// GITLAB_CI=$(printenv GITLAB_CI)
-	// # Overall, OR all of them to find out is it is running via CI
-	// CI=${GITLAB_CI}
-
 	// Get GITLAB_CI from the environment
 	isGitlab := os.Getenv("GITLAB_CI")
 	if isGitlab == "true" {
@@ -103,14 +79,14 @@ func IsDocker() bool {
 
 	// Read the file, and then check if the work docker is written inside it
 	// We can read it directly because we know the file exits
-	cGroupBytes, _ := ReadIfFileExists(cGroupFile)
+	cGroupBytes, _ := FileRead(cGroupFile)
 	cGroupString := string(cGroupBytes)
 	return strings.Contains(cGroupString, "docker")
 
 }
 
 // Read last few bytes of a file
-func ReadTailIfFileExists(filePath string, size int64) (string, error) {
+func FileTail(filePath string, size int64) (string, error) {
 	// Check if file exits, if it doesn't just return an error
 	if FileExists(filePath) == false {
 		return "", errors.New("File does not exist " + filePath)
@@ -149,7 +125,7 @@ func ReadTailIfFileExists(filePath string, size int64) (string, error) {
 }
 
 // Read a file if it exists
-func ReadIfFileExists(filePath string) (string, error) {
+func FileRead(filePath string) (string, error) {
 	// Check if file exits, if it doesn't just return an error
 	if FileExists(filePath) == false {
 		return "", errors.New("File does not exist " + filePath)

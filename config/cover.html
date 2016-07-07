@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/config/config.go (84.1%)</option>
+				<option value="file0">upshift/config/config.go (84.5%)</option>
 				
 				</select>
 			</div>
@@ -103,6 +103,7 @@ type Settings struct {
         IOSXcodeVersion         string
         AndroidPackageName      string
         AndroidMainActivityName string
+        AppVersion              string
 }
 
 type MachineConfig struct {
@@ -142,9 +143,10 @@ func Get() *Config <span class="cov8" title="1">{
 
 func (c *Config) PrepareSettings() error <span class="cov8" title="1">{
 
-        // Defaults that we will use
+        // Defaults that we use
+        appVersion := "0.8.4"
         testDevice := "iPhone 6"
-        xcodeVersion := utils.GetDefaultXcodeVersion()
+        xcodeVersion := "7.3.1"
 
         // Read the Repo config first
         err := c.ReadRepoConfig()
@@ -189,8 +191,9 @@ func (c *Config) PrepareSettings() error <span class="cov8" title="1">{
         <span class="cov8" title="1">if c.settings.IOSXcodeVersion == "" </span><span class="cov0" title="0">{
                 c.settings.IOSXcodeVersion = xcodeVersion
         }</span>
+        <span class="cov8" title="1">c.settings.AppVersion = appVersion
 
-        <span class="cov8" title="1">return nil</span>
+        return nil</span>
 }
 
 func (c *Config) ReadRepoConfig() error <span class="cov8" title="1">{
@@ -272,7 +275,7 @@ func (c *Config) readConfig(file string) error <span class="cov8" title="1">{
         }</span>
 
         // Check if file exists
-        <span class="cov8" title="1">bytes, err := utils.ReadIfFileExists(path)
+        <span class="cov8" title="1">bytes, err := utils.FileRead(path)
         if err != nil </span><span class="cov8" title="1">{
                 return errors.New(err.Error())
         }</span>

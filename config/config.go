@@ -33,6 +33,7 @@ type Settings struct {
 	IOSXcodeVersion         string
 	AndroidPackageName      string
 	AndroidMainActivityName string
+	AppVersion              string
 }
 
 type MachineConfig struct {
@@ -72,9 +73,10 @@ func Get() *Config {
 
 func (c *Config) PrepareSettings() error {
 
-	// Defaults that we will use
+	// Defaults that we use
+	appVersion := "0.8.4"
 	testDevice := "iPhone 6"
-	xcodeVersion := utils.GetDefaultXcodeVersion()
+	xcodeVersion := "7.3.1"
 
 	// Read the Repo config first
 	err := c.ReadRepoConfig()
@@ -119,6 +121,7 @@ func (c *Config) PrepareSettings() error {
 	if c.settings.IOSXcodeVersion == "" {
 		c.settings.IOSXcodeVersion = xcodeVersion
 	}
+	c.settings.AppVersion = appVersion
 
 	return nil
 }
@@ -202,7 +205,7 @@ func (c *Config) readConfig(file string) error {
 	}
 
 	// Check if file exists
-	bytes, err := utils.ReadIfFileExists(path)
+	bytes, err := utils.FileRead(path)
 	if err != nil {
 		return errors.New(err.Error())
 	}
