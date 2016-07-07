@@ -30,6 +30,19 @@ func Test_CreateList(t *testing.T) {
 	assert.Equal(t, 2, len(testArray2))
 }
 
+func Test_FileTail(t *testing.T) {
+	failTailTest, _ := filepath.Abs("failTailTest")
+	data, err := FileTail(failTailTest, 5)
+	assert.Contains(t, err.Error(), "File does not exist")
+
+	tailTest, _ := filepath.Abs("tailTest")
+	data, _ = FileTail(tailTest, 5)
+	assert.Equal(t, "43210", data)
+
+	data, _ = FileTail(tailTest, 15)
+	assert.Equal(t, "9876543210", data)
+}
+
 func Test_FileRead(t *testing.T) {
 	mainGoFile, err := filepath.Abs("../main.go")
 	_, err = FileRead(mainGoFile)
