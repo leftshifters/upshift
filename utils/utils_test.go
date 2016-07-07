@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/stretchr/testify/assert"
-	"path/filepath"
 	"testing"
 )
 
@@ -31,24 +30,20 @@ func Test_CreateList(t *testing.T) {
 }
 
 func Test_FileTail(t *testing.T) {
-	failTailTest, _ := filepath.Abs("failTailTest")
-	data, err := FileTail(failTailTest, 5)
+	data, err := FileTail("failTailTest", 5)
 	assert.Contains(t, err.Error(), "File does not exist")
 
-	tailTest, _ := filepath.Abs("tailTest")
-	data, _ = FileTail(tailTest, 5)
+	data, _ = FileTail("tailTest", 5)
 	assert.Equal(t, "43210", data)
 
-	data, _ = FileTail(tailTest, 15)
+	data, _ = FileTail("tailTest", 15)
 	assert.Equal(t, "9876543210", data)
 }
 
 func Test_FileRead(t *testing.T) {
-	failTailTest, _ := filepath.Abs("failTailTest")
-	data, err := FileRead(failTailTest)
+	data, err := FileRead("failTailTest")
 	assert.Contains(t, err.Error(), "File does not exist")
 
-	tailTest, _ := filepath.Abs("tailTest")
-	data, _ = FileRead(tailTest)
+	data, _ = FileRead("tailTest")
 	assert.Equal(t, "9876543210", data)
 }

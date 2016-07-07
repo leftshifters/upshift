@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	c "upshift/colours"
 )
@@ -47,6 +48,7 @@ func CreateList(data string, ignore []string) []string {
 
 // Read last few bytes of a file
 func FileTail(filePath string, size int64) (string, error) {
+	filePath, _ = filepath.Abs(filePath)
 	// Check if file exits, if it doesn't just return an error
 	if FileExists(filePath) == false {
 		return "", errors.New("File does not exist " + filePath)
@@ -86,6 +88,7 @@ func FileTail(filePath string, size int64) (string, error) {
 
 // Read a file if it exists
 func FileRead(filePath string) (string, error) {
+	filePath, _ = filepath.Abs(filePath)
 	// Check if file exits, if it doesn't just return an error
 	if FileExists(filePath) == false {
 		return "", errors.New("File does not exist " + filePath)
@@ -101,8 +104,9 @@ func FileRead(filePath string) (string, error) {
 }
 
 // Simply to check if a file exists or not
-func FileExists(filepath string) bool {
-	_, err := os.Stat(filepath)
+func FileExists(filePath string) bool {
+	filePath, _ = filepath.Abs(filePath)
+	_, err := os.Stat(filePath)
 	if err == nil {
 		return true
 	} else {

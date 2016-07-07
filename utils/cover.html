@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/utils/utils.go (93.0%)</option>
+				<option value="file0">upshift/utils/utils.go (93.5%)</option>
 				
 				</select>
 			</div>
@@ -75,6 +75,7 @@ import (
         "fmt"
         "io/ioutil"
         "os"
+        "path/filepath"
         "strings"
         c "upshift/colours"
 )
@@ -117,6 +118,7 @@ func CreateList(data string, ignore []string) []string <span class="cov8" title=
 
 // Read last few bytes of a file
 func FileTail(filePath string, size int64) (string, error) <span class="cov8" title="1">{
+        filePath, _ = filepath.Abs(filePath)
         // Check if file exits, if it doesn't just return an error
         if FileExists(filePath) == false </span><span class="cov8" title="1">{
                 return "", errors.New("File does not exist " + filePath)
@@ -156,6 +158,7 @@ func FileTail(filePath string, size int64) (string, error) <span class="cov8" ti
 
 // Read a file if it exists
 func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
+        filePath, _ = filepath.Abs(filePath)
         // Check if file exits, if it doesn't just return an error
         if FileExists(filePath) == false </span><span class="cov8" title="1">{
                 return "", errors.New("File does not exist " + filePath)
@@ -171,8 +174,9 @@ func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
 }
 
 // Simply to check if a file exists or not
-func FileExists(filepath string) bool <span class="cov8" title="1">{
-        _, err := os.Stat(filepath)
+func FileExists(filePath string) bool <span class="cov8" title="1">{
+        filePath, _ = filepath.Abs(filePath)
+        _, err := os.Stat(filePath)
         if err == nil </span><span class="cov8" title="1">{
                 return true
         }</span><span class="cov8" title="1"> else {
