@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/config/config.go (84.5%)</option>
+				<option value="file0">upshift/config/config.go (85.6%)</option>
 				
 				</select>
 			</div>
@@ -292,6 +292,22 @@ func (c *Config) readConfig(file string) error <span class="cov8" title="1">{
         }</span>
 
         <span class="cov8" title="1">return nil</span>
+}
+
+func (c *Config) GetRootPassword() (string, error) <span class="cov8" title="1">{
+        // Check if it is defined in the environment variable
+        RootPassword := os.Getenv("RootPassword")
+        if RootPassword != "" </span><span class="cov8" title="1">{
+                return RootPassword, nil
+        }</span>
+
+        // If not, check if config has it
+        <span class="cov8" title="1">if c.settings.Password != "" </span><span class="cov8" title="1">{
+                return c.settings.Password, nil
+        }</span>
+
+        // Don't have it, throw an error
+        <span class="cov8" title="1">return "", errors.New("We can't do this without the root password, you need to set it up either in your env or the machine config")</span>
 }
 </pre>
 		

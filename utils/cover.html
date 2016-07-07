@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">upshift/utils/utils.go (30.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package utils
+
+import (
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "os"
+        "strings"
+        c "upshift/colours"
+)
+
+// Log Message, this shows up in green and underlined
+func LogMessage(message string) <span class="cov8" title="1">{
+        fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
+}</span>
+
+// Log Information, this shows up in blue
+func LogInfo(message string) <span class="cov8" title="1">{
+        fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
+        fmt.Println(message)
+}</span>
+
+// Log an error, show them this shit in color, red most probably
+func LogError(message string) <span class="cov8" title="1">{
+        fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
+        fmt.Println(message)
+}</span>
+
+// Create a string array from an bash output
+func CreateList(data string, ignore []string) []string <span class="cov0" title="0">{
+        rows := strings.Split(data, "\n")
+        var items []string
+        for _, row := range rows </span><span class="cov0" title="0">{
+                ignoredRow := false
+                for _, ign := range ignore </span><span class="cov0" title="0">{
+                        if strings.Contains(row, ign) == true </span><span class="cov0" title="0">{
+                                ignoredRow = true
+                        }</span>
+                        <span class="cov0" title="0">row = strings.TrimSpace(strings.Replace(row, ign, "", 1))</span>
+                }
+                <span class="cov0" title="0">if row != "" &amp;&amp; ignoredRow == false </span><span class="cov0" title="0">{
+                        items = append(items, row)
+                }</span>
+        }
+        <span class="cov0" title="0">return items</span>
+}
+
+// Check if the currect script is running in a CI
+func IsCI() bool <span class="cov0" title="0">{
+        // Get GITLAB_CI from the environment
+        isGitlab := os.Getenv("GITLAB_CI")
+        if isGitlab == "true" </span><span class="cov0" title="0">{
+                return true
+        }</span><span class="cov0" title="0"> else {
+                return false
+        }</span>
+}
+
+// Check if the current script is running in a docker container
+func IsDocker() bool <span class="cov8" title="1">{
+        // To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
+        // We don't need to return an error on this, just a true of false
+        cGroupFile := "/proc/1/cgroup"
+
+        if FileExists(cGroupFile) == false </span><span class="cov8" title="1">{
+                // File not found, ceratinly not docker or a linux machine
+                return false
+        }</span>
+
+        // Read the file, and then check if the work docker is written inside it
+        // We can read it directly because we know the file exits
+        <span class="cov0" title="0">cGroupBytes, _ := FileRead(cGroupFile)
+        cGroupString := string(cGroupBytes)
+        return strings.Contains(cGroupString, "docker")</span>
+
+}
+
+// Read last few bytes of a file
+func FileTail(filePath string, size int64) (string, error) <span class="cov0" title="0">{
+        // Check if file exits, if it doesn't just return an error
+        if FileExists(filePath) == false </span><span class="cov0" title="0">{
+                return "", errors.New("File does not exist " + filePath)
+        }</span>
+
+        // If file exists, go ahead and read the shit out of it
+        <span class="cov0" title="0">file, err := os.Open(filePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", errors.New("Could not open file " + filePath + "\n" + err.Error())
+        }</span>
+        // Close the file when you are about to close the function
+        <span class="cov0" title="0">defer file.Close()
+
+        // Get the file size from the OS
+        fileStat, err := os.Stat(filePath)
+        // Calculate where you want to start reading
+        startByte := fileStat.Size() - size
+        // Calculate the amount of data that you need read
+        readSize := size
+        // If the file size is less than the amount of data you're trying to read, adjust the two above
+        if startByte &lt; 0 </span><span class="cov0" title="0">{
+                startByte = 0
+                readSize = fileStat.Size()
+        }</span>
+
+        // Make a byte buffer to read the amount of data
+        <span class="cov0" title="0">byteBuffer := make([]byte, readSize)
+        // Ignore the number of bytes read, we just need the effing output
+        _, err = file.ReadAt(byteBuffer, startByte)
+        if err != nil </span><span class="cov0" title="0">{
+                // Reading failed, dump the error
+                return "", errors.New("Could not read file" + filePath + "\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">return string(byteBuffer), nil</span>
+}
+
+// Read a file if it exists
+func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
+        // Check if file exits, if it doesn't just return an error
+        if FileExists(filePath) == false </span><span class="cov0" title="0">{
+                return "", errors.New("File does not exist " + filePath)
+        }</span>
+
+        // If file exists, go ahead and read the shit out of it
+        <span class="cov8" title="1">fileBytes, err := ioutil.ReadFile(filePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", errors.New("Could not read file" + filePath + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return string(fileBytes), nil</span>
+}
+
+// Simply to check if a file exists or not
+func FileExists(filepath string) bool <span class="cov8" title="1">{
+        _, err := os.Stat(filepath)
+        if err == nil </span><span class="cov8" title="1">{
+                return true
+        }</span><span class="cov8" title="1"> else {
+                return false
+        }</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

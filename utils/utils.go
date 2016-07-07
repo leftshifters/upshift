@@ -26,16 +26,6 @@ func LogError(message string) {
 	fmt.Println(message)
 }
 
-// Get RootPassword
-func GetRootPassword() (string, error) {
-	RootPassword := os.Getenv("RootPassword")
-	if RootPassword == "" {
-		return "", errors.New("We can't do this without the root password, you need to set it up in your environment")
-	}
-
-	return RootPassword, nil
-}
-
 // Create a string array from an bash output
 func CreateList(data string, ignore []string) []string {
 	rows := strings.Split(data, "\n")

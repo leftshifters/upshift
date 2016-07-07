@@ -223,3 +223,19 @@ func (c *Config) readConfig(file string) error {
 
 	return nil
 }
+
+func (c *Config) GetRootPassword() (string, error) {
+	// Check if it is defined in the environment variable
+	RootPassword := os.Getenv("RootPassword")
+	if RootPassword != "" {
+		return RootPassword, nil
+	}
+
+	// If not, check if config has it
+	if c.settings.Password != "" {
+		return c.settings.Password, nil
+	}
+
+	// Don't have it, throw an error
+	return "", errors.New("We can't do this without the root password, you need to set it up either in your env or the machine config")
+}

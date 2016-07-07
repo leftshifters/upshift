@@ -7,7 +7,7 @@ import (
 )
 
 func Test_readConfig(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.readConfig("machine.toml")
 	assert.Equal(t, "testPassword", c.machine.Password)
 	assert.Equal(t, "testDeveloperAccount", c.machine.IOSDeveloperAccount)
@@ -37,7 +37,7 @@ func Test_readConfig(t *testing.T) {
 }
 
 func Test_ReadRepoConfig(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.ReadRepoConfig()
 	assert.Equal(t, "testGitURL", c.repo.URL)
 	assert.Equal(t, "testGitRemote", c.repo.Remote)
@@ -55,13 +55,13 @@ func Test_ReadRepoConfig(t *testing.T) {
 }
 
 func Test_ReadMachineConfig(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.ReadMachineConfig()
 	assert.Equal(t, os.Getenv("HOME")+"/code/ios-distribution-certificates", c.machine.IOSCertificatePath)
 }
 
 func Test_WriteMachineConfig(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.ReadMachineConfig()
 
 	// Change android sdk update time to 100
@@ -74,7 +74,7 @@ func Test_WriteMachineConfig(t *testing.T) {
 }
 
 func Test_PrepareSettings(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.PrepareSettings()
 
 	assert.Equal(t, "testDeveloperAccount", c.settings.IOSDeveloperAccount)
@@ -82,7 +82,7 @@ func Test_PrepareSettings(t *testing.T) {
 }
 
 func Test_WriteRepoConfig(t *testing.T) {
-	var c Config
+	c := Get()
 	_ = c.ReadRepoConfig()
 
 	// Change XcodeVersion to 8.0
@@ -103,4 +103,43 @@ func Test_Get(t *testing.T) {
 
 	d := Get()
 	assert.Equal(t, "fakeTestPassword", d.machine.Password)
+}
+
+func Test_GetRootPassword(t *testing.T) {
+	// Get the old password from env
+	oldPassword := os.Getenv("RootPassword")
+
+	// Case #1 : If a password is set in env, do we read it
+
+	// Set a new temporary password in env
+	os.Setenv("RootPassword", "tempRootPassword")
+
+	c := Get()
+	password, _ := c.GetRootPassword()
+	assert.Equal(t, "tempRootPassword", password)
+
+	// Case #2 : If there is no password in env, do we read the password from machine config
+
+	// Set an empty password in env
+	os.Setenv("RootPassword", "")
+	// Set a password in settings
+	c.settings.Password = "tempRootPassword2"
+
+	// Check if you get the correct value
+	password, _ = c.GetRootPassword()
+	assert.Equal(t, "tempRootPassword2", password)
+
+	// Case #3 : No password in env or machine config, should return error
+
+	// Set an empty password in env
+	os.Setenv("RootPassword", "")
+	// Set a password in settings
+	c.settings.Password = ""
+
+	// Check if you get the correct value
+	_, err := c.GetRootPassword()
+	assert.Contains(t, err.Error(), "without the root password")
+
+	// Reset the old password
+	os.Setenv("RootPassword", oldPassword)
 }
