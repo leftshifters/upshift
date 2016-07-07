@@ -17,8 +17,9 @@ func init() {
 }
 
 func UpgradeAndroid() (int, bool) {
+	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
-	_, err := basher.Run("AndroidUpgradeSDK", []string{logPath})
+	_, err := b.Run("AndroidUpgradeSDK", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start upgrading android.\n" + err.Error())
 		return 1, true
@@ -28,8 +29,9 @@ func UpgradeAndroid() (int, bool) {
 }
 
 func SetupAndroid() (int, bool) {
+	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
-	_, err := basher.Run("AndroidInstallSDK", []string{logPath})
+	_, err := b.Run("AndroidInstallSDK", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start upgrading android.\n" + err.Error())
 		return 1, true
@@ -40,15 +42,16 @@ func SetupAndroid() (int, bool) {
 
 func AndroidBuild() (int, bool) {
 
-	conf, _ := config.Get()
-	cleanOnStart := conf.Build.CleanBeforeBuild
+	var b basher.Basher
+	conf := config.Get()
+	cleanOnStart := conf.Settings.CleanBeforeBuild
 
 	if cleanOnStart == true {
 		// Clean the project first, we might not ALWAYS want to do this
 		fmt.Println("Let's clean the project before starting")
 		utils.LogMessage("$ ./gradlew clean")
 		logPath, _ := filepath.Abs(".upshift/logs/android-clean.log")
-		_, err := basher.Run("AndroidClean", []string{logPath})
+		_, err := b.Run("AndroidClean", []string{logPath})
 		if err != nil {
 			utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
 			return 1, true
@@ -62,7 +65,7 @@ func AndroidBuild() (int, bool) {
 		// Delete older builds if they are installed
 		fmt.Println("Removing older builds from connected devices")
 		logPath, _ := filepath.Abs(".upshift/logs/android-uninstall.log")
-		_, err := basher.Run("AndroidUninstall", []string{logPath})
+		_, err := b.Run("AndroidUninstall", []string{logPath})
 		if err != nil {
 			utils.LogError("We could not uninstall the older binaries.\n" + err.Error())
 			// Don't return on this, we don't even know why this fails, maybe because a device isn't connected
@@ -72,13 +75,13 @@ func AndroidBuild() (int, bool) {
 	fmt.Println("Before we build, we need to lint")
 	utils.LogMessage("$ ./gradlew lint")
 	logPath, _ := filepath.Abs(".upshift/logs/android-lint.log")
-	_, err := basher.Run("AndroidLint", []string{logPath})
+	_, err := b.Run("AndroidLint", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start lintin your project.\n" + err.Error())
 		return 1, true
 	}
 
-	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 		return 1, true
@@ -92,13 +95,13 @@ func AndroidBuild() (int, bool) {
 	fmt.Println("Okay, so lets build Debug and install it on a emulator")
 	utils.LogMessage("$ ./gradlew assemble --stacktrace")
 	logPath, _ = filepath.Abs(".upshift/logs/android-assemble.log")
-	_, err = basher.Run("AndroidAssemble", []string{logPath})
+	_, err = b.Run("AndroidAssemble", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start building your project.\n" + err.Error())
 		return 1, true
 	}
 
-	tailData, err = utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err = utils.FileTail(logPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 		return 1, true
@@ -113,6 +116,8 @@ func AndroidBuild() (int, bool) {
 }
 
 func launchEmulator() bool {
+
+	var b basher.Basher
 
 	// 1. Check if any devices are connected, if yes, use one of those
 	// 2. If nothing so far, see if any avds are listed and start the first one
@@ -139,7 +144,7 @@ func launchEmulator() bool {
 
 	fmt.Println("Time to load up the emulator " + c.Blue + avds[0] + c.Default)
 	logPath, _ := filepath.Abs(".upshift/logs/android-emulator.log")
-	_, err := basher.Run("AndroidLaunchEmulator", []string{avds[0], logPath})
+	_, err := b.Run("AndroidLaunchEmulator", []string{avds[0], logPath})
 	if err != nil {
 		utils.LogError("We could not start loading up the emulator.\n" + err.Error())
 		return false
@@ -149,7 +154,7 @@ func launchEmulator() bool {
 }
 
 func avdsAvailable() []string {
-	out, err := command.RunWithoutStdout([]string{"emulator", "-list-avds"}, "")
+	out, err := command.Run([]string{"emulator", "-list-avds"}, "")
 	if err != nil {
 		fmt.Println("We couldn't start finding devices\n" + err.Error())
 		return []string{}
@@ -160,7 +165,7 @@ func avdsAvailable() []string {
 }
 
 func devicesConnected() []string {
-	out, err := command.RunWithoutStdout([]string{"adb", "devices"}, "")
+	out, err := command.Run([]string{"adb", "devices"}, "")
 	if err != nil {
 		fmt.Println("We couldn't start finding devices\n" + err.Error())
 		return []string{}

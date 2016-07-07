@@ -13,22 +13,15 @@ import (
 	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
-	g "upshift/global"
 	"upshift/utils"
 )
-
-//
-// Init function, doesn't do shit
-//
-func init() {
-
-}
 
 //
 // Show the version of the current app
 //
 func ShowVersion() (int, bool) {
-	fmt.Println(utils.GetAppVersion())
+	conf := config.Get()
+	fmt.Println(conf.Settings.AppVersion)
 	return 0, false
 }
 
@@ -37,7 +30,7 @@ func ShowVersion() (int, bool) {
 //
 func SetupGradleW() (int, bool) {
 	// Run gradle -v to figure out if it is install
-	_, err := command.RunWithoutStdout([]string{"gradle", "-v"}, "")
+	_, err := command.Run([]string{"gradle", "-v"}, "")
 	if err != nil {
 		utils.LogError("Gradle itself is not installed, can't install wrapper.")
 		return 1, true
@@ -54,7 +47,8 @@ func SetupGradleW() (int, bool) {
 	// So, gradle is installed, just need to install wrapper [SetupGradleW]
 	// I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
 	utils.LogMessage("$ gradle wraper")
-	status, err := basher.Run("SetupGradleW", []string{})
+	var b basher.Basher
+	status, err := b.Run("SetupGradleW", []string{})
 	if err != nil {
 		utils.LogError("We couldn't initialise gradle wrapper\n" + err.Error())
 		return status, true
@@ -87,14 +81,15 @@ func InstallPods() (int, bool) {
 
 	utils.LogMessage("$ pod install")
 	podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
-	status, err := basher.Run("PodInstall", []string{podInstallLogFullPath})
+	var b basher.Basher
+	status, err := b.Run("PodInstall", []string{podInstallLogFullPath})
 	if err != nil {
 		utils.LogError("We couldn't initialise pods\n" + err.Error())
 		return status, true
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(podInstallLogFullPath, 500)
+	tailData, err := utils.FileTail(podInstallLogFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 		return status, true
@@ -113,21 +108,22 @@ func InstallPods() (int, bool) {
 func runPodRepoUpdate() error {
 
 	// Check if it's been a while since we ran `pod repo update` and if yes, run it
-	globalConf, _ := g.Get()
-	difference := int32(time.Now().Unix()) - globalConf.AndroidSDKUpdatedTime
+	globalConf := config.Get()
+	difference := int32(time.Now().Unix()) - globalConf.Settings.AndroidSDKUpdateTime
 
 	// Run this if last update was never done or more than a month ago
-	if globalConf.AndroidSDKUpdatedTime == 0 || difference > 3600*24*30 {
+	if globalConf.Settings.AndroidSDKUpdateTime == 0 || difference > 3600*24*30 {
 		// This means we have never come here.
 		utils.LogMessage("$ pod repo update --verbose")
 		podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-repo-update.log")
-		_, err := basher.Run("PodRepoUpdate", []string{podInstallLogFullPath})
+		var b basher.Basher
+		_, err := b.Run("PodRepoUpdate", []string{podInstallLogFullPath})
 		if err != nil {
 			return err
 		}
 
 		// Read the last 500 bytes from the whole message, we just want to what happened at the end
-		tailData, err := utils.ReadTailIfFileExists(podInstallLogFullPath, 500)
+		tailData, err := utils.FileTail(podInstallLogFullPath, 500)
 		if err != nil {
 			return err
 		}
@@ -150,8 +146,8 @@ func runPodRepoUpdate() error {
 			fmt.Println("Updated cocoapods to the latest version")
 		}
 
-		globalConf.AndroidSDKUpdatedTime = int32(time.Now().Unix())
-		g.Set(globalConf)
+		globalConf.Settings.AndroidSDKUpdateTime = int32(time.Now().Unix())
+		globalConf.WriteMachineConfig()
 	}
 	return nil
 }
@@ -173,7 +169,8 @@ func GitSubmodules() (int, bool) {
 
 	utils.LogMessage("$ git submodule init")
 	initLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-init.log")
-	status, err := basher.Run("GitSubmoduleInit", []string{initLogFileFullPath})
+	var b basher.Basher
+	status, err := b.Run("GitSubmoduleInit", []string{initLogFileFullPath})
 	if err != nil {
 		utils.LogError("We couldn't initialise submodules\n" + err.Error())
 		return status, true
@@ -181,14 +178,14 @@ func GitSubmodules() (int, bool) {
 
 	utils.LogMessage("$ git submodule update")
 	updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
-	status, err = basher.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
+	status, err = b.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
 	if err != nil {
 		utils.LogError("We couldn't update submodules\n" + err.Error())
 		return status, true
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(updateLogFileFullPath, 500)
+	tailData, err := utils.FileTail(updateLogFileFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 		return status, true
@@ -207,15 +204,16 @@ func GitSubmodules() (int, bool) {
 // Do a git pull on the project based on the defined remote and the branch the user is currently on
 //
 func GitPull() (int, bool) {
+	conf := config.Get()
 
 	// If you are running on a CI, we don't need to worry about this, just skip and take up the next thing
-	if utils.IsCI() == true {
+	if conf.IsCI() == true {
 		fmt.Println("It seems you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
 		return 0, false
 	}
 
 	// Find out which repo and branch are they on
-	out, err := command.RunWithoutStdout([]string{"git", "status"}, "")
+	out, err := command.Run([]string{"git", "status"}, "")
 	if err != nil {
 		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
 		return 1, true
@@ -241,7 +239,7 @@ func GitPull() (int, bool) {
 	// 		Show them the remotes, and ask them to specify it in config.toml
 
 	// Find out which repo and branch are they on
-	out, err = command.RunWithoutStdout([]string{"git", "remote"}, "")
+	out, err = command.Run([]string{"git", "remote"}, "")
 	if err != nil {
 		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
 		return 1, true
@@ -258,19 +256,19 @@ func GitPull() (int, bool) {
 		fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")
 	default:
 		// This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
-		conf, _ := config.Get()
+		conf := config.Get()
 
-		if conf.Build.GitRepoRemote != "" {
+		if conf.Settings.Remote != "" {
 			// Alright, so they have defined a remote, let's check if it exits in our list of remotes
 			for _, row := range gitRemoteOutputRows {
-				if strings.TrimSpace(conf.Build.GitRepoRemote) == strings.TrimSpace(row) {
+				if strings.TrimSpace(conf.Settings.Remote) == strings.TrimSpace(row) {
 					currentRemote = row
 				}
 			}
 
 			// Didn't find their remote in git remotes, tell them so
 			if currentRemote == "" {
-				utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Build.GitRepoRemote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
+				utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
 				return 1, true
 			} else {
 				fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
@@ -285,7 +283,8 @@ func GitPull() (int, bool) {
 	utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
 	// Now we have both, a remote and a branch, let's pull
 	logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull.log")
-	status, err := basher.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
+	var b basher.Basher
+	status, err := b.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
 	// status, err := basher.Run("RunSingleCommand", []string{"$(git pull " + currentRemote + " " + currentBranch + " 2>&1 | tee \"" + logFileFullPath + "\")"})
 	if err != nil {
 		utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
@@ -293,7 +292,7 @@ func GitPull() (int, bool) {
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(logFileFullPath, 500)
+	tailData, err := utils.FileTail(logFileFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 		return status, true
@@ -375,7 +374,7 @@ func SetupXctool() (int, bool) {
 //
 func SetupBrew(tool string) (int, bool) {
 	// Check which version of the brew was installed
-	version, err := command.RunWithoutStdout([]string{tool, "--version"}, "")
+	version, err := command.Run([]string{tool, "--version"}, "")
 	if err == nil {
 		// Remove the name of the tool if it is part of the version string
 		version = strings.Replace(version, tool, "", 1)
@@ -396,7 +395,8 @@ func SetupBrew(tool string) (int, bool) {
 		fmt.Println("Latest " + tool + " was not found, installing it")
 
 		// Brew cowardly refuses to use sudo, hell yeah
-		status, err := basher.Run("SetupBrewTool", []string{tool})
+		var b basher.Basher
+		status, err := b.Run("SetupBrewTool", []string{tool})
 		if err != nil {
 			utils.LogError("We couldn't install " + tool + "\n" + err.Error())
 			return status, false
@@ -436,9 +436,11 @@ func SetupXcpretty() (int, bool) {
 // General script to setup a gem
 //
 func SetupGem(gem string, gemName string, force bool) (int, bool) {
+	conf := config.Get()
+
 	// Check which version of the gem was installed
 	// force will be true when you want to force running sudo install gem irrespective of if it is installed or not
-	version, err := command.RunWithoutStdout([]string{gemName, "--version"}, "")
+	version, err := command.Run([]string{gemName, "--version"}, "")
 	if force == false {
 		if err == nil {
 			// Remove the name of the gem if it is part of the version string
@@ -462,9 +464,9 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 
 		var RootPassword string
 
-		if utils.IsCI() == true {
+		if conf.IsCI() == true {
 			// We are on CI, we need to enter password programatically
-			RootPassword, err = utils.GetRootPassword()
+			RootPassword, err = conf.GetRootPassword()
 			if err != nil {
 				utils.LogError(err.Error())
 				return 1, true
@@ -472,7 +474,8 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 		}
 		// else we are not on CI, ask the user to enter the password
 
-		status, err := basher.Run("SetupGem", []string{gem, strconv.FormatBool(utils.IsCI()), RootPassword})
+		var b basher.Basher
+		status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
 		if err != nil {
 			utils.LogError("We couldn't install " + gem + "\n" + err.Error())
 			return status, false
@@ -492,6 +495,8 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 // It does nothing if the user is on the latest version
 //
 func UpgradeScript() (int, bool) {
+	conf := config.Get()
+
 	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
 	if err != nil {
 		fmt.Println("We couldn't connect to the internet :(", err.Error())
@@ -508,20 +513,21 @@ func UpgradeScript() (int, bool) {
 	latestVersion := string(body)
 	latestVersion = strings.TrimSpace(latestVersion)
 
-	if latestVersion == utils.GetAppVersion() {
-		fmt.Println("Your powers (and version) are already at the top. You're running v", utils.GetAppVersion())
+	if latestVersion == conf.Settings.AppVersion {
+		fmt.Println("Your powers (and version) are already at the top. You're running v", conf.Settings.AppVersion)
 		return 0, false
 	}
 
 	fmt.Println("Get ready to feel the power at your fingertips")
 
-	status, err := basher.Run("UpgradeScript", []string{})
+	var b basher.Basher
+	status, err := b.Run("UpgradeScript", []string{})
 	if err != nil {
 		utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
 		return status, false
 	}
 
-	fmt.Println("You are now awesome. The new version of awesomeness is v", utils.GetAppVersion())
+	fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
 	return 0, false
 }
 

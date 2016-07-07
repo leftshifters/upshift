@@ -11,15 +11,10 @@ import (
 	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
-	g "upshift/global"
 	"upshift/utils"
 )
 
 var projectSettings map[string]string
-
-func init() {
-
-}
 
 func IosUploadBuild() (int, bool) {
 	err := uploadBuildToItunes()
@@ -190,8 +185,9 @@ func IosPrepare() (int, bool) {
 }
 
 func incrementBuildNumber() error {
+	var b basher.Basher
 	projectName := projectSettings["PROJECT_NAME"]
-	_, err := basher.Run("IOSIncrementBuildNumber", []string{projectName})
+	_, err := b.Run("IOSIncrementBuildNumber", []string{projectName})
 	if err != nil {
 		return errors.New("We couldn't incremenet the build number")
 	}
@@ -218,14 +214,14 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
 
 	// If file exists, push it to the simulator
 	fmt.Println("Installing the app in the simulator")
-	_, err := command.RunWithoutStdout([]string{"xcrun", "simctl", "install", "booted", builtFile}, "")
+	_, err := command.Run([]string{"xcrun", "simctl", "install", "booted", builtFile}, "")
 	if err != nil {
 		return errors.New("We could not deploy the app to the simulator\n" + err.Error())
 	}
 
 	// Start the app
 	fmt.Println("Starting the app in the simulator")
-	_, err = command.RunWithoutStdout([]string{"xcrun", "simctl", "launch", "booted", projectBundleIdentifier}, "")
+	_, err = command.Run([]string{"xcrun", "simctl", "launch", "booted", projectBundleIdentifier}, "")
 	if err != nil {
 		return errors.New("We could not deploy the app to the simulator\n" + err.Error())
 	}
@@ -277,6 +273,7 @@ func SetupExportPlist() (int, bool) {
 //
 func SetupProfiles() (int, bool) {
 
+	var b basher.Basher
 	developerAccounts, err := getDeveloperAccounts()
 	if err != nil {
 		utils.LogError(err.Error())
@@ -288,7 +285,7 @@ func SetupProfiles() (int, bool) {
 
 		if email != "" {
 			fmt.Println("Trying to repair your provisioning profiles and installing new and fixed ones for " + email)
-			_, err := basher.Run("FetchAndRepairProvisioningProfiles", []string{email})
+			_, err := b.Run("FetchAndRepairProvisioningProfiles", []string{email})
 			if err != nil {
 				utils.LogError("We couldn't fix and install your provisioning profiles")
 				return 1, false
@@ -302,17 +299,18 @@ func getDeveloperAccounts() ([]string, error) {
 
 	var developerAccounts []string
 
-	globalConf, _ := g.Get()
+	conf := config.Get()
 
-	if globalConf.IOSDeveloperAccounts == "" {
+	if conf.Settings.IOSDeveloperAccount == "" {
 		return developerAccounts, errors.New("You should define the emails of the developer account in the global config")
 	}
 
-	developerAccounts = strings.SplitN(globalConf.IOSDeveloperAccounts, ",", -1)
+	developerAccounts = strings.SplitN(conf.Settings.IOSDeveloperAccount, ",", -1)
 	return developerAccounts, nil
 }
 
 func installCertificates() error {
+	var b basher.Basher
 	utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
 
 	basePath, _ := filepath.Abs(".private")
@@ -329,8 +327,8 @@ func installCertificates() error {
 
 	if !(appleCerExists && distributionCerExists && distributionP12Exists) {
 		// If they don't exist, check global config to see if they have them
-		globalConf, _ := g.Get()
-		globalBasePath := globalConf.IOSCertificatePath
+		conf := config.Get()
+		globalBasePath := conf.Settings.IOSCertificatePath
 
 		if globalBasePath == "" {
 			return errors.New("The certificates don't exist in both .private and global conf")
@@ -353,7 +351,7 @@ func installCertificates() error {
 		// If they don't, crash and burn
 	}
 
-	basher.Run("InstallCertificates", []string{basePath})
+	b.Run("InstallCertificates", []string{basePath})
 	// #TODO Ignore the error here. Even if it says that certificates are already installed, it gets treated like an error
 	// if err != nil {
 	// 	return errors.New("The certicates could not be installed!")
@@ -364,12 +362,13 @@ func installCertificates() error {
 }
 
 func uploadBuildToItunes() error {
+	var b basher.Basher
 	utils.LogMessage("Upload the IPA on iTunesConnect")
 
 	// Get the username which will need to login
 	// Highest priority to local config
-	conf, _ := config.Get()
-	developerAccount := conf.IOS.DeveloperAccount
+	conf := config.Get()
+	developerAccount := conf.Settings.IOSDeveloperAccount
 
 	if developerAccount == "" {
 		// Second priority to machine config
@@ -392,14 +391,14 @@ func uploadBuildToItunes() error {
 	projectName := projectSettings["PROJECT_NAME"]
 
 	// Add SwitSources if required - AddSwiftSources
-	status, err := basher.Run("AddSwiftSources", []string{projectName, projectScheme})
+	status, err := b.Run("AddSwiftSources", []string{projectName, projectScheme})
 	fmt.Println("status", status)
 	if err != nil {
 		fmt.Println("err", err.Error())
 		return errors.New("We could not add SwiftSources to the IPA")
 	}
 
-	status, err = basher.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	status, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
 	if err != nil {
 		return errors.New("We could not upload the IPA on iTunes")
 	}
@@ -409,12 +408,13 @@ func uploadBuildToItunes() error {
 }
 
 func createAppOniTunes() error {
+	var b basher.Basher
 	utils.LogMessage("Create an app on iTunesConnect if it doesn't exist")
 
 	// Get the username which will need to login
 	// Highest priority to local config
-	conf, _ := config.Get()
-	developerAccount := conf.IOS.DeveloperAccount
+	conf := config.Get()
+	developerAccount := conf.Settings.IOSDeveloperAccount
 
 	if developerAccount == "" {
 		// Second priority to machine config
@@ -440,7 +440,7 @@ func createAppOniTunes() error {
 	// And add your shit to it
 	projectName := projectSettings["PROJECT_NAME"] + " Beta by Upshift"
 
-	_, err := basher.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
+	_, err := b.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
 	if err != nil {
 		return errors.New("We could not create the app on iTunes\n" + err.Error())
 	}
@@ -450,12 +450,13 @@ func createAppOniTunes() error {
 }
 
 func addProvisioningProfiles() error {
+	var b basher.Basher
 	utils.LogMessage("We will now try to find the provisioning profile")
 
 	// Get the username which will need to login
 	// Highest priority to local config
-	conf, _ := config.Get()
-	developerAccount := conf.IOS.DeveloperAccount
+	conf := config.Get()
+	developerAccount := conf.Settings.IOSDeveloperAccount
 
 	if developerAccount == "" {
 		// Second priority to machine config
@@ -477,7 +478,7 @@ func addProvisioningProfiles() error {
 	// Get the bundle identifier for this project
 	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
 
-	_, err := basher.Run("FindProvisioningProfile", []string{developerAccount, projectBundleIdentifier})
+	_, err := b.Run("FindProvisioningProfile", []string{developerAccount, projectBundleIdentifier})
 	if err != nil {
 		return errors.New("We could not find your provisioning profile")
 	}
@@ -487,6 +488,7 @@ func addProvisioningProfiles() error {
 }
 
 func exportIPAForIOS(projectName string) error {
+	var b basher.Basher
 	// Check if .private/export.plist exists, we can't do shit without it
 	exportPlistPath, _ := filepath.Abs(".private/export.plist")
 	exportPlistExists := utils.FileExists(exportPlistPath)
@@ -502,13 +504,13 @@ func exportIPAForIOS(projectName string) error {
 	// Fire the export IPA bash script
 	utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
-	_, err := basher.Run("ExportIOS", []string{projectName, logPath})
+	_, err := b.Run("ExportIOS", []string{projectName, logPath})
 	if err != nil {
 		return errors.New("We could not export IPA\n" + err.Error())
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to see what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 	}
@@ -522,15 +524,16 @@ func exportIPAForIOS(projectName string) error {
 }
 
 func archiveForIOS(projectType string, projectPath string, scheme string, projectName string) error {
+	var b basher.Basher
 	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -derivedDataPath .upshift/build -archivePath .upshift/" + projectName + ".xcarchive archive")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-archive.log")
-	_, err := basher.Run("ArchiveIOS", []string{projectType, projectPath, scheme, projectName, logPath})
+	_, err := b.Run("ArchiveIOS", []string{projectType, projectPath, scheme, projectName, logPath})
 	if err != nil {
 		return errors.New("We could not archive for iOS\n" + err.Error())
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 	}
@@ -544,15 +547,16 @@ func archiveForIOS(projectType string, projectPath string, scheme string, projec
 }
 
 func testForIOS(projectType string, projectPath string, scheme string, device string) error {
+	var b basher.Basher
 	utils.LogMessage("$ xctool -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" test")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-test.log")
-	_, err := basher.Run("TestIOS", []string{projectType, projectPath, scheme, device, logPath})
+	_, err := b.Run("TestIOS", []string{projectType, projectPath, scheme, device, logPath})
 	if err != nil {
 		return errors.New("We could not run tests for iOS\n" + err.Error())
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 	}
@@ -566,15 +570,16 @@ func testForIOS(projectType string, projectPath string, scheme string, device st
 }
 
 func compileForIOS(projectType string, projectPath string, scheme string, device string) error {
+	var b basher.Basher
 	utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" -derivedDataPath .upshift/build")
 	logPath, _ := filepath.Abs(".upshift/logs/xcode-build.log")
-	_, err := basher.Run("CompileIOS", []string{projectType, projectPath, scheme, device, logPath})
+	_, err := b.Run("CompileIOS", []string{projectType, projectPath, scheme, device, logPath})
 	if err != nil {
 		return errors.New("We could not compile for iOS\n" + err.Error())
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.ReadTailIfFileExists(logPath, 500)
+	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
 	}
@@ -593,11 +598,11 @@ func findAvailableSchemes() error {
 	// 3. If there is no scheme in config and multiple in xcode, show an error
 
 	// If a scheme is available in config, get that
-	conf, _ := config.Get()
-	confScheme := conf.IOS.Scheme
+	conf := config.Get()
+	confScheme := conf.Settings.IOSScheme
 
 	// Get the list of schemes from xcode
-	listDump, err := command.RunWithoutStdout([]string{"xcodebuild", "-list"}, "")
+	listDump, err := command.Run([]string{"xcodebuild", "-list"}, "")
 	if err != nil {
 		return errors.New("We could not get a list from xcode\n" + err.Error())
 	}
@@ -653,11 +658,12 @@ func startSimulator(device string) {
 	// basher returns an error if status > 0 or if there is an error
 	// Whenever we start the simulator, for some reason, the exit code is always 255, though there is no error
 	// Hence skipping the error check here
-	basher.Run("StartSimulator", []string{device})
+	var b basher.Basher
+	b.Run("StartSimulator", []string{device})
 }
 
 func findIfDeviceIsAvailable(device string) bool {
-	instrumentsDump, err := command.RunWithoutStdout([]string{"instruments", "-s", "devices"}, "")
+	instrumentsDump, err := command.Run([]string{"instruments", "-s", "devices"}, "")
 	if err != nil {
 		return false
 	}
@@ -696,12 +702,12 @@ func findIfDeviceIsAvailable(device string) bool {
 
 // Start the simulator
 func findXcodeAndOSForSimulator() {
-	conf, _ := config.Get()
+	conf := config.Get()
 	var iPhoneOS string
 
 	// Find the correct simulator
 	// From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
-	switch conf.IOS.Xcode {
+	switch conf.Settings.IOSXcodeVersion {
 	case "7.3.1":
 		iPhoneOS = "9.3"
 	case "7.3":
@@ -722,17 +728,17 @@ func findXcodeAndOSForSimulator() {
 		iPhoneOS = "9.3"
 	}
 
-	projectSettings["UP_XCODE_VERSION"] = conf.IOS.Xcode
-	projectSettings["UP_SIMULATOR_IPHONE"] = conf.IOS.TestDevice
+	projectSettings["UP_XCODE_VERSION"] = conf.Settings.IOSXcodeVersion
+	projectSettings["UP_SIMULATOR_IPHONE"] = conf.Settings.IOSTestDevice
 	projectSettings["UP_SIMULATOR_IPHONEOS"] = iPhoneOS
 
 	// This is sort of the wrong place, but we want scheme for later too
-	projectSettings["UP_PROJECT_SCHEME"] = conf.IOS.Scheme
+	projectSettings["UP_PROJECT_SCHEME"] = conf.Settings.IOSScheme
 }
 
 // Is Simulator running
 func isSimulatorRunning() bool {
-	_, err := command.RunWithoutStdout([]string{"pgrep", "-f", "Simulator.app"}, "")
+	_, err := command.Run([]string{"pgrep", "-f", "Simulator.app"}, "")
 	if err != nil {
 		return false
 	}
@@ -741,9 +747,9 @@ func isSimulatorRunning() bool {
 
 // Get Project Path
 func getProjectPath() {
-	conf, _ := config.Get()
+	conf := config.Get()
 
-	useWorkspace := conf.IOS.UseWorkspace
+	useWorkspace := conf.Settings.IOSUseWorkspace
 	podFileFullPath, _ := filepath.Abs("Podfile")
 	podfileExists := utils.FileExists(podFileFullPath)
 
@@ -759,7 +765,7 @@ func getProjectPath() {
 // Read values from xcodebuild settings
 func xcodeBuildSettings() error {
 	projectSettings = make(map[string]string)
-	version, err := command.RunWithoutStdout([]string{"xcodebuild", "-showBuildSettings"}, "")
+	version, err := command.Run([]string{"xcodebuild", "-showBuildSettings"}, "")
 	if err != nil {
 		return errors.New(("We were unable to read xcodebuild settings\n" + err.Error()))
 	}
@@ -781,7 +787,7 @@ func xcodeBuildSettings() error {
 // It is usually defined in config.toml
 //
 func SetupXcode() (int, bool) {
-	version, err := command.RunWithoutStdout([]string{"xcodebuild", "-version"}, "")
+	version, err := command.Run([]string{"xcodebuild", "-version"}, "")
 	if err != nil {
 		utils.LogError("We were unable to get the Xcode version " + err.Error())
 		return 1, true
@@ -797,15 +803,15 @@ func SetupXcode() (int, bool) {
 
 	fmt.Println("We are currently using Xcode-" + currentXcodeVersion)
 
-	conf, err := config.Get()
+	conf := config.Get()
 	if err != nil {
 		fmt.Println("We were unable to load the config file\n", err.Error())
 
-		fmt.Println("You are currently on Xcode-" + currentXcodeVersion + " and the latest Xcode version is " + utils.GetDefaultXcodeVersion() + ". For now, we will continue using the version that you have right now")
+		fmt.Println("You are currently on Xcode-" + currentXcodeVersion + " and the latest Xcode version is " + conf.Settings.IOSXcodeVersion + ". For now, we will continue using the version that you have right now")
 		return 0, false
 	}
 
-	requiredXcodeVersion := conf.IOS.Xcode
+	requiredXcodeVersion := conf.Settings.IOSXcodeVersion
 
 	if requiredXcodeVersion == currentXcodeVersion {
 		fmt.Println("You are on the correct version of Xcode")
@@ -820,16 +826,16 @@ func SetupXcode() (int, bool) {
 	}
 
 	var RootPassword string
-	if utils.IsCI() == true {
+	if conf.IsCI() == true {
 		// We are on CI, we need to enter password programatically
-		RootPassword, err = utils.GetRootPassword()
+		RootPassword, err = conf.GetRootPassword()
 		if err != nil {
 			utils.LogError(err.Error())
 			return 1, true
 		}
 	}
 
-	out, err := command.RunWithoutStdout([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
+	out, err := command.Run([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
 	if err != nil {
 		fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
 		return 1, true

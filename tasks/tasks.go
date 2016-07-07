@@ -35,14 +35,13 @@ func Setup() {
 	fmt.Print("\n")
 
 	var status int
-	var skipNext bool
 
 	for i, action := range tasks.actions {
 		fmt.Println(c.Blue + c.Bold + "🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
-		status, skipNext = loadTask(action)
+		status, _ = loadTask(action)
 		fmt.Print("\n")
 
-		if skipNext == true {
+		if status > 0 {
 			fmt.Println(c.Gray + "➡️  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + c.Default)
 			break
 		}

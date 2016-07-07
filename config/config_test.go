@@ -77,8 +77,8 @@ func Test_PrepareSettings(t *testing.T) {
 	c := Get()
 	_ = c.PrepareSettings()
 
-	assert.Equal(t, "testDeveloperAccount", c.settings.IOSDeveloperAccount)
-	assert.Equal(t, "iPhone 6", c.settings.IOSTestDevice)
+	assert.Equal(t, "testDeveloperAccount", c.Settings.IOSDeveloperAccount)
+	assert.Equal(t, "iPhone 6", c.Settings.IOSTestDevice)
 }
 
 func Test_WriteRepoConfig(t *testing.T) {
@@ -123,7 +123,7 @@ func Test_GetRootPassword(t *testing.T) {
 	// Set an empty password in env
 	os.Setenv("RootPassword", "")
 	// Set a password in settings
-	c.settings.Password = "tempRootPassword2"
+	c.Settings.Password = "tempRootPassword2"
 
 	// Check if you get the correct value
 	password, _ = c.GetRootPassword()
@@ -134,7 +134,7 @@ func Test_GetRootPassword(t *testing.T) {
 	// Set an empty password in env
 	os.Setenv("RootPassword", "")
 	// Set a password in settings
-	c.settings.Password = ""
+	c.Settings.Password = ""
 
 	// Check if you get the correct value
 	_, err := c.GetRootPassword()

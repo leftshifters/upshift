@@ -15,7 +15,7 @@ import (
 type Config struct {
 	machine  MachineConfig
 	repo     RepoConfig
-	settings Settings
+	Settings Settings
 }
 
 type Settings struct {
@@ -86,19 +86,19 @@ func (c *Config) PrepareSettings() error {
 	}
 
 	// Move repo to settings
-	c.settings.URL = c.repo.URL
-	c.settings.Remote = c.repo.Remote
-	c.settings.CleanBeforeBuild = c.repo.CleanBeforeBuild
-	c.settings.UninstallOlderBuilds = c.repo.UninstallOlderBuilds
-	c.settings.IOSDeveloperAccount = c.repo.IOSDeveloperAccount
-	c.settings.IOSCertificatePath = c.repo.IOSCertificatePath
-	c.settings.IOSProjectName = c.repo.IOSProjectName
-	c.settings.IOSUseWorkspace = c.repo.IOSUseWorkspace
-	c.settings.IOSScheme = c.repo.IOSScheme
-	c.settings.IOSTestDevice = c.repo.IOSTestDevice
-	c.settings.IOSXcodeVersion = c.repo.IOSXcodeVersion
-	c.settings.AndroidPackageName = c.repo.AndroidPackageName
-	c.settings.AndroidMainActivityName = c.repo.AndroidMainActivityName
+	c.Settings.URL = c.repo.URL
+	c.Settings.Remote = c.repo.Remote
+	c.Settings.CleanBeforeBuild = c.repo.CleanBeforeBuild
+	c.Settings.UninstallOlderBuilds = c.repo.UninstallOlderBuilds
+	c.Settings.IOSDeveloperAccount = c.repo.IOSDeveloperAccount
+	c.Settings.IOSCertificatePath = c.repo.IOSCertificatePath
+	c.Settings.IOSProjectName = c.repo.IOSProjectName
+	c.Settings.IOSUseWorkspace = c.repo.IOSUseWorkspace
+	c.Settings.IOSScheme = c.repo.IOSScheme
+	c.Settings.IOSTestDevice = c.repo.IOSTestDevice
+	c.Settings.IOSXcodeVersion = c.repo.IOSXcodeVersion
+	c.Settings.AndroidPackageName = c.repo.AndroidPackageName
+	c.Settings.AndroidMainActivityName = c.repo.AndroidMainActivityName
 
 	// Then read the machin config
 	err = c.ReadMachineConfig()
@@ -106,23 +106,23 @@ func (c *Config) PrepareSettings() error {
 		return err
 	}
 
-	c.settings.Password = c.machine.Password
-	c.settings.AndroidSDKUpdateTime = c.machine.AndroidSDKUpdateTime
-	if c.settings.IOSDeveloperAccount == "" {
-		c.settings.IOSDeveloperAccount = c.machine.IOSDeveloperAccount
+	c.Settings.Password = c.machine.Password
+	c.Settings.AndroidSDKUpdateTime = c.machine.AndroidSDKUpdateTime
+	if c.Settings.IOSDeveloperAccount == "" {
+		c.Settings.IOSDeveloperAccount = c.machine.IOSDeveloperAccount
 	}
-	if c.settings.IOSCertificatePath == "" {
-		c.settings.IOSCertificatePath = c.machine.IOSCertificatePath
+	if c.Settings.IOSCertificatePath == "" {
+		c.Settings.IOSCertificatePath = c.machine.IOSCertificatePath
 	}
 
 	// Finally add defaults
-	if c.settings.IOSTestDevice == "" || c.settings.IOSTestDevice == "testDevice" {
-		c.settings.IOSTestDevice = testDevice
+	if c.Settings.IOSTestDevice == "" || c.Settings.IOSTestDevice == "testDevice" {
+		c.Settings.IOSTestDevice = testDevice
 	}
-	if c.settings.IOSXcodeVersion == "" {
-		c.settings.IOSXcodeVersion = xcodeVersion
+	if c.Settings.IOSXcodeVersion == "" {
+		c.Settings.IOSXcodeVersion = xcodeVersion
 	}
-	c.settings.AppVersion = appVersion
+	c.Settings.AppVersion = appVersion
 
 	return nil
 }
@@ -233,8 +233,8 @@ func (c *Config) GetRootPassword() (string, error) {
 	}
 
 	// If not, check if config has it
-	if c.settings.Password != "" {
-		return c.settings.Password, nil
+	if c.Settings.Password != "" {
+		return c.Settings.Password, nil
 	}
 
 	// Don't have it, throw an error

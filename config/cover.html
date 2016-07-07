@@ -85,7 +85,7 @@ import (
 type Config struct {
         machine  MachineConfig
         repo     RepoConfig
-        settings Settings
+        Settings Settings
 }
 
 type Settings struct {
@@ -156,19 +156,19 @@ func (c *Config) PrepareSettings() error <span class="cov8" title="1">{
         }</span>
 
         // Move repo to settings
-        <span class="cov8" title="1">c.settings.URL = c.repo.URL
-        c.settings.Remote = c.repo.Remote
-        c.settings.CleanBeforeBuild = c.repo.CleanBeforeBuild
-        c.settings.UninstallOlderBuilds = c.repo.UninstallOlderBuilds
-        c.settings.IOSDeveloperAccount = c.repo.IOSDeveloperAccount
-        c.settings.IOSCertificatePath = c.repo.IOSCertificatePath
-        c.settings.IOSProjectName = c.repo.IOSProjectName
-        c.settings.IOSUseWorkspace = c.repo.IOSUseWorkspace
-        c.settings.IOSScheme = c.repo.IOSScheme
-        c.settings.IOSTestDevice = c.repo.IOSTestDevice
-        c.settings.IOSXcodeVersion = c.repo.IOSXcodeVersion
-        c.settings.AndroidPackageName = c.repo.AndroidPackageName
-        c.settings.AndroidMainActivityName = c.repo.AndroidMainActivityName
+        <span class="cov8" title="1">c.Settings.URL = c.repo.URL
+        c.Settings.Remote = c.repo.Remote
+        c.Settings.CleanBeforeBuild = c.repo.CleanBeforeBuild
+        c.Settings.UninstallOlderBuilds = c.repo.UninstallOlderBuilds
+        c.Settings.IOSDeveloperAccount = c.repo.IOSDeveloperAccount
+        c.Settings.IOSCertificatePath = c.repo.IOSCertificatePath
+        c.Settings.IOSProjectName = c.repo.IOSProjectName
+        c.Settings.IOSUseWorkspace = c.repo.IOSUseWorkspace
+        c.Settings.IOSScheme = c.repo.IOSScheme
+        c.Settings.IOSTestDevice = c.repo.IOSTestDevice
+        c.Settings.IOSXcodeVersion = c.repo.IOSXcodeVersion
+        c.Settings.AndroidPackageName = c.repo.AndroidPackageName
+        c.Settings.AndroidMainActivityName = c.repo.AndroidMainActivityName
 
         // Then read the machin config
         err = c.ReadMachineConfig()
@@ -176,23 +176,23 @@ func (c *Config) PrepareSettings() error <span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov8" title="1">c.settings.Password = c.machine.Password
-        c.settings.AndroidSDKUpdateTime = c.machine.AndroidSDKUpdateTime
-        if c.settings.IOSDeveloperAccount == "" </span><span class="cov0" title="0">{
-                c.settings.IOSDeveloperAccount = c.machine.IOSDeveloperAccount
+        <span class="cov8" title="1">c.Settings.Password = c.machine.Password
+        c.Settings.AndroidSDKUpdateTime = c.machine.AndroidSDKUpdateTime
+        if c.Settings.IOSDeveloperAccount == "" </span><span class="cov0" title="0">{
+                c.Settings.IOSDeveloperAccount = c.machine.IOSDeveloperAccount
         }</span>
-        <span class="cov8" title="1">if c.settings.IOSCertificatePath == "" </span><span class="cov0" title="0">{
-                c.settings.IOSCertificatePath = c.machine.IOSCertificatePath
+        <span class="cov8" title="1">if c.Settings.IOSCertificatePath == "" </span><span class="cov0" title="0">{
+                c.Settings.IOSCertificatePath = c.machine.IOSCertificatePath
         }</span>
 
         // Finally add defaults
-        <span class="cov8" title="1">if c.settings.IOSTestDevice == "" || c.settings.IOSTestDevice == "testDevice" </span><span class="cov8" title="1">{
-                c.settings.IOSTestDevice = testDevice
+        <span class="cov8" title="1">if c.Settings.IOSTestDevice == "" || c.Settings.IOSTestDevice == "testDevice" </span><span class="cov8" title="1">{
+                c.Settings.IOSTestDevice = testDevice
         }</span>
-        <span class="cov8" title="1">if c.settings.IOSXcodeVersion == "" </span><span class="cov0" title="0">{
-                c.settings.IOSXcodeVersion = xcodeVersion
+        <span class="cov8" title="1">if c.Settings.IOSXcodeVersion == "" </span><span class="cov0" title="0">{
+                c.Settings.IOSXcodeVersion = xcodeVersion
         }</span>
-        <span class="cov8" title="1">c.settings.AppVersion = appVersion
+        <span class="cov8" title="1">c.Settings.AppVersion = appVersion
 
         return nil</span>
 }
@@ -303,8 +303,8 @@ func (c *Config) GetRootPassword() (string, error) <span class="cov8" title="1">
         }</span>
 
         // If not, check if config has it
-        <span class="cov8" title="1">if c.settings.Password != "" </span><span class="cov8" title="1">{
-                return c.settings.Password, nil
+        <span class="cov8" title="1">if c.Settings.Password != "" </span><span class="cov8" title="1">{
+                return c.Settings.Password, nil
         }</span>
 
         // Don't have it, throw an error
