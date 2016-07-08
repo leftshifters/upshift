@@ -19,55 +19,22 @@ import (
 //
 // Show the version of the current app
 //
-func ShowVersion() (int, bool) {
+func ShowVersion() int {
 	conf := config.Get()
 	fmt.Println(conf.Settings.AppVersion)
-	return 0, false
-}
-
-//
-// Setup Gradle Wrapper
-//
-func SetupGradleW() (int, bool) {
-	// Run gradle -v to figure out if it is install
-	_, err := command.Run([]string{"gradle", "-v"}, "")
-	if err != nil {
-		utils.LogError("Gradle itself is not installed, can't install wrapper.")
-		return 1, true
-	}
-
-	gradlewPath, _ := filepath.Abs("./gradlew")
-	gradlewExist := utils.FileExists(gradlewPath)
-
-	if gradlewExist == true {
-		fmt.Println("You already have gradle wrapper installed, moving on.")
-		return 0, false
-	}
-
-	// So, gradle is installed, just need to install wrapper [SetupGradleW]
-	// I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
-	utils.LogMessage("$ gradle wraper")
-	var b basher.Basher
-	status, err := b.Run("SetupGradleW", []string{})
-	if err != nil {
-		utils.LogError("We couldn't initialise gradle wrapper\n" + err.Error())
-		return status, true
-	}
-
-	fmt.Println("Gradle wrapper has been successfully setup")
-	return 0, false
+	return 0
 }
 
 //
 // Install cocoapods
 //
-func InstallPods() (int, bool) {
+func InstallPods() int {
 	podsPath, _ := filepath.Abs("Podfile")
 	podsExist := utils.FileExists(podsPath)
 
 	if podsExist == false {
 		fmt.Println("It looks like this project doesn't use pods")
-		return 0, false
+		return 0
 	}
 
 	// So pods exist, damn
@@ -76,7 +43,7 @@ func InstallPods() (int, bool) {
 	err := runPodRepoUpdate()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
 	utils.LogMessage("$ pod install")
@@ -85,23 +52,23 @@ func InstallPods() (int, bool) {
 	status, err := b.Run("PodInstall", []string{podInstallLogFullPath})
 	if err != nil {
 		utils.LogError("We couldn't initialise pods\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
 	tailData, err := utils.FileTail(podInstallLogFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	if strings.Contains(tailData, "fatal") == true || strings.Contains(tailData, "error") == true || strings.Contains(tailData, "Invalid") == true {
 		utils.LogError("Something went wrong with installing pods, you need to look at this.")
-		return 1, true
+		return 1
 	}
 
 	fmt.Println("We were able to successfully setup cocoapods, moving on")
-	return 0, false
+	return 0
 
 }
 
@@ -139,7 +106,7 @@ func runPodRepoUpdate() error {
 		// We strongly recommend that you use the latest version at all times.
 		if strings.Contains(tailData, "sudo gem install cocoapods") == true {
 			// This means that an update is available, run cocoapods update
-			status, _ := SetupPods(true)
+			status := SetupPods(true)
 			if status > 0 {
 				return errors.New("We couldn't update to the new version of cocoapods")
 			}
@@ -155,13 +122,13 @@ func runPodRepoUpdate() error {
 //
 // Initialize submodules in a project
 //
-func GitSubmodules() (int, bool) {
+func GitSubmodules() int {
 	submodulePath, _ := filepath.Abs(".gitmodules")
 	submodulesExist := utils.FileExists(submodulePath)
 
 	if submodulesExist == false {
 		fmt.Println("It looks like this project doesn't use submodules")
-		return 0, false
+		return 0
 	}
 
 	// So git submodules exist
@@ -173,7 +140,7 @@ func GitSubmodules() (int, bool) {
 	status, err := b.Run("GitSubmoduleInit", []string{initLogFileFullPath})
 	if err != nil {
 		utils.LogError("We couldn't initialise submodules\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	utils.LogMessage("$ git submodule update")
@@ -181,42 +148,42 @@ func GitSubmodules() (int, bool) {
 	status, err = b.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
 	if err != nil {
 		utils.LogError("We couldn't update submodules\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
 	tailData, err := utils.FileTail(updateLogFileFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
 		utils.LogError("Something went wrong with submodule update, you need to look at this.")
-		return 1, true
+		return 1
 	}
 
 	fmt.Println("We were able to successfully setup submodules, moving on")
-	return 0, false
+	return 0
 }
 
 //
 // Do a git pull on the project based on the defined remote and the branch the user is currently on
 //
-func GitPull() (int, bool) {
+func GitPull() int {
 	conf := config.Get()
 
 	// If you are running on a CI, we don't need to worry about this, just skip and take up the next thing
 	if conf.IsCI() == true {
 		fmt.Println("It seems you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
-		return 0, false
+		return 0
 	}
 
 	// Find out which repo and branch are they on
 	out, err := command.Run([]string{"git", "status"}, "")
 	if err != nil {
 		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
-		return 1, true
+		return 1
 	}
 
 	// Read the first row of git sttus which says 'on branch xyz'
@@ -226,7 +193,7 @@ func GitPull() (int, bool) {
 		firstRow = gitStatusOutputRows[0]
 	} else {
 		utils.LogError("You are probably not in a git repository. Quit messing around.")
-		return 1, true
+		return 1
 	}
 
 	// Alright find the correct branch and show it to the user
@@ -242,7 +209,7 @@ func GitPull() (int, bool) {
 	out, err = command.Run([]string{"git", "remote"}, "")
 	if err != nil {
 		utils.LogError("Either this is not a git repository, or you don't even have git installed.")
-		return 1, true
+		return 1
 	}
 
 	var currentRemote string
@@ -250,7 +217,7 @@ func GitPull() (int, bool) {
 	switch len(gitRemoteOutputRows) {
 	case 0:
 		utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
-		return 1, true
+		return 1
 	case 1:
 		currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
 		fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")
@@ -269,14 +236,14 @@ func GitPull() (int, bool) {
 			// Didn't find their remote in git remotes, tell them so
 			if currentRemote == "" {
 				utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
-				return 1, true
+				return 1
 			} else {
 				fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
 			}
 		} else {
 			// They haven't defined a remote in config, screw them
 			utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
-			return 1, true
+			return 1
 		}
 	}
 
@@ -288,29 +255,29 @@ func GitPull() (int, bool) {
 	// status, err := basher.Run("RunSingleCommand", []string{"$(git pull " + currentRemote + " " + currentBranch + " 2>&1 | tee \"" + logFileFullPath + "\")"})
 	if err != nil {
 		utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
-		return status, true
+		return status
 	}
 
 	// Read the last 500 bytes from the whole message, we just want to what happened at the end
 	tailData, err := utils.FileTail(logFileFullPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return status, true
+		return status
 	}
 
 	if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
 		utils.LogError("Something went wrong with the pull, you need to look at this.")
-		return 1, true
+		return 1
 	}
 
 	fmt.Println("We were able to pull the latest code, awesome")
-	return 0, false
+	return 0
 }
 
 //
 // Show help, so that the user knows what to do
 //
-func ShowHelp() (int, bool) {
+func ShowHelp() int {
 	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
 	fmt.Println(c.Bold + "\nNAME" + c.Default)
 	fmt.Println("\tupshift -- the creative mobile app builder")
@@ -361,18 +328,18 @@ func ShowHelp() (int, bool) {
 	fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
 	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
 
-	return 0, false
+	return 0
 }
 
 // Install xctool via brew
-func SetupXctool() (int, bool) {
+func SetupXctool() int {
 	return SetupBrew("xctool")
 }
 
 //
 // Common function to setup tools via brew
 //
-func SetupBrew(tool string) (int, bool) {
+func SetupBrew(tool string) int {
 	// Check which version of the brew was installed
 	version, err := command.Run([]string{tool, "--version"}, "")
 	if err == nil {
@@ -381,7 +348,7 @@ func SetupBrew(tool string) (int, bool) {
 		// Now trim whatever is left
 		version = strings.TrimSpace(version)
 		fmt.Println(tool + " is pretty much setup on this system. You are on version " + version)
-		return 0, false
+		return 0
 	}
 
 	// Check if the command was not found
@@ -399,28 +366,28 @@ func SetupBrew(tool string) (int, bool) {
 		status, err := b.Run("SetupBrewTool", []string{tool})
 		if err != nil {
 			utils.LogError("We couldn't install " + tool + "\n" + err.Error())
-			return status, false
+			return status
 		}
 
 		fmt.Println(tool + " has been setup on your machine. Have fun.")
-		return 0, false
+		return 0
 	}
 
 	fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
-	return 1, true
+	return 1
 }
 
 //
 // If fastlane.tools if is not setup, we go ahead and do it
 //
-func SetupFastlane(force bool) (int, bool) {
+func SetupFastlane(force bool) int {
 	return SetupGem("fastlane", "fastlane", force)
 }
 
 //
 // If cocoapods is not setup, we go ahead and do it
 //
-func SetupPods(force bool) (int, bool) {
+func SetupPods(force bool) int {
 	return SetupGem("cocoapods", "pod", force)
 }
 
@@ -428,14 +395,14 @@ func SetupPods(force bool) (int, bool) {
 // If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
 //
-func SetupXcpretty() (int, bool) {
+func SetupXcpretty() int {
 	return SetupGem("xcpretty", "xcpretty", false)
 }
 
 //
 // General script to setup a gem
 //
-func SetupGem(gem string, gemName string, force bool) (int, bool) {
+func SetupGem(gem string, gemName string, force bool) int {
 	conf := config.Get()
 
 	// Check which version of the gem was installed
@@ -448,7 +415,7 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 			// Now trim whatever is left
 			version = strings.TrimSpace(version)
 			fmt.Println(gem + " is pretty much setup on this system. You are on version " + version)
-			return 0, false
+			return 0
 		}
 	}
 
@@ -469,7 +436,7 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 			RootPassword, err = conf.GetRootPassword()
 			if err != nil {
 				utils.LogError(err.Error())
-				return 1, true
+				return 1
 			}
 		}
 		// else we are not on CI, ask the user to enter the password
@@ -478,15 +445,15 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 		status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
 		if err != nil {
 			utils.LogError("We couldn't install " + gem + "\n" + err.Error())
-			return status, false
+			return status
 		}
 
 		fmt.Println(gem + " has been setup on your machine. Have fun.")
-		return 0, false
+		return 0
 	}
 
 	fmt.Println("There was a problem installing " + gem + "\n" + err.Error())
-	return 1, true
+	return 1
 }
 
 //
@@ -494,20 +461,20 @@ func SetupGem(gem string, gemName string, force bool) (int, bool) {
 // And update the user to the latest version.
 // It does nothing if the user is on the latest version
 //
-func UpgradeScript() (int, bool) {
+func UpgradeScript() int {
 	conf := config.Get()
 
 	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
 	if err != nil {
 		fmt.Println("We couldn't connect to the internet :(", err.Error())
-		return 1, false
+		return 1
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("We were unable to figure out what is the latest version on the server, next time maybe", err.Error())
-		return 1, false
+		return 1
 	}
 
 	latestVersion := string(body)
@@ -515,7 +482,7 @@ func UpgradeScript() (int, bool) {
 
 	if latestVersion == conf.Settings.AppVersion {
 		fmt.Println("Your powers (and version) are already at the top. You're running v", conf.Settings.AppVersion)
-		return 0, false
+		return 0
 	}
 
 	fmt.Println("Get ready to feel the power at your fingertips")
@@ -524,22 +491,22 @@ func UpgradeScript() (int, bool) {
 	status, err := b.Run("UpgradeScript", []string{})
 	if err != nil {
 		utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
-		return status, false
+		return status
 	}
 
 	fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
-	return 0, false
+	return 0
 }
 
 //
 // When a new project doesn't have config, they call this one to create one for them
 //
-func SetupConfig() (int, bool) {
+func SetupConfig() int {
 
 	configExits := utils.FileExists("./config.toml")
 	if configExits == true {
 		fmt.Println("It looks like a config.toml is already here, skipping this step")
-		return 1, false
+		return 1
 	} else {
 		// Config does not exist
 		// Create a new config.toml in this directory
@@ -573,10 +540,10 @@ MainActivityName = "testActivity"`
 		err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
 		if err != nil {
 			utils.LogError("We could not write the config file, the OS told us this <" + err.Error() + ">")
-			return 1, false
+			return 1
 		}
 	}
 
 	fmt.Println("We just added a config.toml to this folder!")
-	return 0, false
+	return 0
 }

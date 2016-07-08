@@ -16,40 +16,40 @@ import (
 
 var projectSettings map[string]string
 
-func IosUploadBuild() (int, bool) {
+func IosUploadBuild() int {
 	err := uploadBuildToItunes()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosCreateApp() (int, bool) {
+func IosCreateApp() int {
 	err := createAppOniTunes()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosExportIPA() (int, bool) {
+func IosExportIPA() int {
 	// Try the build now
 	projectName := projectSettings["PROJECT_NAME"]
 
 	err := exportIPAForIOS(projectName)
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosArchive() (int, bool) {
+func IosArchive() int {
 	projectType := projectSettings["UP_PROJECT_TYPE"]
 	projectName := projectSettings["PROJECT_NAME"]
 	projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
@@ -59,46 +59,46 @@ func IosArchive() (int, bool) {
 	err := archiveForIOS(projectType, projectPath, projectScheme, projectName)
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosCertificates() (int, bool) {
+func IosCertificates() int {
 	err := installCertificates()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosProvisioning() (int, bool) {
+func IosProvisioning() int {
 	err := addProvisioningProfiles()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosDeploySimulator() (int, bool) {
+func IosDeploySimulator() int {
 	projectName := projectSettings["PROJECT_NAME"]
 	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
 
 	err := deployToSimulator(projectName, projectBundleIdentifier)
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosTest() (int, bool) {
+func IosTest() int {
 
 	projectType := projectSettings["UP_PROJECT_TYPE"]
 	projectName := projectSettings["PROJECT_NAME"]
@@ -110,13 +110,13 @@ func IosTest() (int, bool) {
 	err := testForIOS(projectType, projectPath, projectScheme, projectDevice)
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosBuild() (int, bool) {
+func IosBuild() int {
 
 	// Try the build now
 	projectType := projectSettings["UP_PROJECT_TYPE"]
@@ -129,18 +129,18 @@ func IosBuild() (int, bool) {
 	err := compileForIOS(projectType, projectPath, projectScheme, projectDevice)
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func IosPrepare() (int, bool) {
+func IosPrepare() int {
 	fmt.Println("We will now try and load your xcode settings")
 	err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
 	if err != nil {
 		utils.LogError("We could not read your xcode settings, it this an iOS repo?\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
 	getProjectPath()             // Gets UP_PROJECT_EXTENSION, UP_PROJECT_TYPE in projectSettings
@@ -162,7 +162,7 @@ func IosPrepare() (int, bool) {
 		}
 	} else {
 		// Device not found, can't start the simulator
-		return 1, true
+		return 1
 	}
 
 	// Either simulator should be running by now or should have been started
@@ -171,17 +171,17 @@ func IosPrepare() (int, bool) {
 	err = findAvailableSchemes()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
 	// Increment the build number
 	err = incrementBuildNumber()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
 func incrementBuildNumber() error {
@@ -231,11 +231,11 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
 
 // xcrun simctl launch booted "${productBundleIdentifier}"
 
-func SetupExportPlist() (int, bool) {
+func SetupExportPlist() int {
 	configExits := utils.FileExists(".private/export.plist")
 	if configExits == true {
 		fmt.Println("It looks like .private/export.plist is already here, skipping this step")
-		return 1, false
+		return 1
 	} else {
 		// export.Plist does not exist
 		// Create a new export.plist in this directory in .private
@@ -258,12 +258,12 @@ func SetupExportPlist() (int, bool) {
 		err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
 		if err != nil {
 			utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
-			return 1, true
+			return 1
 		}
 	}
 
 	fmt.Println("We just added a sample file to .private/export.plist!")
-	return 0, false
+	return 0
 
 }
 
@@ -271,13 +271,13 @@ func SetupExportPlist() (int, bool) {
 // Setup provisioning profiles
 // This will probably be run once in a while
 //
-func SetupProfiles() (int, bool) {
+func SetupProfiles() int {
 
 	var b basher.Basher
 	developerAccounts, err := getDeveloperAccounts()
 	if err != nil {
 		utils.LogError(err.Error())
-		return 1, false
+		return 1
 	}
 
 	for _, email := range developerAccounts {
@@ -288,11 +288,11 @@ func SetupProfiles() (int, bool) {
 			_, err := b.Run("FetchAndRepairProvisioningProfiles", []string{email})
 			if err != nil {
 				utils.LogError("We couldn't fix and install your provisioning profiles")
-				return 1, false
+				return 1
 			}
 		}
 	}
-	return 0, true
+	return 0
 }
 
 func getDeveloperAccounts() ([]string, error) {
@@ -495,8 +495,8 @@ func exportIPAForIOS(projectName string) error {
 
 	if exportPlistExists == false {
 		// If export.plist doesn't exist, create it
-		status, next := SetupExportPlist()
-		if status != 0 || next == true {
+		status := SetupExportPlist()
+		if status != 0 {
 			return errors.New("We could not add an export.plist to your .private folder")
 		}
 	}
@@ -786,11 +786,11 @@ func xcodeBuildSettings() error {
 // Choose the correct version of Xcode for the project
 // It is usually defined in config.toml
 //
-func SetupXcode() (int, bool) {
+func SetupXcode() int {
 	version, err := command.Run([]string{"xcodebuild", "-version"}, "")
 	if err != nil {
 		utils.LogError("We were unable to get the Xcode version " + err.Error())
-		return 1, true
+		return 1
 	}
 
 	var currentXcodeVersion string
@@ -808,21 +808,21 @@ func SetupXcode() (int, bool) {
 		fmt.Println("We were unable to load the config file\n", err.Error())
 
 		fmt.Println("You are currently on Xcode-" + currentXcodeVersion + " and the latest Xcode version is " + conf.Settings.IOSXcodeVersion + ". For now, we will continue using the version that you have right now")
-		return 0, false
+		return 0
 	}
 
 	requiredXcodeVersion := conf.Settings.IOSXcodeVersion
 
 	if requiredXcodeVersion == currentXcodeVersion {
 		fmt.Println("You are on the correct version of Xcode")
-		return 0, false
+		return 0
 	}
 
 	fmt.Println("Alright, so we will try and switch the Xcode version now to " + requiredXcodeVersion)
 
 	if utils.FileExists("/Applications/Xcode-"+requiredXcodeVersion+".app/") == false {
 		fmt.Println("It seems you don't have /Applications/Xcode-" + requiredXcodeVersion + ".app/\nWe expect XCode versions to be placed like this\n/Applications/Xcode-7.2.app\n/Applications/Xcode-7.3.app")
-		return 1, true
+		return 1
 	}
 
 	var RootPassword string
@@ -831,17 +831,17 @@ func SetupXcode() (int, bool) {
 		RootPassword, err = conf.GetRootPassword()
 		if err != nil {
 			utils.LogError(err.Error())
-			return 1, true
+			return 1
 		}
 	}
 
 	out, err := command.Run([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
 	if err != nil {
 		fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
-		return 1, true
+		return 1
 	}
 	fmt.Println(out)
 	fmt.Println("We are now on the " + c.Underline + "Xcode-" + requiredXcodeVersion + c.Default)
 
-	return 0, false
+	return 0
 }

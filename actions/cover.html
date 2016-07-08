@@ -1,0 +1,1776 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">upshift/actions/android.go (0.0%)</option>
+				
+				<option value="file1">upshift/actions/gradle.go (50.0%)</option>
+				
+				<option value="file2">upshift/actions/ios.go (0.0%)</option>
+				
+				<option value="file3">upshift/actions/setup.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package actions
+
+import (
+        // "errors"
+        "fmt"
+        "path/filepath"
+        "strings"
+        "upshift/basher"
+        c "upshift/colours"
+        "upshift/command"
+        "upshift/config"
+        "upshift/utils"
+)
+
+func init() <span class="cov8" title="1">{
+
+}</span>
+
+func UpgradeAndroid() int <span class="cov0" title="0">{
+        var b basher.Basher
+        logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
+        _, err := b.Run("AndroidUpgradeSDK", []string{logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not start upgrading android.\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func SetupAndroid() int <span class="cov0" title="0">{
+        var b basher.Basher
+        logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
+        _, err := b.Run("AndroidInstallSDK", []string{logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not start upgrading android.\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func AndroidBuild() int <span class="cov0" title="0">{
+
+        var b basher.Basher
+        conf := config.Get()
+        cleanOnStart := conf.Settings.CleanBeforeBuild
+
+        if cleanOnStart == true </span><span class="cov0" title="0">{
+                // Clean the project first, we might not ALWAYS want to do this
+                fmt.Println("Let's clean the project before starting")
+                utils.LogMessage("$ ./gradlew clean")
+                logPath, _ := filepath.Abs(".upshift/logs/android-clean.log")
+                _, err := b.Run("AndroidClean", []string{logPath})
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
+                        return 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">launchEmulator()
+
+        // Check if there are any connected devices
+        if len(devicesConnected()) &gt; 0 </span><span class="cov0" title="0">{
+                // Delete older builds if they are installed
+                fmt.Println("Removing older builds from connected devices")
+                logPath, _ := filepath.Abs(".upshift/logs/android-uninstall.log")
+                _, err := b.Run("AndroidUninstall", []string{logPath})
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We could not uninstall the older binaries.\n" + err.Error())
+                        // Don't return on this, we don't even know why this fails, maybe because a device isn't connected
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("Before we build, we need to lint")
+        utils.LogMessage("$ ./gradlew lint")
+        logPath, _ := filepath.Abs(".upshift/logs/android-lint.log")
+        _, err := b.Run("AndroidLint", []string{logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not start lintin your project.\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "BUILD SUCCESSFUL") == false </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong while linting, you need to look at this.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("Okay, so lets build Debug and install it on a emulator")
+        utils.LogMessage("$ ./gradlew assemble --stacktrace")
+        logPath, _ = filepath.Abs(".upshift/logs/android-assemble.log")
+        _, err = b.Run("AndroidAssemble", []string{logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not start building your project.\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">tailData, err = utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "BUILD SUCCESSFUL") == false </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong while building, you need to look at this.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func launchEmulator() bool <span class="cov0" title="0">{
+
+        var b basher.Basher
+
+        // 1. Check if any devices are connected, if yes, use one of those
+        // 2. If nothing so far, see if any avds are listed and start the first one
+        // 3. If still nothing, create an avd and launch it
+        // - N E V E R - G I V E - U P - (Alright, gave up, not creating avds, too much pain)
+
+        // avdToStart := ""
+        // avdToStart = "Nexus_5_API_22"
+
+        devices := devicesConnected()
+        if len(devices) &gt; 0 </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        <span class="cov0" title="0">avds := avdsAvailable()
+        if len(avds) == 0 </span><span class="cov0" title="0">{
+                // No AVDs found, create one
+                // to view a list of available avds you can create, run 'android list targets'
+                // we prefer to use the latest one possible, and we only feed in the required fields
+                // look for ones with ABIs
+                // android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
+                return false
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("Time to load up the emulator " + c.Blue + avds[0] + c.Default)
+        logPath, _ := filepath.Abs(".upshift/logs/android-emulator.log")
+        _, err := b.Run("AndroidLaunchEmulator", []string{avds[0], logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not start loading up the emulator.\n" + err.Error())
+                return false
+        }</span>
+
+        <span class="cov0" title="0">return true</span>
+}
+
+func avdsAvailable() []string <span class="cov0" title="0">{
+        out, err := command.Run([]string{"emulator", "-list-avds"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We couldn't start finding devices\n" + err.Error())
+                return []string{}
+        }</span>
+
+        <span class="cov0" title="0">avds := utils.CreateList(out, []string{})
+        return avds</span>
+}
+
+func devicesConnected() []string <span class="cov0" title="0">{
+        out, err := command.Run([]string{"adb", "devices"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We couldn't start finding devices\n" + err.Error())
+                return []string{}
+        }</span>
+
+        <span class="cov0" title="0">devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
+
+        return devices</span>
+}
+
+//     printf "\n\n${greenColour}Super${noColour}! The build was fine.\n"
+//     # Check if package is empty
+//     if [ "${package}" != "" ];then
+//       if [ "${mainActivity}" != "" ]; then
+//         printf "Starting activity ${blueColour}${mainActivity}${noColour} in package ${blueColour}${package}${noColour}\n"
+
+//         # Start the activity and package
+//         adb shell am start -n ${package}/${package}.${mainActivity}
+
+//         # Tell the user everything is nice and easy
+//         printf "\nAlright, the build was ${greenColour}successful${noColour} 🍺\n\n"
+//       else
+//         # The mainActivity is empty it seems
+//         printf "Alright, the build was ${greenColour}successful${noColour}, but there was no ${blueColour}mainActivity${noColour} defined, so couldn't start it automatically 🍺\n\n"
+//       fi
+//     else
+//       # The package is empty it seems
+//       printf "Alright, the build was ${greenColour}successful${noColour}, but there was no ${blueColour}package${noColour} defined, so couldn't start it automatically 🍺\n\n"
+//     fi
+//   fi
+// }
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package actions
+
+import (
+        "errors"
+        "strings"
+        "upshift/basher"
+        "upshift/command"
+        "upshift/utils"
+)
+
+type Gradle struct {
+        version          string
+        wrapperInstalled bool
+        basher           basher.Basher
+}
+
+func (g *Gradle) Version() error <span class="cov8" title="1">{
+        // Run gradle -v to figure out if it is install
+        out, err := command.Run([]string{"gradle", "-v"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
+        }</span>
+
+        <span class="cov8" title="1">list := utils.CreateList(out, []string{"Build time", "Build number:", "Revision:", "Groovy:", "Ant:", "JVM:", "OS:", "--------------"})
+        g.version = strings.TrimSpace(strings.Replace(strings.Join(list[:], ""), "Gradle", "", 1))
+        return nil</span>
+}
+
+func (g *Gradle) AddWrapper() error <span class="cov8" title="1">{
+        // Check if gradle is installed
+        if g.version == "" </span><span class="cov0" title="0">{
+                g.wrapperInstalled = false
+                return errors.New("Gradle version not known. Please check version first")
+        }</span>
+
+        // Check if gradlew file exists
+        <span class="cov8" title="1">if utils.FileExists("./gradlew") == true </span><span class="cov8" title="1">{
+                g.wrapperInstalled = true
+                return nil
+        }</span>
+
+        // So, gradle is installed, just need to install wrapper [SetupGradleW]
+        // I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
+        <span class="cov0" title="0">utils.LogMessage("$ gradle wrapper")
+        _, err := g.basher.Run("GradleWrapper", []string{})
+        if err != nil </span><span class="cov0" title="0">{
+                g.wrapperInstalled = false
+                return errors.New("We couldn't initialise gradle wrapper\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">g.wrapperInstalled = true
+        return nil</span>
+}
+
+func (g *Gradle) Clean(logPath string) error <span class="cov8" title="1">{
+        // Check if gradle is installed
+        if g.version == "" </span><span class="cov0" title="0">{
+                return errors.New("Gradle version not known. Please check version first")
+        }</span>
+
+        // Check if gradlew file exists
+        <span class="cov8" title="1">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
+                return errors.New("Gradle wrapper is not installed")
+        }</span>
+
+        <span class="cov8" title="1">return g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package actions
+
+import (
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "path/filepath"
+        "regexp"
+        "strings"
+        "upshift/basher"
+        c "upshift/colours"
+        "upshift/command"
+        "upshift/config"
+        "upshift/utils"
+)
+
+var projectSettings map[string]string
+
+func IosUploadBuild() int <span class="cov0" title="0">{
+        err := uploadBuildToItunes()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosCreateApp() int <span class="cov0" title="0">{
+        err := createAppOniTunes()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosExportIPA() int <span class="cov0" title="0">{
+        // Try the build now
+        projectName := projectSettings["PROJECT_NAME"]
+
+        err := exportIPAForIOS(projectName)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosArchive() int <span class="cov0" title="0">{
+        projectType := projectSettings["UP_PROJECT_TYPE"]
+        projectName := projectSettings["PROJECT_NAME"]
+        projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+        projectPath := projectName + projectExtension
+        projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+
+        err := archiveForIOS(projectType, projectPath, projectScheme, projectName)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosCertificates() int <span class="cov0" title="0">{
+        err := installCertificates()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosProvisioning() int <span class="cov0" title="0">{
+        err := addProvisioningProfiles()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosDeploySimulator() int <span class="cov0" title="0">{
+        projectName := projectSettings["PROJECT_NAME"]
+        projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+        err := deployToSimulator(projectName, projectBundleIdentifier)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosTest() int <span class="cov0" title="0">{
+
+        projectType := projectSettings["UP_PROJECT_TYPE"]
+        projectName := projectSettings["PROJECT_NAME"]
+        projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+        projectPath := projectName + projectExtension
+        projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+        projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+
+        err := testForIOS(projectType, projectPath, projectScheme, projectDevice)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosBuild() int <span class="cov0" title="0">{
+
+        // Try the build now
+        projectType := projectSettings["UP_PROJECT_TYPE"]
+        projectName := projectSettings["PROJECT_NAME"]
+        projectExtension := projectSettings["UP_PROJECT_EXTENSION"]
+        projectPath := projectName + projectExtension
+        projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+        projectDevice := projectSettings["UP_SIMULATOR_IPHONE"]
+
+        err := compileForIOS(projectType, projectPath, projectScheme, projectDevice)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func IosPrepare() int <span class="cov0" title="0">{
+        fmt.Println("We will now try and load your xcode settings")
+        err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not read your xcode settings, it this an iOS repo?\n" + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">getProjectPath()             // Gets UP_PROJECT_EXTENSION, UP_PROJECT_TYPE in projectSettings
+        findXcodeAndOSForSimulator() // Gets UP_XCODE_VERSION, UP_SIMULATOR_IPHONE, UP_SIMULATOR_IPHONEOS in projectSettings
+
+        // Create the device name for testing
+        deviceForSimulator := projectSettings["UP_SIMULATOR_IPHONE"] + " (" + projectSettings["UP_SIMULATOR_IPHONEOS"] + ")"
+
+        // Check if this device is available on this machine
+        fmt.Println("Checking if this machine can run the simulator for " + deviceForSimulator)
+        if findIfDeviceIsAvailable(deviceForSimulator) == true </span><span class="cov0" title="0">{
+                // If simulator is running, don't do anything, if not start it
+                if isSimulatorRunning() == true </span><span class="cov0" title="0">{
+                        fmt.Println("Oh, it seems your simulator is already running, we can't figure out which version it is though")
+                }</span><span class="cov0" title="0"> else {
+                        fmt.Println("It sure is available, lets start up the simulator")
+                        startSimulator(deviceForSimulator)
+                        fmt.Println("You should see a simulator loading in the background")
+                }</span>
+        }<span class="cov0" title="0"> else {
+                // Device not found, can't start the simulator
+                return 1
+        }</span>
+
+        // Either simulator should be running by now or should have been started
+
+        // Find available schemes
+        <span class="cov0" title="0">err = findAvailableSchemes()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        // Increment the build number
+        <span class="cov0" title="0">err = incrementBuildNumber()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">return 0</span>
+}
+
+func incrementBuildNumber() error <span class="cov0" title="0">{
+        var b basher.Basher
+        projectName := projectSettings["PROJECT_NAME"]
+        _, err := b.Run("IOSIncrementBuildNumber", []string{projectName})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We couldn't incremenet the build number")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func deployToSimulator(projectName string, projectBundleIdentifier string) error <span class="cov0" title="0">{
+        builtFile := ""
+        debugFile, _ := filepath.Abs(".upshift/build/Build/Products/Debug-iphonesimulator/" + projectName + ".app")
+        releaseFile, _ := filepath.Abs(".upshift/build/Build/Products/Release-iphonesimulator/" + projectName + ".app")
+        fileExits := utils.FileExists(debugFile)
+        if fileExits == false </span><span class="cov0" title="0">{
+                fileExits = utils.FileExists(releaseFile)
+                if fileExits == false </span><span class="cov0" title="0">{
+                        return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
+                }</span><span class="cov0" title="0"> else {
+                        // we found the release file
+                        builtFile = releaseFile
+                }</span>
+        }<span class="cov0" title="0"> else {
+                // we found the debug file
+                builtFile = debugFile
+        }</span>
+
+        // If file exists, push it to the simulator
+        <span class="cov0" title="0">fmt.Println("Installing the app in the simulator")
+        _, err := command.Run([]string{"xcrun", "simctl", "install", "booted", builtFile}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not deploy the app to the simulator\n" + err.Error())
+        }</span>
+
+        // Start the app
+        <span class="cov0" title="0">fmt.Println("Starting the app in the simulator")
+        _, err = command.Run([]string{"xcrun", "simctl", "launch", "booted", projectBundleIdentifier}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not deploy the app to the simulator\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// xcrun simctl launch booted "${productBundleIdentifier}"
+
+func SetupExportPlist() int <span class="cov0" title="0">{
+        configExits := utils.FileExists(".private/export.plist")
+        if configExits == true </span><span class="cov0" title="0">{
+                fmt.Println("It looks like .private/export.plist is already here, skipping this step")
+                return 1
+        }</span><span class="cov0" title="0"> else {
+                // export.Plist does not exist
+                // Create a new export.plist in this directory in .private
+
+                sampleExportPlist := `&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+        &lt;key&gt;method&lt;/key&gt;
+        &lt;string&gt;ad-hoc&lt;/string&gt;
+        &lt;key&gt;uploadSymbols&lt;/key&gt;
+        &lt;true/&gt;
+        &lt;key&gt;uploadBitcode&lt;/key&gt;
+        &lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;"`
+
+                exportPlistBytes := []byte(sampleExportPlist)
+
+                err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
+                        return 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("We just added a sample file to .private/export.plist!")
+        return 0</span>
+
+}
+
+//
+// Setup provisioning profiles
+// This will probably be run once in a while
+//
+func SetupProfiles() int <span class="cov0" title="0">{
+
+        var b basher.Basher
+        developerAccounts, err := getDeveloperAccounts()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">for _, email := range developerAccounts </span><span class="cov0" title="0">{
+                email = strings.TrimSpace(email)
+
+                if email != "" </span><span class="cov0" title="0">{
+                        fmt.Println("Trying to repair your provisioning profiles and installing new and fixed ones for " + email)
+                        _, err := b.Run("FetchAndRepairProvisioningProfiles", []string{email})
+                        if err != nil </span><span class="cov0" title="0">{
+                                utils.LogError("We couldn't fix and install your provisioning profiles")
+                                return 1
+                        }</span>
+                }
+        }
+        <span class="cov0" title="0">return 0</span>
+}
+
+func getDeveloperAccounts() ([]string, error) <span class="cov0" title="0">{
+
+        var developerAccounts []string
+
+        conf := config.Get()
+
+        if conf.Settings.IOSDeveloperAccount == "" </span><span class="cov0" title="0">{
+                return developerAccounts, errors.New("You should define the emails of the developer account in the global config")
+        }</span>
+
+        <span class="cov0" title="0">developerAccounts = strings.SplitN(conf.Settings.IOSDeveloperAccount, ",", -1)
+        return developerAccounts, nil</span>
+}
+
+func installCertificates() error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
+
+        basePath, _ := filepath.Abs(".private")
+
+        // First check if the certificates are added to .private folder
+        appleCer, _ := filepath.Abs(".private/apple.cer")
+        distributionCer, _ := filepath.Abs(".private/distribution.cer")
+        distributionP12, _ := filepath.Abs(".private/distribution.p12")
+
+        // If they exist, install them
+        appleCerExists := utils.FileExists(appleCer)
+        distributionCerExists := utils.FileExists(distributionCer)
+        distributionP12Exists := utils.FileExists(distributionP12)
+
+        if !(appleCerExists &amp;&amp; distributionCerExists &amp;&amp; distributionP12Exists) </span><span class="cov0" title="0">{
+                // If they don't exist, check global config to see if they have them
+                conf := config.Get()
+                globalBasePath := conf.Settings.IOSCertificatePath
+
+                if globalBasePath == "" </span><span class="cov0" title="0">{
+                        return errors.New("The certificates don't exist in both .private and global conf")
+                }</span>
+
+                <span class="cov0" title="0">basePath = globalBasePath
+
+                appleCer, _ = filepath.Abs(globalBasePath + "/apple.cer")
+                distributionCer, _ = filepath.Abs(globalBasePath + "/distribution.cer")
+                distributionP12, _ = filepath.Abs(globalBasePath + "/distribution.p12")
+
+                // If they exist, install them
+                appleCerExists = utils.FileExists(appleCer)
+                distributionCerExists = utils.FileExists(distributionCer)
+                distributionP12Exists = utils.FileExists(distributionP12)
+
+                if !(appleCerExists &amp;&amp; distributionCerExists &amp;&amp; distributionP12Exists) </span><span class="cov0" title="0">{
+                        return errors.New("All the certificates don't exist in both .private and global conf")
+                }</span>
+                // If they don't, crash and burn
+        }
+
+        <span class="cov0" title="0">b.Run("InstallCertificates", []string{basePath})
+        // #TODO Ignore the error here. Even if it says that certificates are already installed, it gets treated like an error
+        // if err != nil {
+        //         return errors.New("The certicates could not be installed!")
+        // }
+
+        fmt.Println("The certificates were successfully installed")
+        return nil</span>
+}
+
+func uploadBuildToItunes() error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("Upload the IPA on iTunesConnect")
+
+        // Get the username which will need to login
+        // Highest priority to local config
+        conf := config.Get()
+        developerAccount := conf.Settings.IOSDeveloperAccount
+
+        if developerAccount == "" </span><span class="cov0" title="0">{
+                // Second priority to machine config
+                developerAccounts, err := getDeveloperAccounts()
+                if err != nil </span><span class="cov0" title="0">{
+                        return errors.New(err.Error())
+                }</span>
+
+                // If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+                <span class="cov0" title="0">if len(developerAccounts) &gt; 1 </span><span class="cov0" title="0">{
+                        return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+                }</span>
+
+                <span class="cov0" title="0">if len(developerAccounts) == 1 </span><span class="cov0" title="0">{
+                        developerAccount = developerAccounts[0]
+                }</span>
+        }
+
+        <span class="cov0" title="0">projectScheme := projectSettings["UP_PROJECT_SCHEME"]
+        projectName := projectSettings["PROJECT_NAME"]
+
+        // Add SwitSources if required - AddSwiftSources
+        status, err := b.Run("AddSwiftSources", []string{projectName, projectScheme})
+        fmt.Println("status", status)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("err", err.Error())
+                return errors.New("We could not add SwiftSources to the IPA")
+        }</span>
+
+        <span class="cov0" title="0">status, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not upload the IPA on iTunes")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We have successfully uploaded this IPA on iTunes, it's all yours now")
+        return nil</span>
+}
+
+func createAppOniTunes() error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("Create an app on iTunesConnect if it doesn't exist")
+
+        // Get the username which will need to login
+        // Highest priority to local config
+        conf := config.Get()
+        developerAccount := conf.Settings.IOSDeveloperAccount
+
+        if developerAccount == "" </span><span class="cov0" title="0">{
+                // Second priority to machine config
+                developerAccounts, err := getDeveloperAccounts()
+                if err != nil </span><span class="cov0" title="0">{
+                        return errors.New(err.Error())
+                }</span>
+
+                // If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+                <span class="cov0" title="0">if len(developerAccounts) &gt; 1 </span><span class="cov0" title="0">{
+                        return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+                }</span>
+
+                <span class="cov0" title="0">if len(developerAccounts) == 1 </span><span class="cov0" title="0">{
+                        developerAccount = developerAccounts[0]
+                }</span>
+        }
+
+        // Get the bundle identifier for this project
+        <span class="cov0" title="0">projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+        // Get the name of the project
+        // And add your shit to it
+        projectName := projectSettings["PROJECT_NAME"] + " Beta by Upshift"
+
+        _, err := b.Run("CreateAppOnItunes", []string{developerAccount, projectBundleIdentifier, projectName})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not create the app on iTunes\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We have successfully added this app on iTunes, woohoo")
+        return nil</span>
+}
+
+func addProvisioningProfiles() error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("We will now try to find the provisioning profile")
+
+        // Get the username which will need to login
+        // Highest priority to local config
+        conf := config.Get()
+        developerAccount := conf.Settings.IOSDeveloperAccount
+
+        if developerAccount == "" </span><span class="cov0" title="0">{
+                // Second priority to machine config
+                developerAccounts, err := getDeveloperAccounts()
+                if err != nil </span><span class="cov0" title="0">{
+                        return errors.New(err.Error())
+                }</span>
+
+                // If there is only one in machine config, then we can use it, if there are more you need to add it to local config
+                <span class="cov0" title="0">if len(developerAccounts) &gt; 1 </span><span class="cov0" title="0">{
+                        return errors.New("There are too many developer accounts in the machine config, we either need one in machine config or one in local config")
+                }</span>
+
+                <span class="cov0" title="0">if len(developerAccounts) == 1 </span><span class="cov0" title="0">{
+                        developerAccount = developerAccounts[0]
+                }</span>
+        }
+
+        // Get the bundle identifier for this project
+        <span class="cov0" title="0">projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
+
+        _, err := b.Run("FindProvisioningProfile", []string{developerAccount, projectBundleIdentifier})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not find your provisioning profile")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We have successfully added your profiles to this machine, woohoo")
+        return nil</span>
+}
+
+func exportIPAForIOS(projectName string) error <span class="cov0" title="0">{
+        var b basher.Basher
+        // Check if .private/export.plist exists, we can't do shit without it
+        exportPlistPath, _ := filepath.Abs(".private/export.plist")
+        exportPlistExists := utils.FileExists(exportPlistPath)
+
+        if exportPlistExists == false </span><span class="cov0" title="0">{
+                // If export.plist doesn't exist, create it
+                status := SetupExportPlist()
+                if status != 0 </span><span class="cov0" title="0">{
+                        return errors.New("We could not add an export.plist to your .private folder")
+                }</span>
+        }
+
+        // Fire the export IPA bash script
+        <span class="cov0" title="0">utils.LogMessage("$ xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/" + projectName + ".xcarchive -exportPath .upshift")
+        logPath, _ := filepath.Abs(".upshift/logs/xcode-export.log")
+        _, err := b.Run("ExportIOS", []string{projectName, logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not export IPA\n" + err.Error())
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to see what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "EXPORT SUCCEEDED") == false </span><span class="cov0" title="0">{
+                return errors.New("Something went wrong while exporting the IPA, you need to look at this.")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to export an IPA successfully, awesome")
+        return nil</span>
+}
+
+func archiveForIOS(projectType string, projectPath string, scheme string, projectName string) error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -derivedDataPath .upshift/build -archivePath .upshift/" + projectName + ".xcarchive archive")
+        logPath, _ := filepath.Abs(".upshift/logs/xcode-archive.log")
+        _, err := b.Run("ArchiveIOS", []string{projectType, projectPath, scheme, projectName, logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not archive for iOS\n" + err.Error())
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "ARCHIVE SUCCEEDED") == false </span><span class="cov0" title="0">{
+                return errors.New("Something went wrong with the archive, you need to look at this.")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to archive successfully, awesome")
+        return nil</span>
+}
+
+func testForIOS(projectType string, projectPath string, scheme string, device string) error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("$ xctool -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" test")
+        logPath, _ := filepath.Abs(".upshift/logs/xcode-test.log")
+        _, err := b.Run("TestIOS", []string{projectType, projectPath, scheme, device, logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not run tests for iOS\n" + err.Error())
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "BUILD SUCCEEDED") == false </span><span class="cov0" title="0">{
+                return errors.New("Something went wrong with the build, you need to look at this.")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to run all tests successfully, awesome")
+        return nil</span>
+}
+
+func compileForIOS(projectType string, projectPath string, scheme string, device string) error <span class="cov0" title="0">{
+        var b basher.Basher
+        utils.LogMessage("$ xcodebuild -" + projectType + " " + projectPath + " -scheme " + scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + device + "\" -derivedDataPath .upshift/build")
+        logPath, _ := filepath.Abs(".upshift/logs/xcode-build.log")
+        _, err := b.Run("CompileIOS", []string{projectType, projectPath, scheme, device, logPath})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not compile for iOS\n" + err.Error())
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "BUILD SUCCEEDED") == false </span><span class="cov0" title="0">{
+                return errors.New("Something went wrong with the build, you need to look at this.")
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to build successfully, awesome")
+        return nil</span>
+}
+
+func findAvailableSchemes() error <span class="cov0" title="0">{
+        // 1. If scheme defined in config exists, use that
+        // 2. If there is no scheme in config, but there is only one scheme, use that
+        // 3. If there is no scheme in config and multiple in xcode, show an error
+
+        // If a scheme is available in config, get that
+        conf := config.Get()
+        confScheme := conf.Settings.IOSScheme
+
+        // Get the list of schemes from xcode
+        listDump, err := command.Run([]string{"xcodebuild", "-list"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("We could not get a list from xcode\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">listRows := strings.Split(listDump, "\n")
+        schemeRows := []string{}
+        readingSchemesFlag := false
+        for _, row := range listRows </span><span class="cov0" title="0">{
+                // If we have already found "    Schemes:", lets add non null values
+                if readingSchemesFlag == true </span><span class="cov0" title="0">{
+                        // Remove extra spaces
+                        row = strings.TrimSpace(row)
+                        if row != "" </span><span class="cov0" title="0">{
+                                // Add if non-null
+                                schemeRows = append(schemeRows, row)
+                                // Since we are looping, check if the scheme available from conf is available in the sytem
+                                // if it is, just return and say it is
+                                if row == confScheme </span><span class="cov0" title="0">{
+                                        projectSettings["UP_PROJECT_SCHEME"] = row
+                                        return nil
+                                }</span>
+                        }
+                }
+                // After you see the row which says "    Schemes:", start adding items to list of schemes available
+                <span class="cov0" title="0">if strings.Contains(row, "Schemes:") </span><span class="cov0" title="0">{
+                        readingSchemesFlag = true
+                }</span>
+        }
+
+        // Throw an error if there are no schemes available
+        <span class="cov0" title="0">if len(schemeRows) == 0 </span><span class="cov0" title="0">{
+                return errors.New("You have no " + c.Red + "schemes" + c.Default + " defined in your project. I'm going home.")
+        }</span>
+
+        // Condition 1 : has already been checked, check the error condition
+        <span class="cov0" title="0">if confScheme != "" </span><span class="cov0" title="0">{
+                return errors.New("Your config says we should use " + c.Red + confScheme + c.Default + " to build the project. But that scheme is missing!")
+        }</span>
+
+        // Condition 2 : Checking
+        <span class="cov0" title="0">if len(schemeRows) == 1 </span><span class="cov0" title="0">{
+                // There is only one scheme, you can set this in projectSettings
+                fmt.Println("It seems you didn't define a scheme, but Xcode told us about " + c.Blue + schemeRows[0] + c.Default + " so we are using that")
+                projectSettings["UP_PROJECT_SCHEME"] = schemeRows[0]
+                return nil
+        }</span>
+
+        // Condition 3 : Just throw an error
+        <span class="cov0" title="0">return errors.New("You have multiple schemes in your project, hence we can't pick one automatically. Please choose one in your config")</span>
+}
+
+func startSimulator(device string) <span class="cov0" title="0">{
+        // basher returns an error if status &gt; 0 or if there is an error
+        // Whenever we start the simulator, for some reason, the exit code is always 255, though there is no error
+        // Hence skipping the error check here
+        var b basher.Basher
+        b.Run("StartSimulator", []string{device})
+}</span>
+
+func findIfDeviceIsAvailable(device string) bool <span class="cov0" title="0">{
+        instrumentsDump, err := command.Run([]string{"instruments", "-s", "devices"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return false
+        }</span>
+
+        <span class="cov0" title="0">instrumentRows := strings.Split(instrumentsDump, "\n")
+        uuidRegexp, _ := regexp.Compile("\\[(.*?)\\]")
+        var instruments []string
+
+        for _, instrument := range instrumentRows </span><span class="cov0" title="0">{
+                uuid := uuidRegexp.FindString(instrument)
+
+                isSimulator := strings.Contains(instrument, "(Simulator)")
+                instrument = strings.Replace(instrument, "(Simulator)", "", 1)
+
+                simulatorString := "DEVICE   "
+                if isSimulator == true </span><span class="cov0" title="0">{
+                        simulatorString = "SIMULATOR"
+                }</span>
+
+                <span class="cov0" title="0">if uuid != "" </span><span class="cov0" title="0">{
+                        instrument = strings.TrimSpace(strings.Replace(instrument, uuid, "", 1))
+                        instruments = append(instruments, c.Gray+simulatorString+c.Default+" "+c.Bold+c.Green+instrument+c.Default+" "+uuid)
+                }</span>
+
+                <span class="cov0" title="0">if instrument == device </span><span class="cov0" title="0">{
+                        return true
+                }</span>
+        }
+
+        <span class="cov0" title="0">utils.LogError("Your device " + c.Red + device + c.Default + " was not found\nThe following devices are available")
+        for _, item := range instruments </span><span class="cov0" title="0">{
+                fmt.Println(item)
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+// Start the simulator
+func findXcodeAndOSForSimulator() <span class="cov0" title="0">{
+        conf := config.Get()
+        var iPhoneOS string
+
+        // Find the correct simulator
+        // From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
+        switch conf.Settings.IOSXcodeVersion </span>{
+        <span class="cov0" title="0">case "7.3.1":
+                iPhoneOS = "9.3"</span>
+        <span class="cov0" title="0">case "7.3":
+                iPhoneOS = "9.3"</span>
+        <span class="cov0" title="0">case "7.2.1":
+                iPhoneOS = "9.2"</span>
+        <span class="cov0" title="0">case "7.2":
+                iPhoneOS = "9.2"</span>
+        <span class="cov0" title="0">case "7.1.1":
+                iPhoneOS = "9.1"</span>
+        <span class="cov0" title="0">case "7.1":
+                iPhoneOS = "9.1"</span>
+        <span class="cov0" title="0">case "7.0.1":
+                iPhoneOS = "9.0"</span>
+        <span class="cov0" title="0">case "7.0":
+                iPhoneOS = "9.0"</span>
+        <span class="cov0" title="0">default:
+                iPhoneOS = "9.3"</span>
+        }
+
+        <span class="cov0" title="0">projectSettings["UP_XCODE_VERSION"] = conf.Settings.IOSXcodeVersion
+        projectSettings["UP_SIMULATOR_IPHONE"] = conf.Settings.IOSTestDevice
+        projectSettings["UP_SIMULATOR_IPHONEOS"] = iPhoneOS
+
+        // This is sort of the wrong place, but we want scheme for later too
+        projectSettings["UP_PROJECT_SCHEME"] = conf.Settings.IOSScheme</span>
+}
+
+// Is Simulator running
+func isSimulatorRunning() bool <span class="cov0" title="0">{
+        _, err := command.Run([]string{"pgrep", "-f", "Simulator.app"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov0" title="0">return true</span>
+}
+
+// Get Project Path
+func getProjectPath() <span class="cov0" title="0">{
+        conf := config.Get()
+
+        useWorkspace := conf.Settings.IOSUseWorkspace
+        podFileFullPath, _ := filepath.Abs("Podfile")
+        podfileExists := utils.FileExists(podFileFullPath)
+
+        if useWorkspace || podfileExists </span><span class="cov0" title="0">{
+                projectSettings["UP_PROJECT_TYPE"] = "workspace"
+                projectSettings["UP_PROJECT_EXTENSION"] = ".xcworkspace"
+        }</span><span class="cov0" title="0"> else {
+                projectSettings["UP_PROJECT_TYPE"] = "project"
+                projectSettings["UP_PROJECT_EXTENSION"] = ".xcodeproj"
+        }</span>
+}
+
+// Read values from xcodebuild settings
+func xcodeBuildSettings() error <span class="cov0" title="0">{
+        projectSettings = make(map[string]string)
+        version, err := command.Run([]string{"xcodebuild", "-showBuildSettings"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New(("We were unable to read xcodebuild settings\n" + err.Error()))
+        }</span>
+
+        <span class="cov0" title="0">settingsRows := strings.Split(version, "\n")
+        for _, row := range settingsRows </span><span class="cov0" title="0">{
+                settingsKeys := strings.Split(row, "=")
+                if len(settingsKeys) == 2 </span><span class="cov0" title="0">{
+                        key := strings.TrimSpace(settingsKeys[0])
+                        value := strings.TrimSpace(settingsKeys[1])
+                        projectSettings[key] = value
+                }</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+//
+// Choose the correct version of Xcode for the project
+// It is usually defined in config.toml
+//
+func SetupXcode() int <span class="cov0" title="0">{
+        version, err := command.Run([]string{"xcodebuild", "-version"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We were unable to get the Xcode version " + err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">var currentXcodeVersion string
+        versionRows := strings.Split(version, "\n")
+        for _, row := range versionRows </span><span class="cov0" title="0">{
+                if strings.Contains(row, "Xcode") == true </span><span class="cov0" title="0">{
+                        currentXcodeVersion = strings.TrimSpace(strings.Trim(row, "Xcode"))
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("We are currently using Xcode-" + currentXcodeVersion)
+
+        conf := config.Get()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We were unable to load the config file\n", err.Error())
+
+                fmt.Println("You are currently on Xcode-" + currentXcodeVersion + " and the latest Xcode version is " + conf.Settings.IOSXcodeVersion + ". For now, we will continue using the version that you have right now")
+                return 0
+        }</span>
+
+        <span class="cov0" title="0">requiredXcodeVersion := conf.Settings.IOSXcodeVersion
+
+        if requiredXcodeVersion == currentXcodeVersion </span><span class="cov0" title="0">{
+                fmt.Println("You are on the correct version of Xcode")
+                return 0
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("Alright, so we will try and switch the Xcode version now to " + requiredXcodeVersion)
+
+        if utils.FileExists("/Applications/Xcode-"+requiredXcodeVersion+".app/") == false </span><span class="cov0" title="0">{
+                fmt.Println("It seems you don't have /Applications/Xcode-" + requiredXcodeVersion + ".app/\nWe expect XCode versions to be placed like this\n/Applications/Xcode-7.2.app\n/Applications/Xcode-7.3.app")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">var RootPassword string
+        if conf.IsCI() == true </span><span class="cov0" title="0">{
+                // We are on CI, we need to enter password programatically
+                RootPassword, err = conf.GetRootPassword()
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError(err.Error())
+                        return 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">out, err := command.Run([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + requiredXcodeVersion + ".app/"}, RootPassword+"\n")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We couldn't switch Xcodes, you're going to be stuck with this one")
+                return 1
+        }</span>
+        <span class="cov0" title="0">fmt.Println(out)
+        fmt.Println("We are now on the " + c.Underline + "Xcode-" + requiredXcodeVersion + c.Default)
+
+        return 0</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package actions
+
+import (
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "path/filepath"
+        "strconv"
+        "strings"
+        "time"
+        "upshift/basher"
+        c "upshift/colours"
+        "upshift/command"
+        "upshift/config"
+        "upshift/utils"
+)
+
+//
+// Show the version of the current app
+//
+func ShowVersion() int <span class="cov0" title="0">{
+        conf := config.Get()
+        fmt.Println(conf.Settings.AppVersion)
+        return 0
+}</span>
+
+//
+// Install cocoapods
+//
+func InstallPods() int <span class="cov0" title="0">{
+        podsPath, _ := filepath.Abs("Podfile")
+        podsExist := utils.FileExists(podsPath)
+
+        if podsExist == false </span><span class="cov0" title="0">{
+                fmt.Println("It looks like this project doesn't use pods")
+                return 0
+        }</span>
+
+        // So pods exist, damn
+        <span class="cov0" title="0">fmt.Println("It looks like this project uses pods, let me try and set them up")
+
+        err := runPodRepoUpdate()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">utils.LogMessage("$ pod install")
+        podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
+        var b basher.Basher
+        status, err := b.Run("PodInstall", []string{podInstallLogFullPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't initialise pods\n" + err.Error())
+                return status
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(podInstallLogFullPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "fatal") == true || strings.Contains(tailData, "error") == true || strings.Contains(tailData, "Invalid") == true </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong with installing pods, you need to look at this.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to successfully setup cocoapods, moving on")
+        return 0</span>
+
+}
+
+func runPodRepoUpdate() error <span class="cov0" title="0">{
+
+        // Check if it's been a while since we ran `pod repo update` and if yes, run it
+        globalConf := config.Get()
+        difference := int32(time.Now().Unix()) - globalConf.Settings.AndroidSDKUpdateTime
+
+        // Run this if last update was never done or more than a month ago
+        if globalConf.Settings.AndroidSDKUpdateTime == 0 || difference &gt; 3600*24*30 </span><span class="cov0" title="0">{
+                // This means we have never come here.
+                utils.LogMessage("$ pod repo update --verbose")
+                podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-repo-update.log")
+                var b basher.Basher
+                _, err := b.Run("PodRepoUpdate", []string{podInstallLogFullPath})
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // Read the last 500 bytes from the whole message, we just want to what happened at the end
+                <span class="cov0" title="0">tailData, err := utils.FileTail(podInstallLogFullPath, 500)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov0" title="0">if strings.Contains(tailData, "error") == true </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // When an upgrade is available, they say
+                // CocoaPods 1.0.1 is available.
+                // To update use: `sudo gem install cocoapods`
+                // Until we reach version 1.0 the features of CocoaPods can and will change.
+                // We strongly recommend that you use the latest version at all times.
+                <span class="cov0" title="0">if strings.Contains(tailData, "sudo gem install cocoapods") == true </span><span class="cov0" title="0">{
+                        // This means that an update is available, run cocoapods update
+                        status := SetupPods(true)
+                        if status &gt; 0 </span><span class="cov0" title="0">{
+                                return errors.New("We couldn't update to the new version of cocoapods")
+                        }</span>
+                        <span class="cov0" title="0">fmt.Println("Updated cocoapods to the latest version")</span>
+                }
+
+                <span class="cov0" title="0">globalConf.Settings.AndroidSDKUpdateTime = int32(time.Now().Unix())
+                globalConf.WriteMachineConfig()</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+//
+// Initialize submodules in a project
+//
+func GitSubmodules() int <span class="cov0" title="0">{
+        submodulePath, _ := filepath.Abs(".gitmodules")
+        submodulesExist := utils.FileExists(submodulePath)
+
+        if submodulesExist == false </span><span class="cov0" title="0">{
+                fmt.Println("It looks like this project doesn't use submodules")
+                return 0
+        }</span>
+
+        // So git submodules exist
+        <span class="cov0" title="0">fmt.Println("It looks like this project uses git submodules, let me try and set them up")
+
+        utils.LogMessage("$ git submodule init")
+        initLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-init.log")
+        var b basher.Basher
+        status, err := b.Run("GitSubmoduleInit", []string{initLogFileFullPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't initialise submodules\n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">utils.LogMessage("$ git submodule update")
+        updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
+        status, err = b.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't update submodules\n" + err.Error())
+                return status
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(updateLogFileFullPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong with submodule update, you need to look at this.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to successfully setup submodules, moving on")
+        return 0</span>
+}
+
+//
+// Do a git pull on the project based on the defined remote and the branch the user is currently on
+//
+func GitPull() int <span class="cov0" title="0">{
+        conf := config.Get()
+
+        // If you are running on a CI, we don't need to worry about this, just skip and take up the next thing
+        if conf.IsCI() == true </span><span class="cov0" title="0">{
+                fmt.Println("It seems you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
+                return 0
+        }</span>
+
+        // Find out which repo and branch are they on
+        <span class="cov0" title="0">out, err := command.Run([]string{"git", "status"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Either this is not a git repository, or you don't even have git installed.")
+                return 1
+        }</span>
+
+        // Read the first row of git sttus which says 'on branch xyz'
+        <span class="cov0" title="0">gitStatusOutputRows := strings.Split(out, "\n")
+        var firstRow string
+        if len(gitStatusOutputRows) &gt; 0 </span><span class="cov0" title="0">{
+                firstRow = gitStatusOutputRows[0]
+        }</span><span class="cov0" title="0"> else {
+                utils.LogError("You are probably not in a git repository. Quit messing around.")
+                return 1
+        }</span>
+
+        // Alright find the correct branch and show it to the user
+        <span class="cov0" title="0">currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
+        fmt.Println("We suspect that you are on branch " + c.Blue + currentBranch + c.Default)
+
+        // Check if the user has one or more remotes
+        // If they have one, just use it
+        // If they have more
+        //                 Show them the remotes, and ask them to specify it in config.toml
+
+        // Find out which repo and branch are they on
+        out, err = command.Run([]string{"git", "remote"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Either this is not a git repository, or you don't even have git installed.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">var currentRemote string
+        gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
+        switch len(gitRemoteOutputRows) </span>{
+        <span class="cov0" title="0">case 0:
+                utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
+                return 1</span>
+        <span class="cov0" title="0">case 1:
+                currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
+                fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")</span>
+        <span class="cov0" title="0">default:
+                // This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
+                conf := config.Get()
+
+                if conf.Settings.Remote != "" </span><span class="cov0" title="0">{
+                        // Alright, so they have defined a remote, let's check if it exits in our list of remotes
+                        for _, row := range gitRemoteOutputRows </span><span class="cov0" title="0">{
+                                if strings.TrimSpace(conf.Settings.Remote) == strings.TrimSpace(row) </span><span class="cov0" title="0">{
+                                        currentRemote = row
+                                }</span>
+                        }
+
+                        // Didn't find their remote in git remotes, tell them so
+                        <span class="cov0" title="0">if currentRemote == "" </span><span class="cov0" title="0">{
+                                utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
+                                return 1
+                        }</span><span class="cov0" title="0"> else {
+                                fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
+                        }</span>
+                }<span class="cov0" title="0"> else {
+                        // They haven't defined a remote in config, screw them
+                        utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
+                        return 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
+        // Now we have both, a remote and a branch, let's pull
+        logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull.log")
+        var b basher.Basher
+        status, err := b.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
+        // status, err := basher.Run("RunSingleCommand", []string{"$(git pull " + currentRemote + " " + currentBranch + " 2&gt;&amp;1 | tee \"" + logFileFullPath + "\")"})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
+                return status
+        }</span>
+
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logFileFullPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong with the pull, you need to look at this.")
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to pull the latest code, awesome")
+        return 0</span>
+}
+
+//
+// Show help, so that the user knows what to do
+//
+func ShowHelp() int <span class="cov0" title="0">{
+        fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
+        fmt.Println(c.Bold + "\nNAME" + c.Default)
+        fmt.Println("\tupshift -- the creative mobile app builder")
+        fmt.Println(c.Bold + "\nSYNOPSIS" + c.Default)
+        fmt.Println("\tupshift " + c.Underline + "job" + c.Default + " " + c.Underline + "action" + c.Default)
+        fmt.Println(c.Bold + "\nDESCRIPTION" + c.Default)
+        fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
+
+        fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
+        fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do\n")
+        fmt.Println("\tupshift ios build\n\t\tto build your iOS project\n")
+        fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator\n")
+        fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight\n")
+        fmt.Println("\tupshift android build\n\t\tto build your Android project\n")
+        fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator\n")
+        fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric\n")
+        fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml\n")
+        fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder\n")
+        fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project\n")
+        fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
+        fmt.Println("\tupshift -v\n\t\tto view the version number\n")
+
+        fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
+        fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
+        fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
+        fmt.Println("\tupshift action setupScript -- to setup this very script")
+        fmt.Println("\tupshift action setupGradleW -- to setup gradle on your machine")
+        fmt.Println("\tupshift action setupPods -- to setup cocoapods on your machine")
+        fmt.Println("\tupshift action setupXcode -- to choose the correct xcode version for the project")
+        fmt.Println("\tupshift action setupXcpretty -- to setup xcpretty for build output which doesn't suck")
+        fmt.Println("\tupshift action upgradeScript -- to upgrade this script")
+
+        fmt.Println("\tupshift action gitPull -- to pull from code from a repo")
+        // fmt.Println("\tupshift action gitClone -- to clone a repo")
+        fmt.Println("\tupshift action gitSubmodules -- to setup git modules in the project")
+
+        fmt.Println("\tupshift action iosSimulator -- to start the iOS simulator")
+        fmt.Println("\tupshift action iosBuild -- to build an iOS app")
+        fmt.Println("\tupshift action iosRun -- to run an iOS app in the simulator")
+        fmt.Println("\tupshift action iosDeploy -- to archive and deploy an iOS app")
+
+        fmt.Println("\tupshift action androidEmulator -- to start the android emulator")
+        fmt.Println("\tupshift action androidBuild -- to build an android project")
+        fmt.Println("\tupshift action androidRun -- to run an android project")
+        fmt.Println("\tupshift action androidDeploy -- to deploy an android project")
+
+        fmt.Println(c.Bold + "\nCOMPATIBILITY" + c.Default)
+        fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
+        fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
+
+        return 0
+}</span>
+
+// Install xctool via brew
+func SetupXctool() int <span class="cov0" title="0">{
+        return SetupBrew("xctool")
+}</span>
+
+//
+// Common function to setup tools via brew
+//
+func SetupBrew(tool string) int <span class="cov0" title="0">{
+        // Check which version of the brew was installed
+        version, err := command.Run([]string{tool, "--version"}, "")
+        if err == nil </span><span class="cov0" title="0">{
+                // Remove the name of the tool if it is part of the version string
+                version = strings.Replace(version, tool, "", 1)
+                // Now trim whatever is left
+                version = strings.TrimSpace(version)
+                fmt.Println(tool + " is pretty much setup on this system. You are on version " + version)
+                return 0
+        }</span>
+
+        // Check if the command was not found
+        <span class="cov0" title="0">var errorString string
+        if err != nil </span><span class="cov0" title="0">{
+                errorString = err.Error()
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(errorString, "executable file not found") == true </span><span class="cov0" title="0">{
+                // Alright, so the tool was not found, go ahead and install it
+                fmt.Println("Latest " + tool + " was not found, installing it")
+
+                // Brew cowardly refuses to use sudo, hell yeah
+                var b basher.Basher
+                status, err := b.Run("SetupBrewTool", []string{tool})
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We couldn't install " + tool + "\n" + err.Error())
+                        return status
+                }</span>
+
+                <span class="cov0" title="0">fmt.Println(tool + " has been setup on your machine. Have fun.")
+                return 0</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
+        return 1</span>
+}
+
+//
+// If fastlane.tools if is not setup, we go ahead and do it
+//
+func SetupFastlane(force bool) int <span class="cov0" title="0">{
+        return SetupGem("fastlane", "fastlane", force)
+}</span>
+
+//
+// If cocoapods is not setup, we go ahead and do it
+//
+func SetupPods(force bool) int <span class="cov0" title="0">{
+        return SetupGem("cocoapods", "pod", force)
+}</span>
+
+//
+// If Xcpretty is not setup, we go ahead and do it
+// It formats the output from xcode so that you can make sense of what is going wrong
+//
+func SetupXcpretty() int <span class="cov0" title="0">{
+        return SetupGem("xcpretty", "xcpretty", false)
+}</span>
+
+//
+// General script to setup a gem
+//
+func SetupGem(gem string, gemName string, force bool) int <span class="cov0" title="0">{
+        conf := config.Get()
+
+        // Check which version of the gem was installed
+        // force will be true when you want to force running sudo install gem irrespective of if it is installed or not
+        version, err := command.Run([]string{gemName, "--version"}, "")
+        if force == false </span><span class="cov0" title="0">{
+                if err == nil </span><span class="cov0" title="0">{
+                        // Remove the name of the gem if it is part of the version string
+                        version = strings.Replace(version, gemName, "", 1)
+                        // Now trim whatever is left
+                        version = strings.TrimSpace(version)
+                        fmt.Println(gem + " is pretty much setup on this system. You are on version " + version)
+                        return 0
+                }</span>
+        }
+
+        // Check if the command was not found
+        <span class="cov0" title="0">var errorString string
+        if err != nil </span><span class="cov0" title="0">{
+                errorString = err.Error()
+        }</span>
+
+        <span class="cov0" title="0">if strings.Contains(errorString, "executable file not found") == true || force == true </span><span class="cov0" title="0">{
+                // Alright, so the gem was not found, go ahead and install it
+                fmt.Println("Latest " + gem + " was not found, installing it")
+
+                var RootPassword string
+
+                if conf.IsCI() == true </span><span class="cov0" title="0">{
+                        // We are on CI, we need to enter password programatically
+                        RootPassword, err = conf.GetRootPassword()
+                        if err != nil </span><span class="cov0" title="0">{
+                                utils.LogError(err.Error())
+                                return 1
+                        }</span>
+                }
+                // else we are not on CI, ask the user to enter the password
+
+                <span class="cov0" title="0">var b basher.Basher
+                status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We couldn't install " + gem + "\n" + err.Error())
+                        return status
+                }</span>
+
+                <span class="cov0" title="0">fmt.Println(gem + " has been setup on your machine. Have fun.")
+                return 0</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("There was a problem installing " + gem + "\n" + err.Error())
+        return 1</span>
+}
+
+//
+// Call this function to download the latest version of the binary
+// And update the user to the latest version.
+// It does nothing if the user is on the latest version
+//
+func UpgradeScript() int <span class="cov0" title="0">{
+        conf := config.Get()
+
+        resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We couldn't connect to the internet :(", err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">defer resp.Body.Close()
+        body, err := ioutil.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("We were unable to figure out what is the latest version on the server, next time maybe", err.Error())
+                return 1
+        }</span>
+
+        <span class="cov0" title="0">latestVersion := string(body)
+        latestVersion = strings.TrimSpace(latestVersion)
+
+        if latestVersion == conf.Settings.AppVersion </span><span class="cov0" title="0">{
+                fmt.Println("Your powers (and version) are already at the top. You're running v", conf.Settings.AppVersion)
+                return 0
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("Get ready to feel the power at your fingertips")
+
+        var b basher.Basher
+        status, err := b.Run("UpgradeScript", []string{})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
+        return 0</span>
+}
+
+//
+// When a new project doesn't have config, they call this one to create one for them
+//
+func SetupConfig() int <span class="cov0" title="0">{
+
+        configExits := utils.FileExists("./config.toml")
+        if configExits == true </span><span class="cov0" title="0">{
+                fmt.Println("It looks like a config.toml is already here, skipping this step")
+                return 1
+        }</span><span class="cov0" title="0"> else {
+                // Config does not exist
+                // Create a new config.toml in this directory
+
+                sampleToml := `[Application]
+Debug = false
+
+[Runner]
+RootPassword = "testPassword"
+
+[Build]
+GitRepoURL = "testRepo"
+GitRepoRemote = "origin"
+CleanBeforeBuild = false
+UninstallOlderBuilds = false
+
+[IOS]
+ProjectName = "testProject"
+UseWorkspace = false
+Scheme = "testScheme"
+TestDevice = "iPhone 6"
+Xcode = "7.3.1"
+DeveloperAccount = ""
+
+[Android]
+PackageName = "testPackage"
+MainActivityName = "testActivity"`
+
+                tomlBytes := []byte(sampleToml)
+
+                err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We could not write the config file, the OS told us this &lt;" + err.Error() + "&gt;")
+                        return 1
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("We just added a config.toml to this folder!")
+        return 0</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

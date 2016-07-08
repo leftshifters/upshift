@@ -38,7 +38,7 @@ func Setup() {
 
 	for i, action := range tasks.actions {
 		fmt.Println(c.Blue + c.Bold + "🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
-		status, _ = loadTask(action)
+		status = loadTask(action)
 		fmt.Print("\n")
 
 		if status > 0 {
@@ -173,7 +173,7 @@ func findTask(job string, action string) taskList {
 	return taskList{actions: []string{"showHelp"}}
 }
 
-func loadTask(task string) (int, bool) {
+func loadTask(task string) int {
 	switch task {
 	case "upgradeScript":
 		return actions.UpgradeScript()
@@ -194,7 +194,8 @@ func loadTask(task string) (int, bool) {
 	case "setupFastlane":
 		return actions.SetupFastlane(false)
 	case "setupGradleW":
-		return actions.SetupGradleW()
+		var g actions.Gradle
+		return g.AddWrapper()
 	case "setupConfig":
 		return actions.SetupConfig()
 	case "setupProfiles":
@@ -242,7 +243,7 @@ func loadTask(task string) (int, bool) {
 	// case "androidDeploy":
 	default:
 		utils.LogError("It's sad, but we don't know how to " + c.Underline + "handle this effing case" + c.Default + "\nYou should try upshift -v to find out what do we support")
-		return 1, true
+		return 1
 	}
-	return 0, true
+	return 0
 }

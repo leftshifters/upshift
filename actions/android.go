@@ -16,31 +16,31 @@ func init() {
 
 }
 
-func UpgradeAndroid() (int, bool) {
+func UpgradeAndroid() int {
 	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
 	_, err := b.Run("AndroidUpgradeSDK", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start upgrading android.\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func SetupAndroid() (int, bool) {
+func SetupAndroid() int {
 	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
 	_, err := b.Run("AndroidInstallSDK", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start upgrading android.\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
-func AndroidBuild() (int, bool) {
+func AndroidBuild() int {
 
 	var b basher.Basher
 	conf := config.Get()
@@ -54,7 +54,7 @@ func AndroidBuild() (int, bool) {
 		_, err := b.Run("AndroidClean", []string{logPath})
 		if err != nil {
 			utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
-			return 1, true
+			return 1
 		}
 	}
 
@@ -78,18 +78,18 @@ func AndroidBuild() (int, bool) {
 	_, err := b.Run("AndroidLint", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start lintin your project.\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
 	tailData, err := utils.FileTail(logPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
 	if strings.Contains(tailData, "BUILD SUCCESSFUL") == false {
 		utils.LogError("Something went wrong while linting, you need to look at this.")
-		return 1, true
+		return 1
 	}
 
 	fmt.Println("Okay, so lets build Debug and install it on a emulator")
@@ -98,21 +98,21 @@ func AndroidBuild() (int, bool) {
 	_, err = b.Run("AndroidAssemble", []string{logPath})
 	if err != nil {
 		utils.LogError("We could not start building your project.\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
 	tailData, err = utils.FileTail(logPath, 500)
 	if err != nil {
 		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return 1, true
+		return 1
 	}
 
 	if strings.Contains(tailData, "BUILD SUCCESSFUL") == false {
 		utils.LogError("Something went wrong while building, you need to look at this.")
-		return 1, true
+		return 1
 	}
 
-	return 0, false
+	return 0
 }
 
 func launchEmulator() bool {
