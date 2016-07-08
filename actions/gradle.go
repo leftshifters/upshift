@@ -63,5 +63,6 @@ func (g *Gradle) Clean(logPath string) error {
 		return errors.New("Gradle wrapper is not installed")
 	}
 
-	return g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+	_, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+	return err
 }

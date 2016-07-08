@@ -56,7 +56,7 @@
 				
 				<option value="file0">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file1">upshift/actions/gradle.go (50.0%)</option>
+				<option value="file1">upshift/actions/gradle.go (52.0%)</option>
 				
 				<option value="file2">upshift/actions/ios.go (0.0%)</option>
 				
@@ -340,7 +340,8 @@ func (g *Gradle) Clean(logPath string) error <span class="cov8" title="1">{
                 return errors.New("Gradle wrapper is not installed")
         }</span>
 
-        <span class="cov8" title="1">return g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")</span>
+        <span class="cov8" title="1">_, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+        return err</span>
 }
 </pre>
 		
