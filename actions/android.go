@@ -49,13 +49,14 @@ func AndroidBuild() int {
 	if cleanOnStart == true {
 		// Clean the project first, we might not ALWAYS want to do this
 		fmt.Println("Let's clean the project before starting")
-		utils.LogMessage("$ ./gradlew clean")
+		// #TODO : Replace with Gradle.Clean
 		logPath, _ := filepath.Abs(".upshift/logs/android-clean.log")
 		_, err := b.Run("AndroidClean", []string{logPath})
 		if err != nil {
 			utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
 			return 1
 		}
+		// #END
 	}
 
 	launchEmulator()

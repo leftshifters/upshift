@@ -58,7 +58,7 @@
 				
 				<option value="file1">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file2">upshift/actions/gradle.go (55.6%)</option>
+				<option value="file2">upshift/actions/gradle.go (56.7%)</option>
 				
 				<option value="file3">upshift/actions/ios.go (0.0%)</option>
 				
@@ -152,13 +152,14 @@ func AndroidBuild() int <span class="cov0" title="0">{
         if cleanOnStart == true </span><span class="cov0" title="0">{
                 // Clean the project first, we might not ALWAYS want to do this
                 fmt.Println("Let's clean the project before starting")
-                utils.LogMessage("$ ./gradlew clean")
+                // #TODO : Replace with Gradle.Clean
                 logPath, _ := filepath.Abs(".upshift/logs/android-clean.log")
                 _, err := b.Run("AndroidClean", []string{logPath})
                 if err != nil </span><span class="cov0" title="0">{
                         utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
                         return 1
                 }</span>
+                // #END
         }
 
         <span class="cov0" title="0">launchEmulator()
@@ -357,9 +358,14 @@ func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
         return status, nil</span>
 }
 
-func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1">{
+func (g *Gradle) Task(task string, params []string, logPath string, success string) (int, error) <span class="cov8" title="1">{
+        // Check if task exists
+        if task == "" </span><span class="cov0" title="0">{
+                return 1, errors.New("Gradle needs a task to run")
+        }</span>
+
         // Check if gradle is installed
-        if g.version == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if g.version == "" </span><span class="cov0" title="0">{
                 return 1, errors.New("Gradle version not known. Please check version first")
         }</span>
 
@@ -368,10 +374,14 @@ func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1"
                 return 1, errors.New("Gradle wrapper is not installed")
         }</span>
 
-        <span class="cov8" title="1">utils.LogMessage("$ ./gradlew clean")
-        status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+        <span class="cov8" title="1">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
+        status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, success)
         return status, err</span>
 }
+
+func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1">{
+        return g.Task("clean", []string{}, logPath, "BUILD SUCCESSFUL")
+}</span>
 </pre>
 		
 		<pre class="file" id="file3" style="display: none">package actions

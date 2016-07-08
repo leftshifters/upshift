@@ -53,7 +53,12 @@ func (g *Gradle) AddWrapper() (int, error) {
 	return status, nil
 }
 
-func (g *Gradle) Clean(logPath string) (int, error) {
+func (g *Gradle) Task(task string, params []string, logPath string, success string) (int, error) {
+	// Check if task exists
+	if task == "" {
+		return 1, errors.New("Gradle needs a task to run")
+	}
+
 	// Check if gradle is installed
 	if g.version == "" {
 		return 1, errors.New("Gradle version not known. Please check version first")
@@ -64,7 +69,11 @@ func (g *Gradle) Clean(logPath string) (int, error) {
 		return 1, errors.New("Gradle wrapper is not installed")
 	}
 
-	utils.LogMessage("$ ./gradlew clean")
-	status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+	utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
+	status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, success)
 	return status, err
+}
+
+func (g *Gradle) Clean(logPath string) (int, error) {
+	return g.Task("clean", []string{}, logPath, "BUILD SUCCESSFUL")
 }

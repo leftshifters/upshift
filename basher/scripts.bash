@@ -16,10 +16,11 @@ GradleWrapper() {
 	gradle wrapper
 }
 
-GradlewClean() {
-	LOG_PATH=$1
+GradlewTask() {
+	PARAMS=$1
+	LOG_PATH=$2
 	MakeFolders
-	./gradlew clean 2>&1 | tee $1
+	./gradlew "$1" 2>&1 | tee $2
 }
 
 
