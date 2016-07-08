@@ -114,25 +114,25 @@ func (b *Basher) Run(command string, params []string) (int, error) <span class="
         <span class="cov8" title="1">return status, nil</span>
 }
 
-func (b *Basher) RunAndTail(command string, params []string, logPath string, success string) error <span class="cov8" title="1">{
+func (b *Basher) RunAndTail(command string, params []string, logPath string, success string) (int, error) <span class="cov8" title="1">{
 
         logPath, _ = filepath.Abs(logPath)
 
-        _, err := b.Run(command, params)
+        status, err := b.Run(command, params)
         if err != nil </span><span class="cov0" title="0">{
-                return errors.New(command + " could not be completed\n" + err.Error())
+                return status, errors.New(command + " could not be completed\n" + err.Error())
         }</span>
 
         <span class="cov8" title="1">tail, err := utils.FileTail(logPath, 500)
         if err != nil </span><span class="cov0" title="0">{
-                return errors.New("We could not read the logFile " + logPath + "\n" + err.Error())
+                return status, errors.New("We could not read the logFile " + logPath + "\n" + err.Error())
         }</span>
 
         <span class="cov8" title="1">if strings.Contains(tail, success) == false </span><span class="cov0" title="0">{
-                return errors.New("The command " + command + " did not run successfully. You need to look this up")
+                return status, errors.New("The command " + command + " did not run successfully. You need to look this up")
         }</span>
 
-        <span class="cov8" title="1">return nil</span>
+        <span class="cov8" title="1">return status, nil</span>
 }
 </pre>
 		
