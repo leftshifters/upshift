@@ -16,18 +16,14 @@ import (
 	"upshift/utils"
 )
 
-//
-// Show the version of the current app
-//
+// ShowVersion : shows the version of upshift on the command line
 func ShowVersion() int {
 	conf := config.Get()
 	fmt.Println(conf.Settings.AppVersion)
 	return 0
 }
 
-//
-// Install cocoapods
-//
+// InstallPods : Install cocoapods in the project
 func InstallPods() int {
 	podsPath, _ := filepath.Abs("Podfile")
 	podsExist := utils.FileExists(podsPath)
@@ -119,9 +115,7 @@ func runPodRepoUpdate() error {
 	return nil
 }
 
-//
-// Initialize submodules in a project
-//
+// GitSubmodules : Initialize submodules in a project
 func GitSubmodules() int {
 	submodulePath, _ := filepath.Abs(".gitmodules")
 	submodulesExist := utils.FileExists(submodulePath)
@@ -167,9 +161,7 @@ func GitSubmodules() int {
 	return 0
 }
 
-//
-// Do a git pull on the project based on the defined remote and the branch the user is currently on
-//
+// GitPull : Do a git pull on the project based on the defined remote and the branch the user is currently on
 func GitPull() int {
 	conf := config.Get()
 
@@ -237,9 +229,8 @@ func GitPull() int {
 			if currentRemote == "" {
 				utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
 				return 1
-			} else {
-				fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
 			}
+			fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
 		} else {
 			// They haven't defined a remote in config, screw them
 			utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
@@ -274,9 +265,7 @@ func GitPull() int {
 	return 0
 }
 
-//
-// Show help, so that the user knows what to do
-//
+// ShowHelp : Show help, so that the user knows what to do
 func ShowHelp() int {
 	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
 	fmt.Println(c.Bold + "\nNAME" + c.Default)
@@ -287,21 +276,21 @@ func ShowHelp() int {
 	fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
 
 	fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
-	fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do\n")
-	fmt.Println("\tupshift ios build\n\t\tto build your iOS project\n")
-	fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator\n")
-	fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight\n")
-	fmt.Println("\tupshift android build\n\t\tto build your Android project\n")
-	fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator\n")
-	fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric\n")
-	fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml\n")
-	fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder\n")
-	fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project\n")
-	fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
-	fmt.Println("\tupshift -v\n\t\tto view the version number\n")
+	fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do")
+	fmt.Println("\tupshift ios build\n\t\tto build your iOS project")
+	fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator")
+	fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight")
+	fmt.Println("\tupshift android build\n\t\tto build your Android project")
+	fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator")
+	fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric")
+	fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml")
+	fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder")
+	fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project")
+	fmt.Println("\tupshift install\n\t\tto install this binary for the first time")
+	fmt.Println("\tupshift -v\n\t\tto view the version number")
 
 	fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
-	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
+	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions")
 	fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
 	fmt.Println("\tupshift action setupScript -- to setup this very script")
 	fmt.Println("\tupshift action setupGradleW -- to setup gradle on your machine")
@@ -331,14 +320,12 @@ func ShowHelp() int {
 	return 0
 }
 
-// Install xctool via brew
+// SetupXctool : Install xctool via brew
 func SetupXctool() int {
 	return SetupBrew("xctool")
 }
 
-//
-// Common function to setup tools via brew
-//
+// SetupBrew : Common function to setup tools via brew
 func SetupBrew(tool string) int {
 	// Check which version of the brew was installed
 	version, err := command.Run([]string{tool, "--version"}, "")
@@ -363,7 +350,8 @@ func SetupBrew(tool string) int {
 
 		// Brew cowardly refuses to use sudo, hell yeah
 		var b basher.Basher
-		status, err := b.Run("SetupBrewTool", []string{tool})
+		var status int
+		status, err = b.Run("SetupBrewTool", []string{tool})
 		if err != nil {
 			utils.LogError("We couldn't install " + tool + "\n" + err.Error())
 			return status
@@ -377,31 +365,23 @@ func SetupBrew(tool string) int {
 	return 1
 }
 
-//
-// If fastlane.tools if is not setup, we go ahead and do it
-//
+// SetupFastlane : If fastlane.tools if is not setup, we go ahead and do it
 func SetupFastlane(force bool) int {
 	return SetupGem("fastlane", "fastlane", force)
 }
 
-//
-// If cocoapods is not setup, we go ahead and do it
-//
+// SetupPods : If cocoapods is not setup, we go ahead and do it
 func SetupPods(force bool) int {
 	return SetupGem("cocoapods", "pod", force)
 }
 
-//
-// If Xcpretty is not setup, we go ahead and do it
+// SetupXcpretty : If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
-//
 func SetupXcpretty() int {
 	return SetupGem("xcpretty", "xcpretty", false)
 }
 
-//
-// General script to setup a gem
-//
+// SetupGem : General script to setup a gem
 func SetupGem(gem string, gemName string, force bool) int {
 	conf := config.Get()
 
@@ -442,7 +422,9 @@ func SetupGem(gem string, gemName string, force bool) int {
 		// else we are not on CI, ask the user to enter the password
 
 		var b basher.Basher
-		status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+		RootPassword, _ = conf.GetRootPassword()
+		var status int
+		status, err = b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
 		if err != nil {
 			utils.LogError("We couldn't install " + gem + "\n" + err.Error())
 			return status
@@ -456,11 +438,9 @@ func SetupGem(gem string, gemName string, force bool) int {
 	return 1
 }
 
-//
-// Call this function to download the latest version of the binary
+// UpgradeScript : Call this function to download the latest version of the binary
 // And update the user to the latest version.
 // It does nothing if the user is on the latest version
-//
 func UpgradeScript() int {
 	conf := config.Get()
 
@@ -498,20 +478,18 @@ func UpgradeScript() int {
 	return 0
 }
 
-//
-// When a new project doesn't have config, they call this one to create one for them
-//
+// SetupConfig : When a new project doesn't have config, they call this one to create one for them
 func SetupConfig() int {
 
 	configExits := utils.FileExists("./config.toml")
 	if configExits == true {
 		fmt.Println("It looks like a config.toml is already here, skipping this step")
 		return 1
-	} else {
-		// Config does not exist
-		// Create a new config.toml in this directory
+	}
+	// Config does not exist
+	// Create a new config.toml in this directory
 
-		sampleToml := `[Application]
+	sampleToml := `[Application]
 Debug = false
 
 [Runner]
@@ -535,13 +513,12 @@ DeveloperAccount = ""
 PackageName = "testPackage"
 MainActivityName = "testActivity"`
 
-		tomlBytes := []byte(sampleToml)
+	tomlBytes := []byte(sampleToml)
 
-		err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
-		if err != nil {
-			utils.LogError("We could not write the config file, the OS told us this <" + err.Error() + ">")
-			return 1
-		}
+	err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
+	if err != nil {
+		utils.LogError("We could not write the config file, the OS told us this <" + err.Error() + ">")
+		return 1
 	}
 
 	fmt.Println("We just added a config.toml to this folder!")

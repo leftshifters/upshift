@@ -8,12 +8,14 @@ import (
 	"upshift/utils"
 )
 
+// Gradle : Keep track of everything related to gradle in upshift
 type Gradle struct {
 	version          string
 	wrapperInstalled bool
 	basher           basher.Basher
 }
 
+// Version : Find the version number of gradle installed
 func (g *Gradle) Version() error {
 	// Run gradle -v to figure out if it is install
 	utils.LogMessage("$ gradle -v")
@@ -27,6 +29,7 @@ func (g *Gradle) Version() error {
 	return nil
 }
 
+// AddWrapper : Check and confirm if gradlew exists in the project
 func (g *Gradle) AddWrapper() (int, error) {
 	// Check if gradle is installed
 	if g.version == "" {
@@ -53,6 +56,7 @@ func (g *Gradle) AddWrapper() (int, error) {
 	return status, nil
 }
 
+// Task : Execute a gradle task
 func (g *Gradle) Task(task string, params []string, logPath string, success string) (int, error) {
 	// Check if task exists
 	if task == "" {
@@ -74,22 +78,27 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
 	return status, err
 }
 
+// Clean : Execute gradle clean on the Android project
 func (g *Gradle) Clean(logPath string) (int, error) {
 	return g.Task("clean", []string{}, logPath, "BUILD SUCCESSFUL")
 }
 
+// Lint : Execute gradle lint on the Android project
 func (g *Gradle) Lint(logPath string) (int, error) {
 	return g.Task("lint", []string{}, logPath, "BUILD SUCCESSFUL")
 }
 
+// Uninstall : Remove installed versions of the app from connected devices
 func (g *Gradle) Uninstall(logPath string) (int, error) {
 	return g.Task("uninstallAll", []string{}, logPath, "BUILD SUCCESSFUL")
 }
 
+// InstallDebug : Install the debug app on to connected devices
 func (g *Gradle) InstallDebug(logPath string) (int, error) {
 	return g.Task("installDebug", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }
 
+// Assemble : Build an android project
 func (g *Gradle) Assemble(logPath string) (int, error) {
 	return g.Task("assemble", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }

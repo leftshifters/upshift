@@ -16,6 +16,7 @@ func init() {
 
 }
 
+// UpgradeAndroid : Upgrade the android sdk
 func UpgradeAndroid() int {
 	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
@@ -28,6 +29,7 @@ func UpgradeAndroid() int {
 	return 0
 }
 
+// SetupAndroid : Install the android sdk
 func SetupAndroid() int {
 	var b basher.Basher
 	logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
@@ -40,6 +42,7 @@ func SetupAndroid() int {
 	return 0
 }
 
+// AndroidBuild : Build the android project
 func AndroidBuild() int {
 
 	var b basher.Basher

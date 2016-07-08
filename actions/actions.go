@@ -4,6 +4,7 @@ import (
 	"upshift/utils"
 )
 
+// GradleWrapper : Action to install the gradle wrapper
 func GradleWrapper() int {
 	var g Gradle
 

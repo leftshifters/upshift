@@ -16,6 +16,7 @@ import (
 
 var projectSettings map[string]string
 
+// IosUploadBuild : Upload an build to itunesconnect
 func IosUploadBuild() int {
 	err := uploadBuildToItunes()
 	if err != nil {
@@ -26,6 +27,7 @@ func IosUploadBuild() int {
 	return 0
 }
 
+// IosCreateApp : Create an app on itunesconnect
 func IosCreateApp() int {
 	err := createAppOniTunes()
 	if err != nil {
@@ -36,6 +38,7 @@ func IosCreateApp() int {
 	return 0
 }
 
+// IosExportIPA : Export an IPA
 func IosExportIPA() int {
 	// Try the build now
 	projectName := projectSettings["PROJECT_NAME"]
@@ -49,6 +52,7 @@ func IosExportIPA() int {
 	return 0
 }
 
+// IosArchive : Archive an iOS project
 func IosArchive() int {
 	projectType := projectSettings["UP_PROJECT_TYPE"]
 	projectName := projectSettings["PROJECT_NAME"]
@@ -65,6 +69,7 @@ func IosArchive() int {
 	return 0
 }
 
+// IosCertificates : Install certificates for iOS
 func IosCertificates() int {
 	err := installCertificates()
 	if err != nil {
@@ -75,6 +80,7 @@ func IosCertificates() int {
 	return 0
 }
 
+// IosProvisioning : Install the provisioning profiles for a project
 func IosProvisioning() int {
 	err := addProvisioningProfiles()
 	if err != nil {
@@ -85,6 +91,7 @@ func IosProvisioning() int {
 	return 0
 }
 
+// IosDeploySimulator : Deploy an app to the simulator
 func IosDeploySimulator() int {
 	projectName := projectSettings["PROJECT_NAME"]
 	projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
@@ -98,6 +105,7 @@ func IosDeploySimulator() int {
 	return 0
 }
 
+// IosTest : Execute tests written for the iOS project
 func IosTest() int {
 
 	projectType := projectSettings["UP_PROJECT_TYPE"]
@@ -116,6 +124,7 @@ func IosTest() int {
 	return 0
 }
 
+// IosBuild : Build an iOS project
 func IosBuild() int {
 
 	// Try the build now
@@ -135,6 +144,7 @@ func IosBuild() int {
 	return 0
 }
 
+// IosPrepare : Prepare upshift to execute ios builds, we do this so that we don't have to call xcodebuild again and again
 func IosPrepare() int {
 	fmt.Println("We will now try and load your xcode settings")
 	err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
@@ -203,10 +213,9 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
 		fileExits = utils.FileExists(releaseFile)
 		if fileExits == false {
 			return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
-		} else {
-			// we found the release file
-			builtFile = releaseFile
 		}
+		// we found the release file
+		builtFile = releaseFile
 	} else {
 		// we found the debug file
 		builtFile = debugFile
@@ -231,16 +240,17 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
 
 // xcrun simctl launch booted "${productBundleIdentifier}"
 
+// SetupExportPlist : Create an export.plist to archive the project
 func SetupExportPlist() int {
 	configExits := utils.FileExists(".private/export.plist")
 	if configExits == true {
 		fmt.Println("It looks like .private/export.plist is already here, skipping this step")
 		return 1
-	} else {
-		// export.Plist does not exist
-		// Create a new export.plist in this directory in .private
+	}
+	// export.Plist does not exist
+	// Create a new export.plist in this directory in .private
 
-		sampleExportPlist := `<?xml version="1.0" encoding="UTF-8"?>
+	sampleExportPlist := `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -253,13 +263,12 @@ func SetupExportPlist() int {
 </dict>
 </plist>"`
 
-		exportPlistBytes := []byte(sampleExportPlist)
+	exportPlistBytes := []byte(sampleExportPlist)
 
-		err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
-		if err != nil {
-			utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
-			return 1
-		}
+	err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
+	if err != nil {
+		utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
+		return 1
 	}
 
 	fmt.Println("We just added a sample file to .private/export.plist!")
@@ -267,10 +276,8 @@ func SetupExportPlist() int {
 
 }
 
-//
-// Setup provisioning profiles
+// SetupProfiles : Setup provisioning profiles
 // This will probably be run once in a while
-//
 func SetupProfiles() int {
 
 	var b basher.Basher
@@ -398,7 +405,7 @@ func uploadBuildToItunes() error {
 		return errors.New("We could not add SwiftSources to the IPA")
 	}
 
-	status, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+	_, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
 	if err != nil {
 		return errors.New("We could not upload the IPA on iTunes")
 	}
@@ -707,25 +714,31 @@ func findXcodeAndOSForSimulator() {
 
 	// Find the correct simulator
 	// From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
+
+	os93 := "9.3"
+	os92 := "9.2"
+	os91 := "9.1"
+	os90 := "9.0"
+
 	switch conf.Settings.IOSXcodeVersion {
 	case "7.3.1":
-		iPhoneOS = "9.3"
+		iPhoneOS = os93
 	case "7.3":
-		iPhoneOS = "9.3"
+		iPhoneOS = os93
 	case "7.2.1":
-		iPhoneOS = "9.2"
+		iPhoneOS = os92
 	case "7.2":
-		iPhoneOS = "9.2"
+		iPhoneOS = os92
 	case "7.1.1":
-		iPhoneOS = "9.1"
+		iPhoneOS = os91
 	case "7.1":
-		iPhoneOS = "9.1"
+		iPhoneOS = os91
 	case "7.0.1":
-		iPhoneOS = "9.0"
+		iPhoneOS = os90
 	case "7.0":
-		iPhoneOS = "9.0"
+		iPhoneOS = os90
 	default:
-		iPhoneOS = "9.3"
+		iPhoneOS = os93
 	}
 
 	projectSettings["UP_XCODE_VERSION"] = conf.Settings.IOSXcodeVersion
@@ -782,10 +795,8 @@ func xcodeBuildSettings() error {
 	return nil
 }
 
-//
-// Choose the correct version of Xcode for the project
+// SetupXcode : Choose the correct version of Xcode for the project
 // It is usually defined in config.toml
-//
 func SetupXcode() int {
 	version, err := command.Run([]string{"xcodebuild", "-version"}, "")
 	if err != nil {
