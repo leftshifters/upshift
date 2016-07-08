@@ -16,6 +16,7 @@ type Gradle struct {
 
 func (g *Gradle) Version() error {
 	// Run gradle -v to figure out if it is install
+	utils.LogMessage("$ gradle -v")
 	out, err := command.Run([]string{"gradle", "-v"}, "")
 	if err != nil {
 		return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
@@ -63,6 +64,7 @@ func (g *Gradle) Clean(logPath string) (int, error) {
 		return 1, errors.New("Gradle wrapper is not installed")
 	}
 
+	utils.LogMessage("$ ./gradlew clean")
 	status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
 	return status, err
 }

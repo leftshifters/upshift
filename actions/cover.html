@@ -58,7 +58,7 @@
 				
 				<option value="file1">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file2">upshift/actions/gradle.go (52.0%)</option>
+				<option value="file2">upshift/actions/gradle.go (55.6%)</option>
 				
 				<option value="file3">upshift/actions/ios.go (0.0%)</option>
 				
@@ -320,6 +320,7 @@ type Gradle struct {
 
 func (g *Gradle) Version() error <span class="cov8" title="1">{
         // Run gradle -v to figure out if it is install
+        utils.LogMessage("$ gradle -v")
         out, err := command.Run([]string{"gradle", "-v"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
@@ -367,7 +368,8 @@ func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1"
                 return 1, errors.New("Gradle wrapper is not installed")
         }</span>
 
-        <span class="cov8" title="1">status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+        <span class="cov8" title="1">utils.LogMessage("$ ./gradlew clean")
+        status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
         return status, err</span>
 }
 </pre>
