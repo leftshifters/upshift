@@ -193,30 +193,6 @@ PopulateProvisioningProfiles() {
 	fi
 }
 
-AndroidUninstall() {
-	LOG_PATH=$1
-	MakeFolders
-	./gradlew uninstallAll 2>&1 | tee $1
-}
-
-AndroidInstallDebug() {
-	LOG_PATH=$1
-	MakeFolders
-	./gradlew installDebug --stacktrace 2>&1 | tee $1
-}
-
-AndroidAssemble() {
-	LOG_PATH=$1
-	MakeFolders
-	./gradlew assemble --stacktrace 2>&1 | tee $1
-}
-
-AndroidLint() {
-	LOG_PATH=$1
-	MakeFolders
-	./gradlew lint 2>&1 | tee $1
-}
-
 AndroidStartActivity() {
 	PACKAGE=$1
 	MAIN_ACTIVITY=$2

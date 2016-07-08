@@ -8,3 +8,6 @@ upshift-linux*
 upshift-darwin*
 
 cover.out
+
+actions/android-chat/build
+actions/android-chat/Application/build

@@ -77,3 +77,19 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
 func (g *Gradle) Clean(logPath string) (int, error) {
 	return g.Task("clean", []string{}, logPath, "BUILD SUCCESSFUL")
 }
+
+func (g *Gradle) Lint(logPath string) (int, error) {
+	return g.Task("lint", []string{}, logPath, "BUILD SUCCESSFUL")
+}
+
+func (g *Gradle) Uninstall(logPath string) (int, error) {
+	return g.Task("uninstallAll", []string{}, logPath, "BUILD SUCCESSFUL")
+}
+
+func (g *Gradle) InstallDebug(logPath string) (int, error) {
+	return g.Task("installDebug", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
+}
+
+func (g *Gradle) Assemble(logPath string) (int, error) {
+	return g.Task("assemble", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
+}

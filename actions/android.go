@@ -65,14 +65,17 @@ func AndroidBuild() int {
 	if len(devicesConnected()) > 0 {
 		// Delete older builds if they are installed
 		fmt.Println("Removing older builds from connected devices")
+		// #TODO : Change to Gradle.Uninstall
 		logPath, _ := filepath.Abs(".upshift/logs/android-uninstall.log")
 		_, err := b.Run("AndroidUninstall", []string{logPath})
 		if err != nil {
 			utils.LogError("We could not uninstall the older binaries.\n" + err.Error())
 			// Don't return on this, we don't even know why this fails, maybe because a device isn't connected
 		}
+		// #END
 	}
 
+	// #TODO : Replace with Gradle.Lint
 	fmt.Println("Before we build, we need to lint")
 	utils.LogMessage("$ ./gradlew lint")
 	logPath, _ := filepath.Abs(".upshift/logs/android-lint.log")
@@ -92,7 +95,9 @@ func AndroidBuild() int {
 		utils.LogError("Something went wrong while linting, you need to look at this.")
 		return 1
 	}
+	// #END
 
+	// #TODO : Replace with Gradle.Assemble
 	fmt.Println("Okay, so lets build Debug and install it on a emulator")
 	utils.LogMessage("$ ./gradlew assemble --stacktrace")
 	logPath, _ = filepath.Abs(".upshift/logs/android-assemble.log")
@@ -112,6 +117,7 @@ func AndroidBuild() int {
 		utils.LogError("Something went wrong while building, you need to look at this.")
 		return 1
 	}
+	// #END
 
 	return 0
 }
