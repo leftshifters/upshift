@@ -54,13 +54,15 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/actions/android.go (0.0%)</option>
+				<option value="file0">upshift/actions/actions.go (66.7%)</option>
 				
-				<option value="file1">upshift/actions/gradle.go (52.0%)</option>
+				<option value="file1">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file2">upshift/actions/ios.go (0.0%)</option>
+				<option value="file2">upshift/actions/gradle.go (52.0%)</option>
 				
-				<option value="file3">upshift/actions/setup.go (0.0%)</option>
+				<option value="file3">upshift/actions/ios.go (0.0%)</option>
+				
+				<option value="file4">upshift/actions/setup.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -75,6 +77,31 @@
 		<div id="content">
 		
 		<pre class="file" id="file0" style="display: none">package actions
+
+import (
+        "upshift/utils"
+)
+
+func GradleWrapper() int <span class="cov8" title="1">{
+        var g Gradle
+
+        // Check if gradle exists
+        err := g.Version()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+                return 1
+        }</span>
+
+        // Add the wrapper
+        <span class="cov8" title="1">status, err := g.AddWrapper()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError(err.Error())
+        }</span>
+        <span class="cov8" title="1">return status</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package actions
 
 import (
         // "errors"
@@ -275,7 +302,7 @@ func devicesConnected() []string <span class="cov0" title="0">{
 // }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package actions
+		<pre class="file" id="file2" style="display: none">package actions
 
 import (
         "errors"
@@ -303,49 +330,49 @@ func (g *Gradle) Version() error <span class="cov8" title="1">{
         return nil</span>
 }
 
-func (g *Gradle) AddWrapper() error <span class="cov8" title="1">{
+func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
         // Check if gradle is installed
         if g.version == "" </span><span class="cov0" title="0">{
                 g.wrapperInstalled = false
-                return errors.New("Gradle version not known. Please check version first")
+                return 1, errors.New("Gradle version not known. Please check version first")
         }</span>
 
         // Check if gradlew file exists
         <span class="cov8" title="1">if utils.FileExists("./gradlew") == true </span><span class="cov8" title="1">{
                 g.wrapperInstalled = true
-                return nil
+                return 0, nil
         }</span>
 
         // So, gradle is installed, just need to install wrapper [SetupGradleW]
         // I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
         <span class="cov0" title="0">utils.LogMessage("$ gradle wrapper")
-        _, err := g.basher.Run("GradleWrapper", []string{})
+        status, err := g.basher.Run("GradleWrapper", []string{})
         if err != nil </span><span class="cov0" title="0">{
                 g.wrapperInstalled = false
-                return errors.New("We couldn't initialise gradle wrapper\n" + err.Error())
+                return status, errors.New("We couldn't initialise gradle wrapper\n" + err.Error())
         }</span>
 
         <span class="cov0" title="0">g.wrapperInstalled = true
-        return nil</span>
+        return status, nil</span>
 }
 
-func (g *Gradle) Clean(logPath string) error <span class="cov8" title="1">{
+func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1">{
         // Check if gradle is installed
         if g.version == "" </span><span class="cov0" title="0">{
-                return errors.New("Gradle version not known. Please check version first")
+                return 1, errors.New("Gradle version not known. Please check version first")
         }</span>
 
         // Check if gradlew file exists
         <span class="cov8" title="1">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
-                return errors.New("Gradle wrapper is not installed")
+                return 1, errors.New("Gradle wrapper is not installed")
         }</span>
 
-        <span class="cov8" title="1">_, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
-        return err</span>
+        <span class="cov8" title="1">status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+        return status, err</span>
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package actions
+		<pre class="file" id="file3" style="display: none">package actions
 
 import (
         "errors"
@@ -1194,7 +1221,7 @@ func SetupXcode() int <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package actions
+		<pre class="file" id="file4" style="display: none">package actions
 
 import (
         "errors"
