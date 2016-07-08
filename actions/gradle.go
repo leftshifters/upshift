@@ -26,43 +26,43 @@ func (g *Gradle) Version() error {
 	return nil
 }
 
-func (g *Gradle) AddWrapper() error {
+func (g *Gradle) AddWrapper() (int, error) {
 	// Check if gradle is installed
 	if g.version == "" {
 		g.wrapperInstalled = false
-		return errors.New("Gradle version not known. Please check version first")
+		return 1, errors.New("Gradle version not known. Please check version first")
 	}
 
 	// Check if gradlew file exists
 	if utils.FileExists("./gradlew") == true {
 		g.wrapperInstalled = true
-		return nil
+		return 0, nil
 	}
 
 	// So, gradle is installed, just need to install wrapper [SetupGradleW]
 	// I won't touch anything to do with gradle and pipes with a ten foot pole, so this goes to basher
 	utils.LogMessage("$ gradle wrapper")
-	_, err := g.basher.Run("GradleWrapper", []string{})
+	status, err := g.basher.Run("GradleWrapper", []string{})
 	if err != nil {
 		g.wrapperInstalled = false
-		return errors.New("We couldn't initialise gradle wrapper\n" + err.Error())
+		return status, errors.New("We couldn't initialise gradle wrapper\n" + err.Error())
 	}
 
 	g.wrapperInstalled = true
-	return nil
+	return status, nil
 }
 
-func (g *Gradle) Clean(logPath string) error {
+func (g *Gradle) Clean(logPath string) (int, error) {
 	// Check if gradle is installed
 	if g.version == "" {
-		return errors.New("Gradle version not known. Please check version first")
+		return 1, errors.New("Gradle version not known. Please check version first")
 	}
 
 	// Check if gradlew file exists
 	if utils.FileExists("./gradlew") == false {
-		return errors.New("Gradle wrapper is not installed")
+		return 1, errors.New("Gradle wrapper is not installed")
 	}
 
-	_, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
-	return err
+	status, err := g.basher.RunAndTail("GradlewClean", []string{logPath}, logPath, "BUILD SUCCESSFUL")
+	return status, err
 }

@@ -194,8 +194,7 @@ func loadTask(task string) int {
 	case "setupFastlane":
 		return actions.SetupFastlane(false)
 	case "setupGradleW":
-		var g actions.Gradle
-		return g.AddWrapper()
+		return actions.GradleWrapper()
 	case "setupConfig":
 		return actions.SetupConfig()
 	case "setupProfiles":
