@@ -14,3 +14,9 @@ func Test_Run(t *testing.T) {
 	assert.Contains(t, err.Error(), "problem running")
 	assert.Equal(t, 127, status)
 }
+
+func Test_RunAndTail(t *testing.T) {
+	var b Basher
+	err := b.RunAndTail("TestScript2", []string{"Sleeping for 1 second", "tests.log"}, "tests.log", "basher_test.go")
+	assert.Nil(t, err)
+}

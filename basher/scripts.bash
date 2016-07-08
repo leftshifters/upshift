@@ -4,6 +4,28 @@ TestScript() {
 	ls -la
 }
 
+TestScript2() {
+	MESSAGE=$1
+	LOGFILES=$2
+	echo $1
+	sleep 2
+	ls -la 2>&1 | tee $2
+}
+
+GradleWrapper() {
+	gradle wrapper
+}
+
+GradlewClean() {
+	LOG_PATH=$1
+	MakeFolders
+	./gradlew clean 2>&1 | tee $1
+}
+
+
+
+
+
 MakeFolders() {
 	mkdir -p .upshift/logs/
 	mkdir -p .upshift/build/
@@ -70,11 +92,6 @@ PodRepoUpdate() {
 	LOGFILE=$1
 	UpshiftConfig
 	pod repo update --verbose 2>&1 | tee $1	
-}
-
-SetupGradleW() {
-	MakeFolders
-	gradle wrapper
 }
 
 StartSimulator() {
@@ -173,12 +190,6 @@ PopulateProvisioningProfiles() {
 		printf "Hey, you need to add your provisioning profiles in .private\n"
 		exit 1
 	fi
-}
-
-AndroidClean() {
-	LOG_PATH=$1
-	MakeFolders
-	./gradlew clean 2>&1 | tee $1
 }
 
 AndroidUninstall() {
