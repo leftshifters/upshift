@@ -74,7 +74,7 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
 	}
 
 	utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
-	status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, success)
+	status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, []string{success}, []string{})
 	return status, err
 }
 

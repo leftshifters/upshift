@@ -10,24 +10,24 @@ import (
 	c "upshift/colours"
 )
 
-// Log Message, this shows up in green and underlined
+// LogMessage : this shows up in green and underlined
 func LogMessage(message string) {
 	fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
 }
 
-// Log Information, this shows up in blue
+// LogInfo : this shows up in blue
 func LogInfo(message string) {
 	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
 	fmt.Println(message)
 }
 
-// Log an error, show them this shit in color, red most probably
+// LogError : Log an error, show them this shit in color, red most probably
 func LogError(message string) {
 	fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
 	fmt.Println(message)
 }
 
-// Create a string array from an bash output
+// CreateList : Create a string array from an bash output
 func CreateList(data string, ignore []string) []string {
 	rows := strings.Split(data, "\n")
 	var items []string
@@ -46,7 +46,28 @@ func CreateList(data string, ignore []string) []string {
 	return items
 }
 
-// Read last few bytes of a file
+// SetupFolders : for us with the rest of upshift
+func SetupFolders() {
+
+	// mkdir -p .upshift/logs/
+	logs, _ := filepath.Abs(filepath.Join(".upshift", "logs"))
+	os.MkdirAll(logs, os.ModePerm)
+
+	// mkdir -p .upshift/build/
+	build, _ := filepath.Abs(filepath.Join(".upshift", "build"))
+	os.MkdirAll(build, os.ModePerm)
+
+	// mkdir -p .private
+	private, _ := filepath.Abs(filepath.Join(".private"))
+	os.MkdirAll(private, os.ModePerm)
+
+	// mkdir -p ~/.upshift
+	machine, _ := filepath.Abs(filepath.Join(os.Getenv("HOME"), ".upshift"))
+	os.MkdirAll(machine, os.ModePerm)
+
+}
+
+// FileTail : Read last few bytes of a file
 func FileTail(filePath string, size int64) (string, error) {
 	filePath, _ = filepath.Abs(filePath)
 	// Check if file exits, if it doesn't just return an error
@@ -86,7 +107,7 @@ func FileTail(filePath string, size int64) (string, error) {
 	return string(byteBuffer), nil
 }
 
-// Read a file if it exists
+// FileRead : Read a file if it exists
 func FileRead(filePath string) (string, error) {
 	filePath, _ = filepath.Abs(filePath)
 	// Check if file exits, if it doesn't just return an error
@@ -103,13 +124,12 @@ func FileRead(filePath string) (string, error) {
 	return string(fileBytes), nil
 }
 
-// Simply to check if a file exists or not
+// FileExists : Simply to check if a file exists or not
 func FileExists(filePath string) bool {
 	filePath, _ = filepath.Abs(filePath)
 	_, err := os.Stat(filePath)
 	if err == nil {
 		return true
-	} else {
-		return false
 	}
+	return false
 }

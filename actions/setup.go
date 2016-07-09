@@ -1,14 +1,11 @@
 package actions
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 	"upshift/basher"
 	c "upshift/colours"
 	"upshift/command"
@@ -21,98 +18,6 @@ func ShowVersion() int {
 	conf := config.Get()
 	fmt.Println(conf.Settings.AppVersion)
 	return 0
-}
-
-// InstallPods : Install cocoapods in the project
-func InstallPods() int {
-	podsPath, _ := filepath.Abs("Podfile")
-	podsExist := utils.FileExists(podsPath)
-
-	if podsExist == false {
-		fmt.Println("It looks like this project doesn't use pods")
-		return 0
-	}
-
-	// So pods exist, damn
-	fmt.Println("It looks like this project uses pods, let me try and set them up")
-
-	err := runPodRepoUpdate()
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1
-	}
-
-	utils.LogMessage("$ pod install")
-	podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
-	var b basher.Basher
-	status, err := b.Run("PodInstall", []string{podInstallLogFullPath})
-	if err != nil {
-		utils.LogError("We couldn't initialise pods\n" + err.Error())
-		return status
-	}
-
-	// Read the last 500 bytes from the whole message, we just want to what happened at the end
-	tailData, err := utils.FileTail(podInstallLogFullPath, 500)
-	if err != nil {
-		utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-		return status
-	}
-
-	if strings.Contains(tailData, "fatal") == true || strings.Contains(tailData, "error") == true || strings.Contains(tailData, "Invalid") == true {
-		utils.LogError("Something went wrong with installing pods, you need to look at this.")
-		return 1
-	}
-
-	fmt.Println("We were able to successfully setup cocoapods, moving on")
-	return 0
-
-}
-
-func runPodRepoUpdate() error {
-
-	// Check if it's been a while since we ran `pod repo update` and if yes, run it
-	globalConf := config.Get()
-	difference := int32(time.Now().Unix()) - globalConf.Settings.AndroidSDKUpdateTime
-
-	// Run this if last update was never done or more than a month ago
-	if globalConf.Settings.AndroidSDKUpdateTime == 0 || difference > 3600*24*30 {
-		// This means we have never come here.
-		utils.LogMessage("$ pod repo update --verbose")
-		podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-repo-update.log")
-		var b basher.Basher
-		_, err := b.Run("PodRepoUpdate", []string{podInstallLogFullPath})
-		if err != nil {
-			return err
-		}
-
-		// Read the last 500 bytes from the whole message, we just want to what happened at the end
-		tailData, err := utils.FileTail(podInstallLogFullPath, 500)
-		if err != nil {
-			return err
-		}
-
-		if strings.Contains(tailData, "error") == true {
-			return err
-		}
-
-		// When an upgrade is available, they say
-		// CocoaPods 1.0.1 is available.
-		// To update use: `sudo gem install cocoapods`
-		// Until we reach version 1.0 the features of CocoaPods can and will change.
-		// We strongly recommend that you use the latest version at all times.
-		if strings.Contains(tailData, "sudo gem install cocoapods") == true {
-			// This means that an update is available, run cocoapods update
-			status := SetupPods(true)
-			if status > 0 {
-				return errors.New("We couldn't update to the new version of cocoapods")
-			}
-			fmt.Println("Updated cocoapods to the latest version")
-		}
-
-		globalConf.Settings.AndroidSDKUpdateTime = int32(time.Now().Unix())
-		globalConf.WriteMachineConfig()
-	}
-	return nil
 }
 
 // GitSubmodules : Initialize submodules in a project
@@ -365,77 +270,11 @@ func SetupBrew(tool string) int {
 	return 1
 }
 
-// SetupFastlane : If fastlane.tools if is not setup, we go ahead and do it
-func SetupFastlane(force bool) int {
-	return SetupGem("fastlane", "fastlane", force)
-}
-
-// SetupPods : If cocoapods is not setup, we go ahead and do it
-func SetupPods(force bool) int {
-	return SetupGem("cocoapods", "pod", force)
-}
-
 // SetupXcpretty : If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
 func SetupXcpretty() int {
-	return SetupGem("xcpretty", "xcpretty", false)
-}
-
-// SetupGem : General script to setup a gem
-func SetupGem(gem string, gemName string, force bool) int {
-	conf := config.Get()
-
-	// Check which version of the gem was installed
-	// force will be true when you want to force running sudo install gem irrespective of if it is installed or not
-	version, err := command.Run([]string{gemName, "--version"}, "")
-	if force == false {
-		if err == nil {
-			// Remove the name of the gem if it is part of the version string
-			version = strings.Replace(version, gemName, "", 1)
-			// Now trim whatever is left
-			version = strings.TrimSpace(version)
-			fmt.Println(gem + " is pretty much setup on this system. You are on version " + version)
-			return 0
-		}
-	}
-
-	// Check if the command was not found
-	var errorString string
-	if err != nil {
-		errorString = err.Error()
-	}
-
-	if strings.Contains(errorString, "executable file not found") == true || force == true {
-		// Alright, so the gem was not found, go ahead and install it
-		fmt.Println("Latest " + gem + " was not found, installing it")
-
-		var RootPassword string
-
-		if conf.IsCI() == true {
-			// We are on CI, we need to enter password programatically
-			RootPassword, err = conf.GetRootPassword()
-			if err != nil {
-				utils.LogError(err.Error())
-				return 1
-			}
-		}
-		// else we are not on CI, ask the user to enter the password
-
-		var b basher.Basher
-		RootPassword, _ = conf.GetRootPassword()
-		var status int
-		status, err = b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
-		if err != nil {
-			utils.LogError("We couldn't install " + gem + "\n" + err.Error())
-			return status
-		}
-
-		fmt.Println(gem + " has been setup on your machine. Have fun.")
-		return 0
-	}
-
-	fmt.Println("There was a problem installing " + gem + "\n" + err.Error())
-	return 1
+	// return SetupGem("xcpretty", "xcpretty", false)
+	return 0
 }
 
 // UpgradeScript : Call this function to download the latest version of the binary

@@ -116,3 +116,18 @@ func (g *Gems) version(gem string) (bool, string) {
 	// Not installed
 	return false, ""
 }
+
+// #TODO : Find out how do we know that an update is available and update it
+// When an upgrade is available, they say
+// CocoaPods 1.0.1 is available.
+// To update use: `sudo gem install cocoapods`
+// Until we reach version 1.0 the features of CocoaPods can and will change.
+// We strongly recommend that you use the latest version at all times.
+// if strings.Contains(tailData, "sudo gem install cocoapods") == true {
+// This means that an update is available, run cocoapods update
+//	status := SetupPods(true)
+// if status > 0 {
+// return errors.New("We couldn't update to the new version of cocoapods")
+// }
+// fmt.Println("Updated cocoapods to the latest version")
+// }

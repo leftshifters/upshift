@@ -18,6 +18,7 @@ func init() {
 
 }
 
+// Setup : how the actions will be handled
 func Setup() {
 
 	var job, action string
@@ -190,9 +191,9 @@ func loadTask(task string) int {
 	case "setupXctool":
 		return actions.SetupXctool()
 	case "setupPods":
-		return actions.SetupPods(false)
+		// return actions.SetupPods(false)
 	case "setupFastlane":
-		return actions.SetupFastlane(false)
+		// return actions.SetupFastlane(false)
 	case "setupGradleW":
 		return actions.GradleWrapper()
 	case "setupConfig":
@@ -211,7 +212,7 @@ func loadTask(task string) int {
 		return actions.GitSubmodules()
 	// SKIP case "gitClone":
 	case "installPods":
-		return actions.InstallPods()
+		// return actions.InstallPods()
 	case "iosBuild":
 		return actions.IosBuild()
 	case "iosPrepare":

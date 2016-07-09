@@ -58,15 +58,19 @@
 				
 				<option value="file1">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file2">upshift/actions/fastlane.go (80.0%)</option>
+				<option value="file2">upshift/actions/cocoapods.go (40.0%)</option>
 				
-				<option value="file3">upshift/actions/gems.go (56.8%)</option>
+				<option value="file3">upshift/actions/fastlane.go (0.0%)</option>
 				
-				<option value="file4">upshift/actions/gradle.go (0.0%)</option>
+				<option value="file4">upshift/actions/gems.go (25.6%)</option>
 				
-				<option value="file5">upshift/actions/ios.go (0.0%)</option>
+				<option value="file5">upshift/actions/gradle.go (0.0%)</option>
 				
-				<option value="file6">upshift/actions/setup.go (0.0%)</option>
+				<option value="file6">upshift/actions/ios.go (0.0%)</option>
+				
+				<option value="file7">upshift/actions/pod.go (84.6%)</option>
+				
+				<option value="file8">upshift/actions/setup.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -83,26 +87,48 @@
 		<pre class="file" id="file0" style="display: none">package actions
 
 import (
+        "fmt"
         "upshift/utils"
 )
 
 // GradleWrapper : Action to install the gradle wrapper
 func GradleWrapper() int <span class="cov0" title="0">{
-        var g Gradle
+        var gradle Gradle
 
         // Check if gradle exists
-        err := g.Version()
+        err := gradle.Version()
         if err != nil </span><span class="cov0" title="0">{
                 utils.LogError(err.Error())
                 return 1
         }</span>
 
         // Add the wrapper
-        <span class="cov0" title="0">status, err := g.AddWrapper()
+        <span class="cov0" title="0">status, err := gradle.AddWrapper()
         if err != nil </span><span class="cov0" title="0">{
                 utils.LogError(err.Error())
         }</span>
         <span class="cov0" title="0">return status</span>
+}
+
+// PodInstall : Install pods for this project, if the project uses it
+func PodInstall() int <span class="cov0" title="0">{
+        var pod Pod
+
+        // Check if this project uses cocoapods
+        if pod.AreUsed() == false </span><span class="cov0" title="0">{
+                fmt.Println("It looks like this project doesn't use pods")
+                return 0
+        }</span>
+
+        // Install pod
+        <span class="cov0" title="0">status, err := pod.Install()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Could not install pods\n" + err.Error())
+                return status
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("We were able to successfully setup cocoapods, moving on")
+        return 0</span>
 }
 </pre>
 		
@@ -321,33 +347,63 @@ func devicesConnected() []string <span class="cov0" title="0">{
 
 import "errors"
 
-// Fastlane : Construct to handle all things related to fastlane
-type Fastlane struct{}
+// Cocoapods : Construct to handle all things related to fastlane
+type Cocoapods struct{}
 
-// Install : Install fastlane on the machine
-func (f *Fastlane) Install() error <span class="cov8" title="1">{
+// Install : Install cocoapods on the machine
+func (c *Cocoapods) Install() error <span class="cov8" title="1">{
         var g Gems
-        err := g.Install("fastlane")
+        err := g.Install("cocoapods", "pod")
         if err != nil </span><span class="cov0" title="0">{
-                return errors.New("Could not install fastlane\n" + err.Error())
+                return errors.New("Could not install cocoapods\n" + err.Error())
         }</span>
 
         <span class="cov8" title="1">return nil</span>
 }
 
-// Uninstall : Uninstall fastlane on the machine
-func (f *Fastlane) Uninstall() error <span class="cov8" title="1">{
+// Uninstall : Uninstall cocoapods on the machine
+func (c *Cocoapods) Uninstall() error <span class="cov0" title="0">{
         var g Gems
-        err := g.Uninstall("fastlane")
+        err := g.Uninstall("cocoapods", "pod")
         if err != nil </span><span class="cov0" title="0">{
-                return errors.New("Could not uninstall fastlane\n" + err.Error())
+                return errors.New("Could not uninstall cocoapods\n" + err.Error())
         }</span>
 
-        <span class="cov8" title="1">return nil</span>
+        <span class="cov0" title="0">return nil</span>
 }
 </pre>
 		
 		<pre class="file" id="file3" style="display: none">package actions
+
+import "errors"
+
+// Fastlane : Construct to handle all things related to fastlane
+type Fastlane struct{}
+
+// Install : Install fastlane on the machine
+func (f *Fastlane) Install() error <span class="cov0" title="0">{
+        var g Gems
+        err := g.InstallSimple("fastlane")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not install fastlane\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Uninstall : Uninstall fastlane on the machine
+func (f *Fastlane) Uninstall() error <span class="cov0" title="0">{
+        var g Gems
+        err := g.UninstallSimple("fastlane")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not uninstall fastlane\n" + err.Error())
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package actions
 
 import (
         "errors"
@@ -362,44 +418,64 @@ import (
 // Gems structure to install, upgrade, uninstall gems
 type Gems struct{}
 
-// Install a gem
-func (g *Gems) Install(gem string) error <span class="cov8" title="1">{
+// InstallSimple a gem with gem name only
+func (g *Gems) InstallSimple(gem string) error <span class="cov0" title="0">{
+        return g.Install(gem, "")
+}</span>
+
+// Install a gem with gem name and scriptName
+func (g *Gems) Install(gem string, scriptName string) error <span class="cov8" title="1">{
         // Get the global config
         conf := config.Get()
 
+        // If scriptName is empty, use the gem name
+        if scriptName == "" </span><span class="cov0" title="0">{
+                scriptName = gem
+        }</span>
+
         // Check if gem is installed
-        installed, _ := g.version(gem)
-        if installed == true </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">installed, _ := g.version(scriptName)
+        if installed == true </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
         // Okay, so the gem was not installed, big deal
         // Let's install the effing thing
-        <span class="cov8" title="1">var b basher.Basher
+        <span class="cov0" title="0">var b basher.Basher
         RootPassword, err := conf.GetRootPassword()
         if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov0" title="0">{
                 return errors.New("Unable to find the RootPassword\n" + err.Error())
         }</span>
 
-        <span class="cov8" title="1">status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+        <span class="cov0" title="0">status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not install " + gem + " [Error Code &lt;" + strconv.Itoa(status) + "&gt;]\n" + err.Error())
         }</span>
 
         // Verify if gem was installed
-        <span class="cov8" title="1">installed, _ = g.version(gem)
-        if installed == true </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">installed, _ = g.version(scriptName)
+        if installed == true </span><span class="cov0" title="0">{
                 // It was successfull installed
                 return nil
         }</span>
         <span class="cov0" title="0">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
 }
 
+// UninstallSimple a gem with gem name only
+func (g *Gems) UninstallSimple(gem string) error <span class="cov0" title="0">{
+        return g.Uninstall(gem, "")
+}</span>
+
 // Uninstall : remove a gem from the system
-func (g *Gems) Uninstall(gem string) error <span class="cov8" title="1">{
+func (g *Gems) Uninstall(gem string, scriptName string) error <span class="cov0" title="0">{
+        // If scriptName is not set, use the gem name
+        if scriptName == "" </span><span class="cov0" title="0">{
+                scriptName = gem
+        }</span>
+
         // Check if the gem is installed
-        installed, _ := g.version(gem)
-        if installed == false </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">installed, _ := g.version(scriptName)
+        if installed == false </span><span class="cov0" title="0">{
                 // If it is not installed then return
                 return nil
         }</span>
@@ -421,7 +497,7 @@ func (g *Gems) Uninstall(gem string) error <span class="cov8" title="1">{
         }</span>
 
         // Verify if gem was uninstalled
-        <span class="cov0" title="0">installed, _ = g.version(gem)
+        <span class="cov0" title="0">installed, _ = g.version(scriptName)
         if installed == false </span><span class="cov0" title="0">{
                 // It was successfull uninstalled
                 return nil
@@ -443,11 +519,26 @@ func (g *Gems) version(gem string) (bool, string) <span class="cov8" title="1">{
         }</span>
 
         // Not installed
-        <span class="cov8" title="1">return false, ""</span>
+        <span class="cov0" title="0">return false, ""</span>
 }
+
+// #TODO : Find out how do we know that an update is available and update it
+// When an upgrade is available, they say
+// CocoaPods 1.0.1 is available.
+// To update use: `sudo gem install cocoapods`
+// Until we reach version 1.0 the features of CocoaPods can and will change.
+// We strongly recommend that you use the latest version at all times.
+// if strings.Contains(tailData, "sudo gem install cocoapods") == true {
+// This means that an update is available, run cocoapods update
+//        status := SetupPods(true)
+// if status &gt; 0 {
+// return errors.New("We couldn't update to the new version of cocoapods")
+// }
+// fmt.Println("Updated cocoapods to the latest version")
+// }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package actions
+		<pre class="file" id="file5" style="display: none">package actions
 
 import (
         "errors"
@@ -523,7 +614,7 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
         }</span>
 
         <span class="cov0" title="0">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
-        status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, success)
+        status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, []string{success}, []string{})
         return status, err</span>
 }
 
@@ -553,7 +644,7 @@ func (g *Gradle) Assemble(logPath string) (int, error) <span class="cov0" title=
 }</span>
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package actions
+		<pre class="file" id="file6" style="display: none">package actions
 
 import (
         "errors"
@@ -1413,7 +1504,63 @@ func SetupXcode() int <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file6" style="display: none">package actions
+		<pre class="file" id="file7" style="display: none">package actions
+
+import (
+        "upshift/basher"
+        "upshift/utils"
+)
+
+// Pod : Handle everything related to install pods
+type Pod struct{}
+
+// IsInstalled : Check if cocoapods is installed
+func (p *Pod) IsInstalled() bool <span class="cov8" title="1">{
+        var c Cocoapods
+        err := c.Install()
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Could not install underlying cocoapods\n" + err.Error())
+                return false
+        }</span>
+        <span class="cov8" title="1">return true</span>
+}
+
+// AreUsed : Check if this project uses pods
+func (p *Pod) AreUsed() bool <span class="cov8" title="1">{
+        return utils.FileExists("Podfile")
+}</span>
+
+// Install : Install pods which are being used in the system
+func (p *Pod) Install() (int, error) <span class="cov8" title="1">{
+        var b basher.Basher
+        utils.LogMessage("$ pod install")
+        return b.RunAndTail("PodInstall", []string{".upshift/logs/pod-install.log"}, ".upshift/logs/pod-install.log", []string{}, []string{})
+}</span>
+
+// RepoUpdate : Update the pod repo, not sure who will call it
+func (p *Pod) RepoUpdate() (int, error) <span class="cov8" title="1">{
+        var b basher.Basher
+        utils.LogMessage("$ pod repo update --verbose")
+        return b.RunAndTail("PodRepoUpdate", []string{".upshift/logs/pod-repo-update.log"}, ".upshift/logs/pod-repo-update.log", []string{}, []string{"error"})
+}</span>
+
+// #TODO : Find out how do we know that an update is available and update it
+// When an upgrade is available, they say
+// CocoaPods 1.0.1 is available.
+// To update use: `sudo gem install cocoapods`
+// Until we reach version 1.0 the features of CocoaPods can and will change.
+// We strongly recommend that you use the latest version at all times.
+// if strings.Contains(tailData, "sudo gem install cocoapods") == true {
+// This means that an update is available, run cocoapods update
+//        status := SetupPods(true)
+// if status &gt; 0 {
+// return errors.New("We couldn't update to the new version of cocoapods")
+// }
+// fmt.Println("Updated cocoapods to the latest version")
+// }
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package actions
 
 import (
         "fmt"
@@ -1421,7 +1568,6 @@ import (
         "net/http"
         "path/filepath"
         "strings"
-        "time"
         "upshift/basher"
         c "upshift/colours"
         "upshift/command"
@@ -1430,180 +1576,88 @@ import (
 )
 
 // ShowVersion : shows the version of upshift on the command line
-func ShowVersion() int {
+func ShowVersion() int <span class="cov0" title="0">{
         conf := config.Get()
         fmt.Println(conf.Settings.AppVersion)
         return 0
-}
+}</span>
 
-</span>// InstallPods : Install cocoapods in the project
-func InstallPods() int {
-        var p Pods
-
-        // Check if this project uses cocoapods
-        if p.InUse() == false {
-                fmt.Println("It looks</span><span class="cov0" title="0"> like this project doesn't use pods")
-                return 0
-        }
-
-</span>        // So pods exist, damn
-        // fmt.Println("It looks like this project uses pods, let me try and set them up")
-
-        // err := runPodRepoUpdate()
-        // if err != nil {
-        //         utils.LogE</span><span class="cov0" title="0">rror(err.Error())
-        //         return 1
-        // }
-
-</span>        utils.LogMessage("$ pod install")
-        <span class="cov0" title="0">podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-install.log")
-        var b basher.Basher
-        status, err := b.Run("PodInstall", []string{podInstallLogFullPath})
-        if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("We couldn't initialise pods\n" + err.Error())
-                return status
-        }
-
-</span>        // Read the last 500 bytes from the whole message, we just want to what happened at the end
-        tailData, err := utils.FileTail(podInstallLogFullPath, 500)
-        <span class="cov0" title="0">if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("It seems we couldn't read the output. Here's what happened\n" + err.Error())
-                return status
-        }
-
-</span>        if strings.Contains(tailData, "fatal") == true || strings.Contains(tailData, "error") == true || strings.Contains(tailData, "Invalid") == true {
-        <span class="cov0" title="0">        utils.LogError("Something went wrong with installing pods, you need to look at this.")
-</span>                return 1
-        }
-
-</span>        fmt.Println("We were able to successfully setup cocoapods, moving on")
-        <span class="cov0" title="0">return 0
-
-</span>}
-
-func runPodRepoUpdate() error {
-
-        // Check if it's been a while since we ran `pod repo update` and if yes, run it
-        globalConf := config.Get()
-        difference := int32(time.Now().Unix()) - globalConf.Settings.AndroidSDKUpdateTime
-
-        // Run this if last update was never done or more than a month ago
-        if globalConf.Settings.AndroidSDKUpdateTime == 0 || difference &gt; 3600*24*30 {
-                // This means we have never come here.
-</span>                utils.LogMessage("$ pod repo update --verbose")
-                podInstallLogFullPath, _ := filepath.Abs(".upshift/logs/pod-repo-update.log")
-                var b basher.Basher
-                _, err := b.Run("PodRepoUpdate", []string{podInstallLogFullPath})
-                if err != nil {
-                        return err
-</span>                }
-
-</span>                // Read the last 500 bytes from the whole message, we just want to what happened at the end
-                tailData, err := utils.FileTail(podInstallLogFullPath, 500)
-                <span class="cov0" title="0">if err != nil {
-                        return err
-</span>                }
-
-</span>                if strings.Contains(tailData, "error") == true {
-                <span class="cov0" title="0">        return err
-</span>                }
-
-</span>                // When an upgrade is available, they say
-                // CocoaPods 1.0.1 is available.
-                // To update use: `sudo gem install cocoapods`
-                // Until we reach version 1.0 the features of CocoaPods can and will change.
-                // We strongly recommend that you use the latest version at all times.
-                // if strings.Contains(tailData, "sudo gem install cocoapods") == true {
-                <span class="cov0" title="0">// This means that an update is available, run cocoapods update
-</span>                //        status := SetupPods(true)
-                // if status &gt; 0 {
-                // return error</span><span class="cov0" title="0">s.New("We couldn't update to the new version of cocoapods")
-                // }
-                //</span> fmt.Println("Updated cocoapods to the latest version")
-                /<span class="cov0" title="0">/ }
-</span>
-                globalConf.Settings.AndroidSDKUpdateTime = int32(time.Now().Unix())
-                <span class="cov0" title="0">globalConf.WriteMachineConfig()
-        }
-</span>        return nil
-}<span class="cov0" title="0">
-</span>
 // GitSubmodules : Initialize submodules in a project
-func GitSubmodules() int {
-        submodulePath, _ := file<span class="cov0" title="0">path.Abs(".gitmodules")
+func GitSubmodules() int <span class="cov0" title="0">{
+        submodulePath, _ := filepath.Abs(".gitmodules")
         submodulesExist := utils.FileExists(submodulePath)
 
-        if submodulesExist == false {
-                fmt.Println("It looks like </span><span class="cov0" title="0">this project doesn't use submodules")
+        if submodulesExist == false </span><span class="cov0" title="0">{
+                fmt.Println("It looks like this project doesn't use submodules")
                 return 0
-        }
+        }</span>
 
-</span>        // So git submodules exist
-        fmt.Println("It looks like this project uses git submodules, let me try and set them up")
+        // So git submodules exist
+        <span class="cov0" title="0">fmt.Println("It looks like this project uses git submodules, let me try and set them up")
 
         utils.LogMessage("$ git submodule init")
         initLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-init.log")
         var b basher.Basher
         status, err := b.Run("GitSubmoduleInit", []string{initLogFileFullPath})
-        if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("We couldn't initialise submodules\n" + err.Error())
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't initialise submodules\n" + err.Error())
                 return status
-        }
+        }</span>
 
-</span>        utils.LogMessage("$ git submodule update")
-        <span class="cov0" title="0">updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
+        <span class="cov0" title="0">utils.LogMessage("$ git submodule update")
+        updateLogFileFullPath, _ := filepath.Abs(".upshift/logs/git-submodule-update.log")
         status, err = b.Run("GitSubmoduleUpdate", []string{updateLogFileFullPath})
-        if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("We couldn't update submodules\n" + err.Error())
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't update submodules\n" + err.Error())
                 return status
-        }
+        }</span>
 
-</span>        // Read the last 500 bytes from the whole message, we just want to what happened at the end
-        tailData, err := utils.FileTail(updateLogFileFullPath, 500)
-        <span class="cov0" title="0">if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(updateLogFileFullPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
                 return status
-        }
+        }</span>
 
-</span>        if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
-        <span class="cov0" title="0">        utils.LogError("Something went wrong with submodule update, you need to look at this.")
-</span>                return 1
-        }
+        <span class="cov0" title="0">if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong with submodule update, you need to look at this.")
+                return 1
+        }</span>
 
-</span>        fmt.Println("We were able to successfully setup submodules, moving on")
-        <span class="cov0" title="0">return 0
+        <span class="cov0" title="0">fmt.Println("We were able to successfully setup submodules, moving on")
+        return 0</span>
 }
-</span>
+
 // GitPull : Do a git pull on the project based on the defined remote and the branch the user is currently on
-func GitPull() int {
-        conf := config.Get<span class="cov0" title="0">()
+func GitPull() int <span class="cov0" title="0">{
+        conf := config.Get()
 
         // If you are running on a CI, we don't need to worry about this, just skip and take up the next thing
-        if conf.IsCI() == true {
-                fmt.Println("It seems </span><span class="cov0" title="0">you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
+        if conf.IsCI() == true </span><span class="cov0" title="0">{
+                fmt.Println("It seems you're running this on a CI, so we are going to skip the git pull, it's the CI's job to give me the latest code")
                 return 0
-        }
+        }</span>
 
-</span>        // Find out which repo and branch are they on
-        out, err := command.Run([]string{"git", "status"}, "")
-        <span class="cov0" title="0">if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("Either this is not a git repository, or you don't even have git installed.")
+        // Find out which repo and branch are they on
+        <span class="cov0" title="0">out, err := command.Run([]string{"git", "status"}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Either this is not a git repository, or you don't even have git installed.")
                 return 1
-        }
+        }</span>
 
-</span>        // Read the first row of git sttus which says 'on branch xyz'
-        gitStatusOutputRows := strings.Split(out, "\n")
-        <span class="cov0" title="0">var firstRow string
-        if len(gitStatusOutputRows) &gt; 0 {
-                firstRow = gitStatusOutputRows[</span><span class="cov0" title="0">0]
-        } else {
-                </span><span class="cov0" title="0">utils.LogError("You are probably not in a git repository. Quit messing around.")
+        // Read the first row of git sttus which says 'on branch xyz'
+        <span class="cov0" title="0">gitStatusOutputRows := strings.Split(out, "\n")
+        var firstRow string
+        if len(gitStatusOutputRows) &gt; 0 </span><span class="cov0" title="0">{
+                firstRow = gitStatusOutputRows[0]
+        }</span><span class="cov0" title="0"> else {
+                utils.LogError("You are probably not in a git repository. Quit messing around.")
                 return 1
-        }
+        }</span>
 
-</span>        // Alright find the correct branch and show it to the user
-        currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
-        <span class="cov0" title="0">fmt.Println("We suspect that you are on branch " + c.Blue + currentBranch + c.Default)
+        // Alright find the correct branch and show it to the user
+        <span class="cov0" title="0">currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
+        fmt.Println("We suspect that you are on branch " + c.Blue + currentBranch + c.Default)
 
         // Check if the user has one or more remotes
         // If they have one, just use it
@@ -1612,75 +1666,75 @@ func GitPull() int {
 
         // Find out which repo and branch are they on
         out, err = command.Run([]string{"git", "remote"}, "")
-        if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("Either this is not a git repository, or you don't even have git installed.")
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Either this is not a git repository, or you don't even have git installed.")
                 return 1
-        }
+        }</span>
 
-</span>        var currentRemote string
-        <span class="cov0" title="0">gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
-        switch len(gitRemoteOutputRows) {
-        case 0:
-</span>        <span class="cov0" title="0">        utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
-                return 1
-        case 1:
-</span>        <span class="cov0" title="0">        currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
-                fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")
-        default:
-</span>        <span class="cov0" title="0">        // This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
+        <span class="cov0" title="0">var currentRemote string
+        gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
+        switch len(gitRemoteOutputRows) </span>{
+        <span class="cov0" title="0">case 0:
+                utils.LogError("Um, you have no remotes, I really don't know what to do. I'm going to kill myself")
+                return 1</span>
+        <span class="cov0" title="0">case 1:
+                currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
+                fmt.Println("And we suspect that you are using the " + c.Blue + currentRemote + c.Default + " remote")</span>
+        <span class="cov0" title="0">default:
+                // This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
                 conf := config.Get()
 
-                if conf.Settings.Remote != "" {
-                        // Alright, so they have defi</span><span class="cov0" title="0">ned a remote, let's check if it exits in our list of remotes
-                        for _, row := range gitRemoteOutputRows {
-                                if strings.TrimSpace(conf.Settings.Remo</span><span class="cov0" title="0">te) == strings.TrimSpace(row) {
+                if conf.Settings.Remote != "" </span><span class="cov0" title="0">{
+                        // Alright, so they have defined a remote, let's check if it exits in our list of remotes
+                        for _, row := range gitRemoteOutputRows </span><span class="cov0" title="0">{
+                                if strings.TrimSpace(conf.Settings.Remote) == strings.TrimSpace(row) </span><span class="cov0" title="0">{
                                         currentRemote = row
-</span>                                }
+                                }</span>
                         }
-</span>
+
                         // Didn't find their remote in git remotes, tell them so
-                        if currentRemote == "" {
-                        <span class="cov0" title="0">        utils.LogError("Here's</span><span class="cov0" title="0"> a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
+                        <span class="cov0" title="0">if currentRemote == "" </span><span class="cov0" title="0">{
+                                utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
                                 return 1
-                        }
-                        f</span>mt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
+                        }</span>
+                        <span class="cov0" title="0">fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)</span>
                 }<span class="cov0" title="0"> else {
-</span>                        <span class="cov0" title="0">// They haven't defined a remote in config, screw them
+                        // They haven't defined a remote in config, screw them
                         utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
                         return 1
-                }
+                }</span>
         }
-</span>
-        utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
-        <span class="cov0" title="0">// Now we have both, a remote and a branch, let's pull
+
+        <span class="cov0" title="0">utils.LogMessage("$ git pull " + currentRemote + " " + currentBranch)
+        // Now we have both, a remote and a branch, let's pull
         logFileFullPath, _ := filepath.Abs(".upshift/logs/git-pull.log")
         var b basher.Basher
         status, err := b.Run("GitPull", []string{currentRemote, currentBranch, logFileFullPath})
         // status, err := basher.Run("RunSingleCommand", []string{"$(git pull " + currentRemote + " " + currentBranch + " 2&gt;&amp;1 | tee \"" + logFileFullPath + "\")"})
-        if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We couldn't pull the branch " + currentBranch + " from the remote " + currentRemote + " - \n" + err.Error())
                 return status
-        }
+        }</span>
 
-</span>        // Read the last 500 bytes from the whole message, we just want to what happened at the end
-        tailData, err := utils.FileTail(logFileFullPath, 500)
-        <span class="cov0" title="0">if err != nil {
-                utils.LogErro</span><span class="cov0" title="0">r("It seems we couldn't read the output. Here's what happened\n" + err.Error())
+        // Read the last 500 bytes from the whole message, we just want to what happened at the end
+        <span class="cov0" title="0">tailData, err := utils.FileTail(logFileFullPath, 500)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("It seems we couldn't read the output. Here's what happened\n" + err.Error())
                 return status
-        }
+        }</span>
 
-</span>        if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true {
-        <span class="cov0" title="0">        utils.LogError("Something went wrong with the pull, you need to look at this.")
-</span>                return 1
-        }
+        <span class="cov0" title="0">if strings.Contains(tailData, "fatal:") == true || strings.Contains(tailData, "error:") == true </span><span class="cov0" title="0">{
+                utils.LogError("Something went wrong with the pull, you need to look at this.")
+                return 1
+        }</span>
 
-</span>        fmt.Println("We were able to pull the latest code, awesome")
-        <span class="cov0" title="0">return 0
+        <span class="cov0" title="0">fmt.Println("We were able to pull the latest code, awesome")
+        return 0</span>
 }
-</span>
+
 // ShowHelp : Show help, so that the user knows what to do
-func ShowHelp() int {
-        fmt.Println("\nUPSH<span class="cov0" title="0">IFT(1)               Upshift Commands Manual               UPSHIFT(1)")
+func ShowHelp() int <span class="cov0" title="0">{
+        fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
         fmt.Println(c.Bold + "\nNAME" + c.Default)
         fmt.Println("\tupshift -- the creative mobile app builder")
         fmt.Println(c.Bold + "\nSYNOPSIS" + c.Default)
@@ -1731,73 +1785,73 @@ func ShowHelp() int {
         fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
 
         return 0
-}
+}</span>
 
-</span>// SetupXctool : Install xctool via brew
-func SetupXctool() int {
-        return SetupBrew("xcto<span class="cov0" title="0">ol")
-}
+// SetupXctool : Install xctool via brew
+func SetupXctool() int <span class="cov0" title="0">{
+        return SetupBrew("xctool")
+}</span>
 
-</span>// SetupBrew : Common function to setup tools via brew
-func SetupBrew(tool string) int {
-        // Check which version of the b<span class="cov0" title="0">rew was installed
+// SetupBrew : Common function to setup tools via brew
+func SetupBrew(tool string) int <span class="cov0" title="0">{
+        // Check which version of the brew was installed
         version, err := command.Run([]string{tool, "--version"}, "")
-        if err == nil {
-                // Remove the</span><span class="cov0" title="0"> name of the tool if it is part of the version string
+        if err == nil </span><span class="cov0" title="0">{
+                // Remove the name of the tool if it is part of the version string
                 version = strings.Replace(version, tool, "", 1)
                 // Now trim whatever is left
                 version = strings.TrimSpace(version)
                 fmt.Println(tool + " is pretty much setup on this system. You are on version " + version)
                 return 0
-        }
+        }</span>
 
-</span>        // Check if the command was not found
-        var errorString string
-        <span class="cov0" title="0">if err != nil {
-                errorString =</span><span class="cov0" title="0"> err.Error()
-        }
+        // Check if the command was not found
+        <span class="cov0" title="0">var errorString string
+        if err != nil </span><span class="cov0" title="0">{
+                errorString = err.Error()
+        }</span>
 
-</span>        if strings.Contains(errorString, "executable file not found") == true {
-        <span class="cov0" title="0">        // Alright, so the tool was not found, go ahead and install it
-</span>                fmt.Println("Latest " + tool + " was not found, installing it")
+        <span class="cov0" title="0">if strings.Contains(errorString, "executable file not found") == true </span><span class="cov0" title="0">{
+                // Alright, so the tool was not found, go ahead and install it
+                fmt.Println("Latest " + tool + " was not found, installing it")
 
                 // Brew cowardly refuses to use sudo, hell yeah
                 var b basher.Basher
                 var status int
                 status, err = b.Run("SetupBrewTool", []string{tool})
-                if err != nil {
-                        utils.LogErro</span><span class="cov0" title="0">r("We couldn't install " + tool + "\n" + err.Error())
+                if err != nil </span><span class="cov0" title="0">{
+                        utils.LogError("We couldn't install " + tool + "\n" + err.Error())
                         return status
-                }
+                }</span>
 
-</span>                fmt.Println(tool + " has been setup on your machine. Have fun.")
-                <span class="cov0" title="0">return 0
+                <span class="cov0" title="0">fmt.Println(tool + " has been setup on your machine. Have fun.")
+                return 0</span>
         }
-</span>
-        fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
-        <span class="cov0" title="0">return 1
+
+        <span class="cov0" title="0">fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
+        return 1</span>
 }
-</span>
+
 // SetupXcpretty : If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
-func SetupXcpretty() int {
+func SetupXcpretty() int <span class="cov0" title="0">{
         // return SetupGem("xcpretty", "xcpretty", false)
         return 0
 }</span>
 
 // UpgradeScript : Call this function to download the latest version of the binary
 // And update the user to the latest version.
-// It does nothing if the<span class="cov0" title="0"> user is on the latest version
-func UpgradeScript() int {
+// It does nothing if the user is on the latest version
+func UpgradeScript() int <span class="cov0" title="0">{
         conf := config.Get()
 
-</span>        resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
-        if err != nil {
+        resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
+        if err != nil </span><span class="cov0" title="0">{
                 fmt.Println("We couldn't connect to the internet :(", err.Error())
                 return 1
-        }
+        }</span>
 
-        defer resp.Body.Close()
+        <span class="cov0" title="0">defer resp.Body.Close()
         body, err := ioutil.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 fmt.Println("We were unable to figure out what is the latest version on the server, next time maybe", err.Error())
@@ -1807,43 +1861,43 @@ func UpgradeScript() int {
         <span class="cov0" title="0">latestVersion := string(body)
         latestVersion = strings.TrimSpace(latestVersion)
 
-</span>        if latestVersion == conf.Settings.AppVersion {
+        if latestVersion == conf.Settings.AppVersion </span><span class="cov0" title="0">{
                 fmt.Println("Your powers (and version) are already at the top. You're running v", conf.Settings.AppVersion)
-                </span>return 0
-        }
+                return 0
+        }</span>
 
-        fmt.Println("Get ready to feel the power at your fingertips")
+        <span class="cov0" title="0">fmt.Println("Get ready to feel the power at your fingertips")
 
         var b basher.Basher
-</span>        status, err := b.Run("UpgradeScript", []string{})
-        if err != nil {
-                </span>utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
+        status, err := b.Run("UpgradeScript", []string{})
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
                 return status
-        <span class="cov0" title="0">}
+        }</span>
 
-        fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
-        return 0
+        <span class="cov0" title="0">fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
+        return 0</span>
 }
-</span>
-// SetupConfig : When a new project doesn't have config, they call this one to create one for them
-fu</span>nc SetupConfig() int {
 
-        <span class="cov0" title="0">configExits := utils.FileExists("./config.toml")
-        if confi</span>gExits == true {
+// SetupConfig : When a new project doesn't have config, they call this one to create one for them
+func SetupConfig() int <span class="cov0" title="0">{
+
+        configExits := utils.FileExists("./config.toml")
+        if configExits == true </span><span class="cov0" title="0">{
                 fmt.Println("It looks like a config.toml is already here, skipping this step")
                 return 1
-        }
-        // Config does not exi<span class="cov0" title="0">st
+        }</span>
+        // Config does not exist
         // Create a new config.toml in this directory
 
-        sampleToml := `[Applica</span><span class="cov0" title="0">tion]
+        <span class="cov0" title="0">sampleToml := `[Application]
 Debug = false
 
-[R</span>unner]
+[Runner]
 RootPassword = "testPassword"
 
 [Build]
-G<span class="cov0" title="0">itRepoURL = "testRepo"
+GitRepoURL = "testRepo"
 GitRepoRemote = "origin"
 CleanBeforeBuild = false
 UninstallOlderBuilds = false
@@ -1863,13 +1917,13 @@ MainActivityName = "testActivity"`
         tomlBytes := []byte(sampleToml)
 
         err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
-        if err != nil {
+        if err != nil </span><span class="cov0" title="0">{
                 utils.LogError("We could not write the config file, the OS told us this &lt;" + err.Error() + "&gt;")
                 return 1
-        }
+        }</span>
 
-        fmt.Println("We just added a config.toml to this folder!")
-        return 0
+        <span class="cov0" title="0">fmt.Println("We just added a config.toml to this folder!")
+        return 0</span>
 }
 </pre>
 		

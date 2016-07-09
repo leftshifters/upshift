@@ -2,18 +2,21 @@ package basher
 
 import (
 	"errors"
-	gobasher "github.com/progrium/go-basher"
 	"os"
 	"path/filepath"
 	"strings"
 	c "upshift/colours"
 	"upshift/utils"
+
+	gobasher "github.com/progrium/go-basher"
 )
 
+// Basher : Construct to handle everything related to basher and bash scripts
 type Basher struct {
 	bash *gobasher.Context
 }
 
+// Load : Load the basher binary, so that you can start running scripts
 func (b *Basher) Load() {
 	b.bash, _ = gobasher.NewContext("/bin/bash", false)
 	if b.bash.HandleFuncs(os.Args) {
@@ -24,6 +27,7 @@ func (b *Basher) Load() {
 	b.bash.Source("scripts.bash", Asset)
 }
 
+// Run : Run a command on bash
 func (b *Basher) Run(command string, params []string) (int, error) {
 
 	if b.bash == nil {
@@ -42,7 +46,8 @@ func (b *Basher) Run(command string, params []string) (int, error) {
 	return status, nil
 }
 
-func (b *Basher) RunAndTail(command string, params []string, logPath string, success string) (int, error) {
+// RunAndTail : Run a command on basher and tail it's output when the command finishes to look for specific words
+func (b *Basher) RunAndTail(command string, params []string, logPath string, success []string, failure []string) (int, error) {
 
 	logPath, _ = filepath.Abs(logPath)
 
@@ -56,8 +61,22 @@ func (b *Basher) RunAndTail(command string, params []string, logPath string, suc
 		return status, errors.New("We could not read the logFile " + logPath + "\n" + err.Error())
 	}
 
-	if strings.Contains(tail, success) == false {
-		return status, errors.New("The command " + command + " did not run successfully. You need to look this up")
+	//
+	// Look through success and failure cases
+	//
+
+	// If any anti success cases are found, return with error
+	for _, successItem := range success {
+		if strings.Contains(tail, successItem) == false {
+			return status, errors.New("The command " + command + " did not run successfully. You need to look this up")
+		}
+	}
+
+	// If any failure cases are found, return with error
+	for _, successItem := range failure {
+		if strings.Contains(tail, successItem) == true {
+			return status, errors.New("The command " + command + " did not run successfully. You need to look this up")
+		}
 	}
 
 	return status, nil

@@ -63,15 +63,23 @@ UninstallGem() {
 	fi
 }
 
-
-
-
-
-MakeFolders() {
-	mkdir -p .upshift/logs/
-	mkdir -p .upshift/build/
-	mkdir -p .private
+PodInstall() {
+	LOGFILE=$1
+	MakeFolders
+	pod install 2>&1 | tee $1
 }
+
+PodRepoUpdate() {
+	LOGFILE=$1
+	pod repo update --verbose 2>&1 | tee $1
+}
+
+
+
+
+
+
+
 
 UpgradeScript() {
 	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm upshift.temp
@@ -87,37 +95,21 @@ GitPull() {
 	REMOTE=$1
 	BRANCH=$2
 	LOGFILE=$3
-	MakeFolders
 	git pull $1 $2 2>&1 | tee $3
 }
 
 GitSubmoduleInit() {
 	LOGFILE=$1
-	MakeFolders
 	git submodule init 2>&1 | tee $1
 }
 
 GitSubmoduleUpdate() {
 	LOGFILE=$1
-	MakeFolders
 	git submodule update 2>&1 | tee $1
-}
-
-PodInstall() {
-	LOGFILE=$1
-	MakeFolders
-	pod install 2>&1 | tee $1
-}
-
-PodRepoUpdate() {
-	LOGFILE=$1
-	UpshiftConfig
-	pod repo update --verbose 2>&1 | tee $1
 }
 
 StartSimulator() {
 	DEVICE=$1
-	MakeFolders
 	xcrun instruments -w "$1" 1>/dev/null 2>&1
 }
 
@@ -127,7 +119,6 @@ CompileIOS() {
 	SCHEME=$3
 	DEVICE=$4
 	LOG_PATH=$5
-	MakeFolders
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
 }
 
@@ -137,7 +128,6 @@ TestIOS() {
 	SCHEME=$3
 	DEVICE=$4
 	LOG_PATH=$5
-	MakeFolders
 	xctool -"$1" "$2" -scheme "$3" -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" test | tee "$5"
 }
 
@@ -147,14 +137,12 @@ ArchiveIOS() {
 	SCHEME=$3
 	PROJECT_NAME=$4
 	LOG_PATH=$5
-	MakeFolders
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -derivedDataPath .upshift/build -archivePath .upshift/$4.xcarchive archive | tee "$5" | xcpretty
 }
 
 ExportIOS() {
 	PROJECT_NAME=$1
 	LOG_PATH=$2
-	MakeFolders
 	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/ 2>&1 | tee "$2" | xcpretty
 }
 
@@ -165,7 +153,6 @@ FetchAndRepairProvisioningProfiles() {
 	ACCOUNT_EMAIL=$1
 	sigh repair -u $1
 	sigh download_all -u $1
-	mkdir -p ./.private
 	mv *.mobileprovision .private
 	PopulateProvisioningProfiles
 }
@@ -180,7 +167,7 @@ PopulateProvisioningProfiles() {
 	# Get the UUID from .private
 	# https://gist.github.com/mxpr/8208289a63ca4e3a35a4
 	# Loop through all files, if you get a UDID, add them to the list of profiles
-	MakeFolders
+
 	if [ -d "./.private/" ]; then
 		# The .private folder exists
 		foundProfiles=false
@@ -216,13 +203,10 @@ PopulateProvisioningProfiles() {
 AndroidStartActivity() {
 	PACKAGE=$1
 	MAIN_ACTIVITY=$2
-	MakeFolders
 	adb shell am start -n $1/$1.$2
 }
 
 AndroidLaunchEmulator() {
-
-	MakeFolders
 
 	redColour='\033[0;31m'
 	greenColour='\033[0;32m'
@@ -298,11 +282,6 @@ AndroidInstallSDK() {
 	echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
 	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
-}
-
-UpshiftConfig() {
-	mkdir -p ~/.upshift
-	touch ~/.upshift/config
 }
 
 InstallCertificates() {
