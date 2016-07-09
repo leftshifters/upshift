@@ -3,21 +3,24 @@ package config
 import (
 	"bytes"
 	"errors"
-	"github.com/BurntSushi/toml"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"upshift/utils"
+
+	"github.com/BurntSushi/toml"
 )
 
+// Config : Construct to store the app's main config
 type Config struct {
 	machine  MachineConfig
 	repo     RepoConfig
 	Settings Settings
 }
 
+// Settings : Consturct to get overall settings for the app
 type Settings struct {
 	Password                string
 	IOSDeveloperAccount     string // Comes from both repo and machine configs
@@ -37,6 +40,7 @@ type Settings struct {
 	AppVersion              string
 }
 
+// MachineConfig : Construct to readh machine config
 type MachineConfig struct {
 	Password             string
 	IOSDeveloperAccount  string
@@ -44,6 +48,7 @@ type MachineConfig struct {
 	AndroidSDKUpdateTime int32
 }
 
+// RepoConfig : Construct to read the repo config
 type RepoConfig struct {
 	URL                     string
 	Remote                  string
@@ -64,14 +69,19 @@ type RepoConfig struct {
 var conf *Config
 var once sync.Once
 
+// Get : Get the singleon to the config
 func Get() *Config {
 	once.Do(func() {
 		conf = &Config{}
-		conf.PrepareSettings()
+		err := conf.PrepareSettings()
+		if err != nil {
+			utils.LogError("Could not PrepareSettings\n" + err.Error())
+		}
 	})
 	return conf
 }
 
+// PrepareSettings : Read all settings and populate the settings block
 func (c *Config) PrepareSettings() error {
 
 	// Defaults that we use
@@ -82,7 +92,7 @@ func (c *Config) PrepareSettings() error {
 	// Read the Repo config first
 	err := c.ReadRepoConfig()
 	if err != nil {
-		return err
+		utils.LogInfo("Your can setup your repo config at config.toml\n" + err.Error())
 	}
 
 	// Move repo to settings
@@ -103,7 +113,7 @@ func (c *Config) PrepareSettings() error {
 	// Then read the machin config
 	err = c.ReadMachineConfig()
 	if err != nil {
-		return err
+		utils.LogInfo("Your can setup your machine config at ~/.upshift/config\n" + err.Error())
 	}
 
 	c.Settings.Password = c.machine.Password
@@ -127,6 +137,7 @@ func (c *Config) PrepareSettings() error {
 	return nil
 }
 
+// ReadRepoConfig : Read the config in the repo - config.toml
 func (c *Config) ReadRepoConfig() error {
 	repoPath := "config.toml"
 
@@ -138,6 +149,7 @@ func (c *Config) ReadRepoConfig() error {
 	return nil
 }
 
+// ReadMachineConfig : Read the machine config at $HOME/.upshift/config
 func (c *Config) ReadMachineConfig() error {
 	machinePath := filepath.Join(os.Getenv("HOME"), ".upshift", "config")
 
@@ -149,6 +161,7 @@ func (c *Config) ReadMachineConfig() error {
 	return nil
 }
 
+// WriteMachineConfig : write a config from memory to $HOME/.upshift/config
 func (c *Config) WriteMachineConfig() error {
 	// Make sure the folder exits
 	machinePath := filepath.Join(os.Getenv("HOME"), ".upshift")
@@ -177,6 +190,7 @@ func (c *Config) WriteMachineConfig() error {
 	return nil
 }
 
+// WriteRepoConfig : Write the config from memory to config.toml
 func (c *Config) WriteRepoConfig() error {
 	// Create the file path
 	path, err := filepath.Abs("config.toml")
@@ -225,9 +239,11 @@ func (c *Config) readConfig(file string) error {
 	return nil
 }
 
+// GetRootPassword : Get the root password setup for the system
 func (c *Config) GetRootPassword() (string, error) {
 	// Check if it is defined in the environment variable
 	RootPassword := os.Getenv("RootPassword")
+
 	if RootPassword != "" {
 		return RootPassword, nil
 	}
@@ -241,18 +257,17 @@ func (c *Config) GetRootPassword() (string, error) {
 	return "", errors.New("We can't do this without the root password, you need to set it up either in your env or the machine config")
 }
 
-// Check if the currect script is running in a CI
+// IsCI : Check if the currect script is running in a CI
 func (c *Config) IsCI() bool {
 	// Get GITLAB_CI from the environment
 	isGitlab := os.Getenv("GITLAB_CI")
 	if isGitlab == "true" {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
-// Check if the current script is running in a docker container
+// IsDocker : Check if the current script is running in a docker container
 func (c *Config) IsDocker() bool {
 	// To check if it's docker or not, find out if /proc/1/cgroup has Docker written anywhere
 	// We don't need to return an error on this, just a true of false
