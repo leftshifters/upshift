@@ -29,6 +29,7 @@ func (b *Basher) Load() {
 
 // Run : Run a command on bash
 func (b *Basher) Run(command string, params []string) (int, error) {
+	utils.SetupFolders()
 
 	if b.bash == nil {
 		b.Load()
@@ -48,6 +49,7 @@ func (b *Basher) Run(command string, params []string) (int, error) {
 
 // RunAndTail : Run a command on basher and tail it's output when the command finishes to look for specific words
 func (b *Basher) RunAndTail(command string, params []string, logPath string, success []string, failure []string) (int, error) {
+	utils.SetupFolders()
 
 	logPath, _ = filepath.Abs(logPath)
 
