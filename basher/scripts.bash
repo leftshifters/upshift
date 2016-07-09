@@ -74,6 +74,18 @@ PodRepoUpdate() {
 	pod repo update --verbose 2>&1 | tee $1
 }
 
+GitSubmoduleInit() {
+	LOGFILE=$1
+	git submodule init 2>&1 | tee $1
+}
+
+GitPull() {
+	REMOTE=$1
+	BRANCH=$2
+	LOGFILE=$3
+	git pull $1 $2 2>&1 | tee $3
+}
+
 
 
 
@@ -89,18 +101,6 @@ SetupBrewTool() {
 	TOOL=$1
 	brew install $1
 	exit 0
-}
-
-GitPull() {
-	REMOTE=$1
-	BRANCH=$2
-	LOGFILE=$3
-	git pull $1 $2 2>&1 | tee $3
-}
-
-GitSubmoduleInit() {
-	LOGFILE=$1
-	git submodule init 2>&1 | tee $1
 }
 
 GitSubmoduleUpdate() {
