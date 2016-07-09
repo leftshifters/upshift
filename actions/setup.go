@@ -73,19 +73,6 @@ func ShowHelp() int {
 	return 0
 }
 
-// SetupXctool : Install xctool via brew
-func SetupXctool() int {
-	// return SetupBrew("xctool")
-	return 0
-}
-
-// SetupXcpretty : If Xcpretty is not setup, we go ahead and do it
-// It formats the output from xcode so that you can make sense of what is going wrong
-func SetupXcpretty() int {
-	// return SetupGem("xcpretty", "xcpretty", false)
-	return 0
-}
-
 // UpgradeScript : Call this function to download the latest version of the binary
 // And update the user to the latest version.
 // It does nothing if the user is on the latest version

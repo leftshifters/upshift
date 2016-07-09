@@ -1,0 +1,28 @@
+package actions
+
+import "errors"
+
+// Xcpretty : Construct to handle all things related to xcpretty
+type Xcpretty struct{}
+
+// Install : Install xcpretty on the machine
+func (x *Xcpretty) Install() error {
+	var g Gems
+	err := g.InstallSimple("xcpretty")
+	if err != nil {
+		return errors.New("Could not install xcpretty\n" + err.Error())
+	}
+
+	return nil
+}
+
+// Uninstall : Uninstall xcpretty on the machine
+func (x *Xcpretty) Uninstall() error {
+	var g Gems
+	err := g.UninstallSimple("xcpretty")
+	if err != nil {
+		return errors.New("Could not uninstall xcpretty\n" + err.Error())
+	}
+
+	return nil
+}
