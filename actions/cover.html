@@ -54,15 +54,17 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/actions/actions.go (66.7%)</option>
+				<option value="file0">upshift/actions/actions.go (0.0%)</option>
 				
 				<option value="file1">upshift/actions/android.go (0.0%)</option>
 				
-				<option value="file2">upshift/actions/gradle.go (61.8%)</option>
+				<option value="file2">upshift/actions/gems.go (81.1%)</option>
 				
-				<option value="file3">upshift/actions/ios.go (0.0%)</option>
+				<option value="file3">upshift/actions/gradle.go (0.0%)</option>
 				
-				<option value="file4">upshift/actions/setup.go (0.0%)</option>
+				<option value="file4">upshift/actions/ios.go (0.0%)</option>
+				
+				<option value="file5">upshift/actions/setup.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -82,7 +84,8 @@ import (
         "upshift/utils"
 )
 
-func GradleWrapper() int <span class="cov8" title="1">{
+// GradleWrapper : Action to install the gradle wrapper
+func GradleWrapper() int <span class="cov0" title="0">{
         var g Gradle
 
         // Check if gradle exists
@@ -93,11 +96,11 @@ func GradleWrapper() int <span class="cov8" title="1">{
         }</span>
 
         // Add the wrapper
-        <span class="cov8" title="1">status, err := g.AddWrapper()
+        <span class="cov0" title="0">status, err := g.AddWrapper()
         if err != nil </span><span class="cov0" title="0">{
                 utils.LogError(err.Error())
         }</span>
-        <span class="cov8" title="1">return status</span>
+        <span class="cov0" title="0">return status</span>
 }
 </pre>
 		
@@ -119,6 +122,7 @@ func init() <span class="cov8" title="1">{
 
 }</span>
 
+// UpgradeAndroid : Upgrade the android sdk
 func UpgradeAndroid() int <span class="cov0" title="0">{
         var b basher.Basher
         logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
@@ -131,6 +135,7 @@ func UpgradeAndroid() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// SetupAndroid : Install the android sdk
 func SetupAndroid() int <span class="cov0" title="0">{
         var b basher.Basher
         logPath, _ := filepath.Abs(".upshift/logs/android-sdk-upgrade.log")
@@ -143,6 +148,7 @@ func SetupAndroid() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// AndroidBuild : Build the android project
 func AndroidBuild() int <span class="cov0" title="0">{
 
         var b basher.Basher
@@ -313,19 +319,121 @@ func devicesConnected() []string <span class="cov0" title="0">{
 
 import (
         "errors"
+        "fmt"
+        "strconv"
+        "strings"
+        "upshift/basher"
+        "upshift/command"
+        "upshift/config"
+)
+
+// Gems structure to install, upgrade, uninstall gems
+type Gems struct{}
+
+// Install a gem
+func (g *Gems) Install(gem string) error <span class="cov8" title="1">{
+        // Get the global config
+        conf := config.Get()
+
+        // Check if gem is installed
+        installed, _ := g.version(gem)
+        if installed == true </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        // Okay, so the gem was not installed, big deal
+        // Let's install the effing thing
+        <span class="cov8" title="1">var b basher.Basher
+        RootPassword, err := conf.GetRootPassword()
+        if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov0" title="0">{
+                return errors.New("Unable to find the RootPassword\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not install " + gem + " [Error Code &lt;" + strconv.Itoa(status) + "&gt;]\n" + err.Error())
+        }</span>
+
+        // Verify if gem was installed
+        <span class="cov8" title="1">installed, _ = g.version(gem)
+        if installed == true </span><span class="cov8" title="1">{
+                // It was successfull installed
+                return nil
+        }</span>
+        <span class="cov0" title="0">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
+}
+
+// Uninstall : remove a gem from the system
+func (g *Gems) Uninstall(gem string) error <span class="cov8" title="1">{
+        // Check if the gem is installed
+        installed, _ := g.version(gem)
+        if installed == false </span><span class="cov8" title="1">{
+                // If it is not installed then return
+                return nil
+        }</span>
+
+        // Get the global config
+        <span class="cov8" title="1">conf := config.Get()
+
+        // So we know that it is installed, go ahead and uninstall it
+        // Let's uninstall the effing thing
+        var b basher.Basher
+        RootPassword, err := conf.GetRootPassword()
+        if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov0" title="0">{
+                return errors.New("Unable to find the RootPassword\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">status, err := b.Run("UninstallGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not uninstall " + gem + " [Error Code &lt;" + strconv.Itoa(status) + "&gt;]\n" + err.Error())
+        }</span>
+
+        // Verify if gem was uninstalled
+        <span class="cov8" title="1">installed, _ = g.version(gem)
+        if installed == false </span><span class="cov8" title="1">{
+                // It was successfull uninstalled
+                return nil
+        }</span>
+        <span class="cov0" title="0">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
+}
+
+func (g *Gems) version(gem string) (bool, string) <span class="cov8" title="1">{
+        // Check which version of the gem was installed
+        ver, err := command.Run([]string{gem, "--version"}, "")
+        if err == nil </span><span class="cov8" title="1">{
+                // This means that the gem is installed
+                // Get rid of the name and get the version number
+                ver = strings.Replace(ver, gem, "", 1)
+                // Next trim what's left
+                ver = strings.TrimSpace(ver)
+                fmt.Println(gem + " v" + ver + " is installed on your machine")
+                return true, ver
+        }</span>
+
+        // Not installed
+        <span class="cov8" title="1">return false, ""</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package actions
+
+import (
+        "errors"
         "strings"
         "upshift/basher"
         "upshift/command"
         "upshift/utils"
 )
 
+// Gradle : Keep track of everything related to gradle in upshift
 type Gradle struct {
         version          string
         wrapperInstalled bool
         basher           basher.Basher
 }
 
-func (g *Gradle) Version() error <span class="cov8" title="1">{
+// Version : Find the version number of gradle installed
+func (g *Gradle) Version() error <span class="cov0" title="0">{
         // Run gradle -v to figure out if it is install
         utils.LogMessage("$ gradle -v")
         out, err := command.Run([]string{"gradle", "-v"}, "")
@@ -333,12 +441,13 @@ func (g *Gradle) Version() error <span class="cov8" title="1">{
                 return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
         }</span>
 
-        <span class="cov8" title="1">list := utils.CreateList(out, []string{"Build time", "Build number:", "Revision:", "Groovy:", "Ant:", "JVM:", "OS:", "--------------"})
+        <span class="cov0" title="0">list := utils.CreateList(out, []string{"Build time", "Build number:", "Revision:", "Groovy:", "Ant:", "JVM:", "OS:", "--------------"})
         g.version = strings.TrimSpace(strings.Replace(strings.Join(list[:], ""), "Gradle", "", 1))
         return nil</span>
 }
 
-func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
+// AddWrapper : Check and confirm if gradlew exists in the project
+func (g *Gradle) AddWrapper() (int, error) <span class="cov0" title="0">{
         // Check if gradle is installed
         if g.version == "" </span><span class="cov0" title="0">{
                 g.wrapperInstalled = false
@@ -346,7 +455,7 @@ func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
         }</span>
 
         // Check if gradlew file exists
-        <span class="cov8" title="1">if utils.FileExists("./gradlew") == true </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">if utils.FileExists("./gradlew") == true </span><span class="cov0" title="0">{
                 g.wrapperInstalled = true
                 return 0, nil
         }</span>
@@ -364,49 +473,55 @@ func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
         return status, nil</span>
 }
 
-func (g *Gradle) Task(task string, params []string, logPath string, success string) (int, error) <span class="cov8" title="1">{
+// Task : Execute a gradle task
+func (g *Gradle) Task(task string, params []string, logPath string, success string) (int, error) <span class="cov0" title="0">{
         // Check if task exists
         if task == "" </span><span class="cov0" title="0">{
                 return 1, errors.New("Gradle needs a task to run")
         }</span>
 
         // Check if gradle is installed
-        <span class="cov8" title="1">if g.version == "" </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if g.version == "" </span><span class="cov0" title="0">{
                 return 1, errors.New("Gradle version not known. Please check version first")
         }</span>
 
         // Check if gradlew file exists
-        <span class="cov8" title="1">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
                 return 1, errors.New("Gradle wrapper is not installed")
         }</span>
 
-        <span class="cov8" title="1">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
+        <span class="cov0" title="0">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
         status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, success)
         return status, err</span>
 }
 
-func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1">{
+// Clean : Execute gradle clean on the Android project
+func (g *Gradle) Clean(logPath string) (int, error) <span class="cov0" title="0">{
         return g.Task("clean", []string{}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
-func (g *Gradle) Lint(logPath string) (int, error) <span class="cov8" title="1">{
+// Lint : Execute gradle lint on the Android project
+func (g *Gradle) Lint(logPath string) (int, error) <span class="cov0" title="0">{
         return g.Task("lint", []string{}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
-func (g *Gradle) Uninstall(logPath string) (int, error) <span class="cov8" title="1">{
+// Uninstall : Remove installed versions of the app from connected devices
+func (g *Gradle) Uninstall(logPath string) (int, error) <span class="cov0" title="0">{
         return g.Task("uninstallAll", []string{}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
-func (g *Gradle) InstallDebug(logPath string) (int, error) <span class="cov8" title="1">{
+// InstallDebug : Install the debug app on to connected devices
+func (g *Gradle) InstallDebug(logPath string) (int, error) <span class="cov0" title="0">{
         return g.Task("installDebug", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
-func (g *Gradle) Assemble(logPath string) (int, error) <span class="cov8" title="1">{
+// Assemble : Build an android project
+func (g *Gradle) Assemble(logPath string) (int, error) <span class="cov0" title="0">{
         return g.Task("assemble", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }</span>
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package actions
+		<pre class="file" id="file4" style="display: none">package actions
 
 import (
         "errors"
@@ -424,6 +539,7 @@ import (
 
 var projectSettings map[string]string
 
+// IosUploadBuild : Upload an build to itunesconnect
 func IosUploadBuild() int <span class="cov0" title="0">{
         err := uploadBuildToItunes()
         if err != nil </span><span class="cov0" title="0">{
@@ -434,6 +550,7 @@ func IosUploadBuild() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosCreateApp : Create an app on itunesconnect
 func IosCreateApp() int <span class="cov0" title="0">{
         err := createAppOniTunes()
         if err != nil </span><span class="cov0" title="0">{
@@ -444,6 +561,7 @@ func IosCreateApp() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosExportIPA : Export an IPA
 func IosExportIPA() int <span class="cov0" title="0">{
         // Try the build now
         projectName := projectSettings["PROJECT_NAME"]
@@ -457,6 +575,7 @@ func IosExportIPA() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosArchive : Archive an iOS project
 func IosArchive() int <span class="cov0" title="0">{
         projectType := projectSettings["UP_PROJECT_TYPE"]
         projectName := projectSettings["PROJECT_NAME"]
@@ -473,6 +592,7 @@ func IosArchive() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosCertificates : Install certificates for iOS
 func IosCertificates() int <span class="cov0" title="0">{
         err := installCertificates()
         if err != nil </span><span class="cov0" title="0">{
@@ -483,6 +603,7 @@ func IosCertificates() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosProvisioning : Install the provisioning profiles for a project
 func IosProvisioning() int <span class="cov0" title="0">{
         err := addProvisioningProfiles()
         if err != nil </span><span class="cov0" title="0">{
@@ -493,6 +614,7 @@ func IosProvisioning() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosDeploySimulator : Deploy an app to the simulator
 func IosDeploySimulator() int <span class="cov0" title="0">{
         projectName := projectSettings["PROJECT_NAME"]
         projectBundleIdentifier := projectSettings["PRODUCT_BUNDLE_IDENTIFIER"]
@@ -506,6 +628,7 @@ func IosDeploySimulator() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosTest : Execute tests written for the iOS project
 func IosTest() int <span class="cov0" title="0">{
 
         projectType := projectSettings["UP_PROJECT_TYPE"]
@@ -524,6 +647,7 @@ func IosTest() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosBuild : Build an iOS project
 func IosBuild() int <span class="cov0" title="0">{
 
         // Try the build now
@@ -543,6 +667,7 @@ func IosBuild() int <span class="cov0" title="0">{
         <span class="cov0" title="0">return 0</span>
 }
 
+// IosPrepare : Prepare upshift to execute ios builds, we do this so that we don't have to call xcodebuild again and again
 func IosPrepare() int <span class="cov0" title="0">{
         fmt.Println("We will now try and load your xcode settings")
         err := xcodeBuildSettings() // Gets PROJECT_NAME, FULL_PRODUCT_NAME, PRODUCT_BUNDLE_IDENTIFIER amongst others in projectSettings
@@ -611,10 +736,9 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
                 fileExits = utils.FileExists(releaseFile)
                 if fileExits == false </span><span class="cov0" title="0">{
                         return errors.New("It seems you haven't build for the simulator yet. Please try " + c.Red + "upshift ios build" + c.Default + " first")
-                }</span><span class="cov0" title="0"> else {
-                        // we found the release file
-                        builtFile = releaseFile
                 }</span>
+                // we found the release file
+                <span class="cov0" title="0">builtFile = releaseFile</span>
         }<span class="cov0" title="0"> else {
                 // we found the debug file
                 builtFile = debugFile
@@ -639,16 +763,17 @@ func deployToSimulator(projectName string, projectBundleIdentifier string) error
 
 // xcrun simctl launch booted "${productBundleIdentifier}"
 
+// SetupExportPlist : Create an export.plist to archive the project
 func SetupExportPlist() int <span class="cov0" title="0">{
         configExits := utils.FileExists(".private/export.plist")
         if configExits == true </span><span class="cov0" title="0">{
                 fmt.Println("It looks like .private/export.plist is already here, skipping this step")
                 return 1
-        }</span><span class="cov0" title="0"> else {
-                // export.Plist does not exist
-                // Create a new export.plist in this directory in .private
+        }</span>
+        // export.Plist does not exist
+        // Create a new export.plist in this directory in .private
 
-                sampleExportPlist := `&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+        <span class="cov0" title="0">sampleExportPlist := `&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
 &lt;plist version="1.0"&gt;
 &lt;dict&gt;
@@ -661,24 +786,21 @@ func SetupExportPlist() int <span class="cov0" title="0">{
 &lt;/dict&gt;
 &lt;/plist&gt;"`
 
-                exportPlistBytes := []byte(sampleExportPlist)
+        exportPlistBytes := []byte(sampleExportPlist)
 
-                err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
-                if err != nil </span><span class="cov0" title="0">{
-                        utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
-                        return 1
-                }</span>
-        }
+        err := ioutil.WriteFile(".private/export.plist", exportPlistBytes, 0644)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not write the .private/export.plist file\n" + err.Error())
+                return 1
+        }</span>
 
         <span class="cov0" title="0">fmt.Println("We just added a sample file to .private/export.plist!")
         return 0</span>
 
 }
 
-//
-// Setup provisioning profiles
+// SetupProfiles : Setup provisioning profiles
 // This will probably be run once in a while
-//
 func SetupProfiles() int <span class="cov0" title="0">{
 
         var b basher.Basher
@@ -806,7 +928,7 @@ func uploadBuildToItunes() error <span class="cov0" title="0">{
                 return errors.New("We could not add SwiftSources to the IPA")
         }</span>
 
-        <span class="cov0" title="0">status, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
+        <span class="cov0" title="0">_, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + projectScheme + ".ipa"})
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("We could not upload the IPA on iTunes")
         }</span>
@@ -1115,25 +1237,31 @@ func findXcodeAndOSForSimulator() <span class="cov0" title="0">{
 
         // Find the correct simulator
         // From here - https://en.wikipedia.org/wiki/Xcode - Xcode 7.0 - 7.x (since Swift 2.0 support)
+
+        os93 := "9.3"
+        os92 := "9.2"
+        os91 := "9.1"
+        os90 := "9.0"
+
         switch conf.Settings.IOSXcodeVersion </span>{
         <span class="cov0" title="0">case "7.3.1":
-                iPhoneOS = "9.3"</span>
+                iPhoneOS = os93</span>
         <span class="cov0" title="0">case "7.3":
-                iPhoneOS = "9.3"</span>
+                iPhoneOS = os93</span>
         <span class="cov0" title="0">case "7.2.1":
-                iPhoneOS = "9.2"</span>
+                iPhoneOS = os92</span>
         <span class="cov0" title="0">case "7.2":
-                iPhoneOS = "9.2"</span>
+                iPhoneOS = os92</span>
         <span class="cov0" title="0">case "7.1.1":
-                iPhoneOS = "9.1"</span>
+                iPhoneOS = os91</span>
         <span class="cov0" title="0">case "7.1":
-                iPhoneOS = "9.1"</span>
+                iPhoneOS = os91</span>
         <span class="cov0" title="0">case "7.0.1":
-                iPhoneOS = "9.0"</span>
+                iPhoneOS = os90</span>
         <span class="cov0" title="0">case "7.0":
-                iPhoneOS = "9.0"</span>
+                iPhoneOS = os90</span>
         <span class="cov0" title="0">default:
-                iPhoneOS = "9.3"</span>
+                iPhoneOS = os93</span>
         }
 
         <span class="cov0" title="0">projectSettings["UP_XCODE_VERSION"] = conf.Settings.IOSXcodeVersion
@@ -1190,10 +1318,8 @@ func xcodeBuildSettings() error <span class="cov0" title="0">{
         <span class="cov0" title="0">return nil</span>
 }
 
-//
-// Choose the correct version of Xcode for the project
+// SetupXcode : Choose the correct version of Xcode for the project
 // It is usually defined in config.toml
-//
 func SetupXcode() int <span class="cov0" title="0">{
         version, err := command.Run([]string{"xcodebuild", "-version"}, "")
         if err != nil </span><span class="cov0" title="0">{
@@ -1255,7 +1381,7 @@ func SetupXcode() int <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package actions
+		<pre class="file" id="file5" style="display: none">package actions
 
 import (
         "errors"
@@ -1273,18 +1399,14 @@ import (
         "upshift/utils"
 )
 
-//
-// Show the version of the current app
-//
+// ShowVersion : shows the version of upshift on the command line
 func ShowVersion() int <span class="cov0" title="0">{
         conf := config.Get()
         fmt.Println(conf.Settings.AppVersion)
         return 0
 }</span>
 
-//
-// Install cocoapods
-//
+// InstallPods : Install cocoapods in the project
 func InstallPods() int <span class="cov0" title="0">{
         podsPath, _ := filepath.Abs("Podfile")
         podsExist := utils.FileExists(podsPath)
@@ -1376,9 +1498,7 @@ func runPodRepoUpdate() error <span class="cov0" title="0">{
         <span class="cov0" title="0">return nil</span>
 }
 
-//
-// Initialize submodules in a project
-//
+// GitSubmodules : Initialize submodules in a project
 func GitSubmodules() int <span class="cov0" title="0">{
         submodulePath, _ := filepath.Abs(".gitmodules")
         submodulesExist := utils.FileExists(submodulePath)
@@ -1424,9 +1544,7 @@ func GitSubmodules() int <span class="cov0" title="0">{
         return 0</span>
 }
 
-//
-// Do a git pull on the project based on the defined remote and the branch the user is currently on
-//
+// GitPull : Do a git pull on the project based on the defined remote and the branch the user is currently on
 func GitPull() int <span class="cov0" title="0">{
         conf := config.Get()
 
@@ -1494,9 +1612,8 @@ func GitPull() int <span class="cov0" title="0">{
                         <span class="cov0" title="0">if currentRemote == "" </span><span class="cov0" title="0">{
                                 utils.LogError("Here's a strange problem. Your config says you want to use\nthe " + conf.Settings.Remote + " remote, but sadly we " + c.Underline + "couldn't find that remote" + c.Default + " for\nthis repo. All we found was " + strings.Join(gitRemoteOutputRows, ", "))
                                 return 1
-                        }</span><span class="cov0" title="0"> else {
-                                fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)
                         }</span>
+                        <span class="cov0" title="0">fmt.Println("And your config tells me you want to read from the remote " + c.Blue + currentRemote + c.Default)</span>
                 }<span class="cov0" title="0"> else {
                         // They haven't defined a remote in config, screw them
                         utils.LogError("You have more than one remote. In your config.toml you need to specify which remote to pull from\nThe following remotes are avilable " + strings.TrimSpace(out))
@@ -1531,9 +1648,7 @@ func GitPull() int <span class="cov0" title="0">{
         return 0</span>
 }
 
-//
-// Show help, so that the user knows what to do
-//
+// ShowHelp : Show help, so that the user knows what to do
 func ShowHelp() int <span class="cov0" title="0">{
         fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
         fmt.Println(c.Bold + "\nNAME" + c.Default)
@@ -1544,21 +1659,21 @@ func ShowHelp() int <span class="cov0" title="0">{
         fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
 
         fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
-        fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do\n")
-        fmt.Println("\tupshift ios build\n\t\tto build your iOS project\n")
-        fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator\n")
-        fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight\n")
-        fmt.Println("\tupshift android build\n\t\tto build your Android project\n")
-        fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator\n")
-        fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric\n")
-        fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml\n")
-        fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder\n")
-        fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project\n")
-        fmt.Println("\tupshift install\n\t\tto install this binary for the first time\n")
-        fmt.Println("\tupshift -v\n\t\tto view the version number\n")
+        fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do")
+        fmt.Println("\tupshift ios build\n\t\tto build your iOS project")
+        fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator")
+        fmt.Println("\tupshift ios deploy\n\t\tto create an .ipa and deploy it on TestFlight")
+        fmt.Println("\tupshift android build\n\t\tto build your Android project")
+        fmt.Println("\tupshift android run\n\t\tto run your Android project in a simulator")
+        fmt.Println("\tupshift android deploy\n\t\tto create an .apk and upload it to Fabric")
+        fmt.Println("\tupshift setup clone\n\t\tto clone a repo defined in config.toml")
+        fmt.Println("\tupshift setup config\n\t\tto setup an empty config.toml in your current folder")
+        fmt.Println("\tupshift setup export.plist\n\t\tto setup a sample .private/export.plist in your project")
+        fmt.Println("\tupshift install\n\t\tto install this binary for the first time")
+        fmt.Println("\tupshift -v\n\t\tto view the version number")
 
         fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
-        fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions\n")
+        fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions")
         fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
         fmt.Println("\tupshift action setupScript -- to setup this very script")
         fmt.Println("\tupshift action setupGradleW -- to setup gradle on your machine")
@@ -1588,14 +1703,12 @@ func ShowHelp() int <span class="cov0" title="0">{
         return 0
 }</span>
 
-// Install xctool via brew
+// SetupXctool : Install xctool via brew
 func SetupXctool() int <span class="cov0" title="0">{
         return SetupBrew("xctool")
 }</span>
 
-//
-// Common function to setup tools via brew
-//
+// SetupBrew : Common function to setup tools via brew
 func SetupBrew(tool string) int <span class="cov0" title="0">{
         // Check which version of the brew was installed
         version, err := command.Run([]string{tool, "--version"}, "")
@@ -1620,7 +1733,8 @@ func SetupBrew(tool string) int <span class="cov0" title="0">{
 
                 // Brew cowardly refuses to use sudo, hell yeah
                 var b basher.Basher
-                status, err := b.Run("SetupBrewTool", []string{tool})
+                var status int
+                status, err = b.Run("SetupBrewTool", []string{tool})
                 if err != nil </span><span class="cov0" title="0">{
                         utils.LogError("We couldn't install " + tool + "\n" + err.Error())
                         return status
@@ -1634,31 +1748,23 @@ func SetupBrew(tool string) int <span class="cov0" title="0">{
         return 1</span>
 }
 
-//
-// If fastlane.tools if is not setup, we go ahead and do it
-//
+// SetupFastlane : If fastlane.tools if is not setup, we go ahead and do it
 func SetupFastlane(force bool) int <span class="cov0" title="0">{
         return SetupGem("fastlane", "fastlane", force)
 }</span>
 
-//
-// If cocoapods is not setup, we go ahead and do it
-//
+// SetupPods : If cocoapods is not setup, we go ahead and do it
 func SetupPods(force bool) int <span class="cov0" title="0">{
         return SetupGem("cocoapods", "pod", force)
 }</span>
 
-//
-// If Xcpretty is not setup, we go ahead and do it
+// SetupXcpretty : If Xcpretty is not setup, we go ahead and do it
 // It formats the output from xcode so that you can make sense of what is going wrong
-//
 func SetupXcpretty() int <span class="cov0" title="0">{
         return SetupGem("xcpretty", "xcpretty", false)
 }</span>
 
-//
-// General script to setup a gem
-//
+// SetupGem : General script to setup a gem
 func SetupGem(gem string, gemName string, force bool) int <span class="cov0" title="0">{
         conf := config.Get()
 
@@ -1699,7 +1805,9 @@ func SetupGem(gem string, gemName string, force bool) int <span class="cov0" tit
                 // else we are not on CI, ask the user to enter the password
 
                 <span class="cov0" title="0">var b basher.Basher
-                status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+                RootPassword, _ = conf.GetRootPassword()
+                var status int
+                status, err = b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
                 if err != nil </span><span class="cov0" title="0">{
                         utils.LogError("We couldn't install " + gem + "\n" + err.Error())
                         return status
@@ -1713,11 +1821,9 @@ func SetupGem(gem string, gemName string, force bool) int <span class="cov0" tit
         return 1</span>
 }
 
-//
-// Call this function to download the latest version of the binary
+// UpgradeScript : Call this function to download the latest version of the binary
 // And update the user to the latest version.
 // It does nothing if the user is on the latest version
-//
 func UpgradeScript() int <span class="cov0" title="0">{
         conf := config.Get()
 
@@ -1755,20 +1861,18 @@ func UpgradeScript() int <span class="cov0" title="0">{
         return 0</span>
 }
 
-//
-// When a new project doesn't have config, they call this one to create one for them
-//
+// SetupConfig : When a new project doesn't have config, they call this one to create one for them
 func SetupConfig() int <span class="cov0" title="0">{
 
         configExits := utils.FileExists("./config.toml")
         if configExits == true </span><span class="cov0" title="0">{
                 fmt.Println("It looks like a config.toml is already here, skipping this step")
                 return 1
-        }</span><span class="cov0" title="0"> else {
-                // Config does not exist
-                // Create a new config.toml in this directory
+        }</span>
+        // Config does not exist
+        // Create a new config.toml in this directory
 
-                sampleToml := `[Application]
+        <span class="cov0" title="0">sampleToml := `[Application]
 Debug = false
 
 [Runner]
@@ -1792,14 +1896,13 @@ DeveloperAccount = ""
 PackageName = "testPackage"
 MainActivityName = "testActivity"`
 
-                tomlBytes := []byte(sampleToml)
+        tomlBytes := []byte(sampleToml)
 
-                err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
-                if err != nil </span><span class="cov0" title="0">{
-                        utils.LogError("We could not write the config file, the OS told us this &lt;" + err.Error() + "&gt;")
-                        return 1
-                }</span>
-        }
+        err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
+        if err != nil </span><span class="cov0" title="0">{
+                utils.LogError("We could not write the config file, the OS told us this &lt;" + err.Error() + "&gt;")
+                return 1
+        }</span>
 
         <span class="cov0" title="0">fmt.Println("We just added a config.toml to this folder!")
         return 0</span>

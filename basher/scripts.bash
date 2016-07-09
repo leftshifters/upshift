@@ -23,6 +23,46 @@ GradlewTask() {
 	./gradlew "$1" 2>&1 | tee $2
 }
 
+SetupGem() {
+	GEM=$1
+	CI=$2
+	RootPassword=$3
+
+	if [ "$2" == "true" ]; then
+		# CI is true, we now need password
+		if [ "$3" != "" ]; then
+			echo -e "$3" | sudo -k -S gem install $1
+			exit 0
+		else
+			exit 1
+		fi
+	else
+		# User should type in the password
+		sudo -k gem install $1
+		exit 0
+	fi
+}
+
+UninstallGem() {
+	GEM=$1
+	CI=$2
+	RootPassword=$3
+
+	if [ "$2" == "true" ]; then
+		# CI is true, we now need password
+		if [ "$3" != "" ]; then
+			echo -e "$3" | sudo -k -S gem uninstall -aIx $1
+			exit 0
+		else
+			exit 1
+		fi
+	else
+		# User should type in the password
+		sudo -k gem uninstall -aIx $1
+		exit 0
+	fi
+}
+
 
 
 
@@ -41,26 +81,6 @@ SetupBrewTool() {
 	TOOL=$1
 	brew install $1
 	exit 0
-}
-
-SetupGem() {
-	GEM=$1
-	CI=$2
-	RootPassword=$3
-
-	if [ "$2" == "true" ]; then
-		# CI is true, we now need password
-		if [ "$3" != "" ]; then
-			echo -e "$3" | sudo -S gem install $1
-			exit 0
-		else
-			exit 1
-		fi
-	else
-		# User should type in the password
-		sudo -S gem install $1
-		exit 0
-	fi
 }
 
 GitPull() {
@@ -86,13 +106,13 @@ GitSubmoduleUpdate() {
 PodInstall() {
 	LOGFILE=$1
 	MakeFolders
-	pod install 2>&1 | tee $1	
+	pod install 2>&1 | tee $1
 }
 
 PodRepoUpdate() {
 	LOGFILE=$1
 	UpshiftConfig
-	pod repo update --verbose 2>&1 | tee $1	
+	pod repo update --verbose 2>&1 | tee $1
 }
 
 StartSimulator() {
@@ -302,7 +322,7 @@ CreateAppOnItunes() {
 UploadIPAoniTunes() {
 	DEVELOPER_ACCOUNT=$1
 	IPA_PATH=$2
-	pilot upload --username $1 --ipa "$2" --skip_waiting_for_build_processing true --verbose 
+	pilot upload --username $1 --ipa "$2" --skip_waiting_for_build_processing true --verbose
 }
 
 AddSwiftSources() {
