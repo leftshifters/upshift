@@ -16,26 +16,26 @@ func Test_Gem_Install(t *testing.T) {
 	installed, _ := g.version(gem)
 
 	// Uninstall gem first
-	err := g.Uninstall(gem)
+	err := g.UninstallSimple(gem)
 	assert.Nil(t, err)
 
 	// Install gem
-	err = g.Install(gem)
+	err = g.InstallSimple(gem)
 	assert.Nil(t, err)
 
 	// Uninstall it again
-	err = g.Uninstall(gem)
+	err = g.UninstallSimple(gem)
 	assert.Nil(t, err)
 
 	// Change env setting, simulate CI
 	os.Setenv("GITLAB_CI", "true")
 
 	// Install gem in CI
-	err = g.Install(gem)
+	err = g.InstallSimple(gem)
 	assert.Nil(t, err)
 
 	// Uninstall gem in CI
-	err = g.Uninstall(gem)
+	err = g.UninstallSimple(gem)
 	assert.Nil(t, err)
 
 	// Reset CI flag
@@ -43,7 +43,7 @@ func Test_Gem_Install(t *testing.T) {
 
 	// Bring gem back to original state
 	if installed == true {
-		err := g.Install(gem)
+		err := g.InstallSimple(gem)
 		assert.Nil(t, err)
 	}
 }

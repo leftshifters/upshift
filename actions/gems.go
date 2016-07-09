@@ -13,13 +13,23 @@ import (
 // Gems structure to install, upgrade, uninstall gems
 type Gems struct{}
 
-// Install a gem
-func (g *Gems) Install(gem string) error {
+// InstallSimple a gem with gem name only
+func (g *Gems) InstallSimple(gem string) error {
+	return g.Install(gem, "")
+}
+
+// Install a gem with gem name and scriptName
+func (g *Gems) Install(gem string, scriptName string) error {
 	// Get the global config
 	conf := config.Get()
 
+	// If scriptName is empty, use the gem name
+	if scriptName == "" {
+		scriptName = gem
+	}
+
 	// Check if gem is installed
-	installed, _ := g.version(gem)
+	installed, _ := g.version(scriptName)
 	if installed == true {
 		return nil
 	}
@@ -38,7 +48,7 @@ func (g *Gems) Install(gem string) error {
 	}
 
 	// Verify if gem was installed
-	installed, _ = g.version(gem)
+	installed, _ = g.version(scriptName)
 	if installed == true {
 		// It was successfull installed
 		return nil
@@ -46,10 +56,20 @@ func (g *Gems) Install(gem string) error {
 	return errors.New("The script ran but the gem " + gem + " was not installed on the machine")
 }
 
+// UninstallSimple a gem with gem name only
+func (g *Gems) UninstallSimple(gem string) error {
+	return g.Uninstall(gem, "")
+}
+
 // Uninstall : remove a gem from the system
-func (g *Gems) Uninstall(gem string) error {
+func (g *Gems) Uninstall(gem string, scriptName string) error {
+	// If scriptName is not set, use the gem name
+	if scriptName == "" {
+		scriptName = gem
+	}
+
 	// Check if the gem is installed
-	installed, _ := g.version(gem)
+	installed, _ := g.version(scriptName)
 	if installed == false {
 		// If it is not installed then return
 		return nil
@@ -72,7 +92,7 @@ func (g *Gems) Uninstall(gem string) error {
 	}
 
 	// Verify if gem was uninstalled
-	installed, _ = g.version(gem)
+	installed, _ = g.version(scriptName)
 	if installed == false {
 		// It was successfull uninstalled
 		return nil
