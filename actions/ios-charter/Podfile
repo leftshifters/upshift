@@ -1,0 +1,13 @@
+# Uncomment this line to define a global platform for your project
+platform :ios, '9.0'
+# Uncomment this line if you're using Swift
+use_frameworks!
+
+target 'Charter' do
+  pod 'RealmSwift', '~> 0.98.0'
+end
+
+target 'CharterUITests' do
+  pod 'SimulatorStatusMagic', :configurations => ['Debug']
+end
+
