@@ -76,6 +76,8 @@
 				
 				<option value="file10">upshift/actions/setup.go (0.0%)</option>
 				
+				<option value="file11">upshift/actions/xctool.go (80.0%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -1918,6 +1920,47 @@ MainActivityName = "testActivity"`
 
         <span class="cov0" title="0">fmt.Println("We just added a config.toml to this folder!")
         return 0</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package actions
+
+import "errors"
+
+// Xctool : Construct to handle all things related to xctool
+type Xctool struct{}
+
+// Install : Install Xctool on the machine
+func (x *Xctool) Install() error <span class="cov8" title="1">{
+        var b Brew
+        _, err := b.Install("xctool")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not install xctool\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Upgrade : Upgrade Xctool on the machine
+func (x *Xctool) Upgrade() error <span class="cov8" title="1">{
+        var b Brew
+        _, err := b.Upgrade("xctool")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not upgrade xctool\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Uninstall : Uninstall xctool on the machine
+func (x *Xctool) Uninstall() error <span class="cov8" title="1">{
+        var b Brew
+        _, err := b.Uninstall("xctool")
+        if err != nil </span><span class="cov0" title="0">{
+                return errors.New("Could not uninstall xctool\n" + err.Error())
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
