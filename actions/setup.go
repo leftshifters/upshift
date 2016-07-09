@@ -7,7 +7,6 @@ import (
 	"strings"
 	"upshift/basher"
 	c "upshift/colours"
-	"upshift/command"
 	"upshift/config"
 	"upshift/utils"
 )
@@ -76,47 +75,8 @@ func ShowHelp() int {
 
 // SetupXctool : Install xctool via brew
 func SetupXctool() int {
-	return SetupBrew("xctool")
-}
-
-// SetupBrew : Common function to setup tools via brew
-func SetupBrew(tool string) int {
-	// Check which version of the brew was installed
-	version, err := command.Run([]string{tool, "--version"}, "")
-	if err == nil {
-		// Remove the name of the tool if it is part of the version string
-		version = strings.Replace(version, tool, "", 1)
-		// Now trim whatever is left
-		version = strings.TrimSpace(version)
-		fmt.Println(tool + " is pretty much setup on this system. You are on version " + version)
-		return 0
-	}
-
-	// Check if the command was not found
-	var errorString string
-	if err != nil {
-		errorString = err.Error()
-	}
-
-	if strings.Contains(errorString, "executable file not found") == true {
-		// Alright, so the tool was not found, go ahead and install it
-		fmt.Println("Latest " + tool + " was not found, installing it")
-
-		// Brew cowardly refuses to use sudo, hell yeah
-		var b basher.Basher
-		var status int
-		status, err = b.Run("SetupBrewTool", []string{tool})
-		if err != nil {
-			utils.LogError("We couldn't install " + tool + "\n" + err.Error())
-			return status
-		}
-
-		fmt.Println(tool + " has been setup on your machine. Have fun.")
-		return 0
-	}
-
-	fmt.Println("There was a problem installing " + tool + "\n" + err.Error())
-	return 1
+	// return SetupBrew("xctool")
+	return 0
 }
 
 // SetupXcpretty : If Xcpretty is not setup, we go ahead and do it

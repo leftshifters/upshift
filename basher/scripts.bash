@@ -79,11 +79,34 @@ GitSubmoduleInit() {
 	git submodule init 2>&1 | tee $1
 }
 
+GitSubmoduleUpdate() {
+	LOGFILE=$1
+	git submodule update 2>&1 | tee $1
+}
+
 GitPull() {
 	REMOTE=$1
 	BRANCH=$2
 	LOGFILE=$3
 	git pull $1 $2 2>&1 | tee $3
+}
+
+BrewInstall() {
+	TOOL=$1
+	brew install $1
+	exit 0
+}
+
+BrewUpgrade() {
+	TOOL=$1
+	brew upgrade $1
+	exit 0
+}
+
+BrewUninstall() {
+	TOOL=$1
+	brew uninstall $1
+	exit 0
 }
 
 
@@ -97,16 +120,6 @@ UpgradeScript() {
 	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm upshift.temp
 }
 
-SetupBrewTool() {
-	TOOL=$1
-	brew install $1
-	exit 0
-}
-
-GitSubmoduleUpdate() {
-	LOGFILE=$1
-	git submodule update 2>&1 | tee $1
-}
 
 StartSimulator() {
 	DEVICE=$1
