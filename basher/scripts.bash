@@ -109,16 +109,22 @@ BrewUninstall() {
 	exit 0
 }
 
-
-
-
-
-
-
-
 UpgradeScript() {
-	curl -fsSL https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh > upshift.temp && chmod +x upshift.temp && ./upshift.temp && rm upshift.temp
+	BETA=$1
+	INSTALL_URL="https://raw.githubusercontent.com/leftshifters/upshift/master/install.sh"
+	if [ "${BETA}" == "true" ]; then
+		INSTALL_URL="https://raw.githubusercontent.com/leftshifters/upshift/go/install.sh"
+	fi
+	curl -fsSL "${INSTALL_URL}"  > install.sh && chmod +x install.sh && ./install.sh && rm ./install.sh
 }
+
+
+
+
+
+
+
+
 
 
 StartSimulator() {

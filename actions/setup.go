@@ -2,13 +2,8 @@ package actions
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"upshift/basher"
 	c "upshift/colours"
 	"upshift/config"
-	"upshift/utils"
 )
 
 // ShowVersion : shows the version of upshift on the command line
@@ -70,92 +65,5 @@ func ShowHelp() int {
 	fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
 	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
 
-	return 0
-}
-
-// UpgradeScript : Call this function to download the latest version of the binary
-// And update the user to the latest version.
-// It does nothing if the user is on the latest version
-func UpgradeScript() int {
-	conf := config.Get()
-
-	resp, err := http.Get("https://raw.githubusercontent.com/leftshifters/upshift/master/release")
-	if err != nil {
-		fmt.Println("We couldn't connect to the internet :(", err.Error())
-		return 1
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("We were unable to figure out what is the latest version on the server, next time maybe", err.Error())
-		return 1
-	}
-
-	latestVersion := string(body)
-	latestVersion = strings.TrimSpace(latestVersion)
-
-	if latestVersion == conf.Settings.AppVersion {
-		fmt.Println("Your powers (and version) are already at the top. You're running v", conf.Settings.AppVersion)
-		return 0
-	}
-
-	fmt.Println("Get ready to feel the power at your fingertips")
-
-	var b basher.Basher
-	status, err := b.Run("UpgradeScript", []string{})
-	if err != nil {
-		utils.LogError("Your fingertips will suck for some more time, we couldn't upgrade you because of this - \n" + err.Error())
-		return status
-	}
-
-	fmt.Println("You are now awesome. The new version of awesomeness is v", conf.Settings.AppVersion)
-	return 0
-}
-
-// SetupConfig : When a new project doesn't have config, they call this one to create one for them
-func SetupConfig() int {
-
-	configExits := utils.FileExists("./config.toml")
-	if configExits == true {
-		fmt.Println("It looks like a config.toml is already here, skipping this step")
-		return 1
-	}
-	// Config does not exist
-	// Create a new config.toml in this directory
-
-	sampleToml := `[Application]
-Debug = false
-
-[Runner]
-RootPassword = "testPassword"
-
-[Build]
-GitRepoURL = "testRepo"
-GitRepoRemote = "origin"
-CleanBeforeBuild = false
-UninstallOlderBuilds = false
-
-[IOS]
-ProjectName = "testProject"
-UseWorkspace = false
-Scheme = "testScheme"
-TestDevice = "iPhone 6"
-Xcode = "7.3.1"
-DeveloperAccount = ""
-
-[Android]
-PackageName = "testPackage"
-MainActivityName = "testActivity"`
-
-	tomlBytes := []byte(sampleToml)
-
-	err := ioutil.WriteFile("./config.toml", tomlBytes, 0644)
-	if err != nil {
-		utils.LogError("We could not write the config file, the OS told us this <" + err.Error() + ">")
-		return 1
-	}
-
-	fmt.Println("We just added a config.toml to this folder!")
 	return 0
 }
