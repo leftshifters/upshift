@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"upshift/basher"
@@ -345,6 +346,58 @@ func (x *Xcodebuild) Run() error {
 	if err != nil {
 		return errors.New("We could not deploy the app to the simulator\n" + err.Error())
 	}
+
+	return nil
+}
+
+// InstallCertificates : Find where are the certificates and install them
+func (x *Xcodebuild) InstallCertificates() error {
+	utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
+
+	var appleCert, distributionCert, distributionP12Cert string
+
+	if utils.FileExists(".private/apple.cer") && utils.FileExists(".private/distribution.cer") && utils.FileExists(".private/distribution.p12") {
+		// Install certs from .private
+		appleCert, _ = filepath.Abs(".private/apple.cer")
+		distributionCert, _ = filepath.Abs(".private/distribution.cer")
+		distributionP12Cert, _ = filepath.Abs(".private/distribution.p12")
+	} else {
+		// Since they don't exist in .private, look in machine config
+		conf := config.Get()
+		base := conf.Settings.IOSCertificatePath
+
+		if base == "" {
+			return errors.New("The certificates don't exist in both .private and global conf")
+		}
+
+		if utils.FileExists(base+"/apple.cer") && utils.FileExists(base+"/distribution.cer") && utils.FileExists(base+"/distribution.p12") {
+			appleCert, _ = filepath.Abs(base + "/apple.cer")
+			distributionCert, _ = filepath.Abs(base + "/distribution.cer")
+			distributionP12Cert, _ = filepath.Abs(base + "/distribution.p12")
+		}
+	}
+
+	if appleCert == "" {
+		return errors.New("All the certificates don't exist in both .private and global conf")
+	}
+
+	outApple, err := command.Run([]string{"security", "import", appleCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
+	if err != nil {
+		return err
+	}
+	fmt.Println(outApple)
+
+	outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
+	if err != nil {
+		return err
+	}
+	fmt.Println(outCert)
+
+	outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
+	if err != nil {
+		return err
+	}
+	fmt.Println(outP12)
 
 	return nil
 }

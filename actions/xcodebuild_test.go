@@ -15,7 +15,7 @@ func Test_Xcodebuild_LoadSettings(t *testing.T) {
 	currentWD, _ := os.Getwd()
 
 	// Move to the new directory
-	os.Chdir(filepath.Join(currentWD, "ios-charter"))
+	os.Chdir(filepath.Join(os.Getenv("HOME"), "code", "deezeno-ios"))
 	newWD, _ := os.Getwd()
 	t.Log(newWD)
 

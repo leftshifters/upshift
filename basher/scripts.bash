@@ -178,20 +178,8 @@ IOSExport() {
 	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/ 2>&1 | tee "$2" | xcpretty
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 FetchAndRepairProvisioningProfiles() {
+	# NOT USING THIS ANYWHERE, NEED TO DECIDE IF WE NEED TO DO THIS
 	# this uses sigh
 	# download all into .private folder
 	# and then run the function PopulateProvisioningProfiles
@@ -201,6 +189,20 @@ FetchAndRepairProvisioningProfiles() {
 	mv *.mobileprovision .private
 	PopulateProvisioningProfiles
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 FindProvisioningProfile() {
 	DEVELOPER_ACCOUNT=$1
@@ -315,13 +317,6 @@ AndroidInstallSDK() {
 	echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
 	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
-}
-
-InstallCertificates() {
-	BASE_PATH=$1
-	security import $1/apple.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
-	security import $1/distribution.p12 -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security -P ""
-	security import $1/distribution.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
 }
 
 CreateAppOnItunes() {

@@ -3,83 +3,10 @@ package actions
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
-	"strings"
 	"upshift/basher"
 	"upshift/config"
 	"upshift/utils"
 )
-
-// SetupProfiles : Setup provisioning profiles
-// This will probably be run once in a while
-// * SIGH *
-func SetupProfiles() int {
-	conf := config.Get()
-	var b basher.Basher
-	email := strings.TrimSpace(conf.Settings.IOSDeveloperAccount)
-
-	if email != "" {
-		fmt.Println("Trying to repair your provisioning profiles and installing new and fixed ones for " + email)
-		_, err := b.Run("FetchAndRepairProvisioningProfiles", []string{email})
-		if err != nil {
-			utils.LogError("We couldn't fix and install your provisioning profiles")
-			return 1
-		}
-	}
-	return 0
-}
-
-func installCertificates() error {
-	var b basher.Basher
-	utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
-
-	basePath, _ := filepath.Abs(".private")
-
-	// First check if the certificates are added to .private folder
-	appleCer, _ := filepath.Abs(".private/apple.cer")
-	distributionCer, _ := filepath.Abs(".private/distribution.cer")
-	distributionP12, _ := filepath.Abs(".private/distribution.p12")
-
-	// If they exist, install them
-	appleCerExists := utils.FileExists(appleCer)
-	distributionCerExists := utils.FileExists(distributionCer)
-	distributionP12Exists := utils.FileExists(distributionP12)
-
-	if !(appleCerExists && distributionCerExists && distributionP12Exists) {
-		// If they don't exist, check global config to see if they have them
-		conf := config.Get()
-		globalBasePath := conf.Settings.IOSCertificatePath
-
-		if globalBasePath == "" {
-			return errors.New("The certificates don't exist in both .private and global conf")
-		}
-
-		basePath = globalBasePath
-
-		appleCer, _ = filepath.Abs(globalBasePath + "/apple.cer")
-		distributionCer, _ = filepath.Abs(globalBasePath + "/distribution.cer")
-		distributionP12, _ = filepath.Abs(globalBasePath + "/distribution.p12")
-
-		// If they exist, install them
-		appleCerExists = utils.FileExists(appleCer)
-		distributionCerExists = utils.FileExists(distributionCer)
-		distributionP12Exists = utils.FileExists(distributionP12)
-
-		if !(appleCerExists && distributionCerExists && distributionP12Exists) {
-			return errors.New("All the certificates don't exist in both .private and global conf")
-		}
-		// If they don't, crash and burn
-	}
-
-	b.Run("InstallCertificates", []string{basePath})
-	// #TODO Ignore the error here. Even if it says that certificates are already installed, it gets treated like an error
-	// if err != nil {
-	// 	return errors.New("The certicates could not be installed!")
-	// }
-
-	fmt.Println("The certificates were successfully installed")
-	return nil
-}
 
 // * Pilot *
 func uploadBuildToItunes() error {
