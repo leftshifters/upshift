@@ -2,8 +2,12 @@ package actions
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"upshift/basher"
+	c "upshift/colours"
 	"upshift/command"
+	"upshift/utils"
 )
 
 // IOSSimulator : Construct to handle everything on the ios simulator
@@ -42,4 +46,44 @@ func (i *IOSSimulator) StopSimulator() {
 
 	// #TODO : If simulator is running, kill it
 	fmt.Println("We don't know how to kill the simular yet")
+}
+
+// FindDevice : find if the suggested device is available on this machine
+func (i *IOSSimulator) FindDevice(device string) bool {
+	instrumentsDump, err := command.Run([]string{"instruments", "-s", "devices"}, "")
+	if err != nil {
+		return false
+	}
+
+	instrumentRows := strings.Split(instrumentsDump, "\n")
+	uuidRegexp, _ := regexp.Compile("\\[(.*?)\\]")
+	var instruments []string
+
+	for _, instrument := range instrumentRows {
+		uuid := uuidRegexp.FindString(instrument)
+
+		isSimulator := strings.Contains(instrument, "(Simulator)")
+		instrument = strings.Replace(instrument, "(Simulator)", "", 1)
+
+		simulatorString := "DEVICE   "
+		if isSimulator == true {
+			simulatorString = "SIMULATOR"
+		}
+
+		if uuid != "" {
+			instrument = strings.TrimSpace(strings.Replace(instrument, uuid, "", 1))
+			instruments = append(instruments, c.Gray+simulatorString+c.Default+" "+c.Bold+c.Green+instrument+c.Default+" "+uuid)
+		}
+
+		if instrument == device {
+			return true
+		}
+	}
+
+	// If device is not available, show all devices that are available
+	utils.LogError("Your device " + c.Red + device + c.Default + " was not found\nThe following devices are available")
+	for _, item := range instruments {
+		fmt.Println(item)
+	}
+	return false
 }

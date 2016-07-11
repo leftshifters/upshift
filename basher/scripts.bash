@@ -118,21 +118,34 @@ UpgradeScript() {
 	curl -fsSL "${INSTALL_URL}"  > install.sh && chmod +x install.sh && ./install.sh && rm ./install.sh
 }
 
-
-
-
-
-
-
-
-
-
 StartSimulator() {
 	DEVICE=$1
 	xcrun instruments -w "$1" 1>/dev/null 2>&1
 }
 
-CompileIOS() {
+IOSIncrementBuildNumber() {
+	PROJECT_NAME=$1
+
+	commitCount=$(git rev-list --all --count)
+	currentBuildNumber=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $1/Info.plist)
+
+	newBuildNumber=""
+	if [ "$commitCount" -gt "$currentBuildNumber" ]; then
+		newBuildNumber=$commitCount
+	else
+		newBuildNumber=$(($currentBuildNumber+1))
+	fi
+
+	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $newBuildNumber" "$1/Info.plist"
+
+	# Add ITSAppUsesNonExemptEncryption as false if it isn't set
+	answerToEncryption=$(/usr/libexec/PlistBuddy -c "Print ITSAppUsesNonExemptEncryption" "$1/Info.plist")
+	if [[ $answerToEncryption == *"Does Not Exist"* ]]; then
+		/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$1/Info.plist"
+	fi
+}
+
+IOSBuild() {
 	PROJECT_TYPE=$1
 	PROJECT_PATH=$2
 	SCHEME=$3
@@ -141,7 +154,7 @@ CompileIOS() {
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -hideShellScriptEnvironment -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" -derivedDataPath .upshift/build | tee "$5" | xcpretty
 }
 
-TestIOS() {
+IOSTest() {
 	PROJECT_TYPE=$1
 	PROJECT_PATH=$2
 	SCHEME=$3
@@ -150,7 +163,7 @@ TestIOS() {
 	xctool -"$1" "$2" -scheme "$3" -sdk iphonesimulator -destination "platform=iphonesimulator,name=$4" test | tee "$5"
 }
 
-ArchiveIOS() {
+IOSArchive() {
 	PROJECT_TYPE=$1
 	PROJECT_PATH=$2
 	SCHEME=$3
@@ -159,11 +172,24 @@ ArchiveIOS() {
 	set -o pipefail && xcodebuild -"$1" "$2" -scheme "$3" -derivedDataPath .upshift/build -archivePath .upshift/$4.xcarchive archive | tee "$5" | xcpretty
 }
 
-ExportIOS() {
+IOSExport() {
 	PROJECT_NAME=$1
 	LOG_PATH=$2
 	set -o pipefail && xcodebuild -exportArchive -exportOptionsPlist .private/export.plist -archivePath .upshift/$1.xcarchive -exportPath .upshift/ 2>&1 | tee "$2" | xcpretty
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 FetchAndRepairProvisioningProfiles() {
 	# this uses sigh
@@ -189,7 +215,6 @@ PopulateProvisioningProfiles() {
 
 	if [ -d "./.private/" ]; then
 		# The .private folder exists
-		foundProfiles=false
 		for profileName in .private/*.mobileprovision; do
 			uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< $(security cms -D -i "${profileName}" 2>/dev/null))
 
@@ -197,26 +222,15 @@ PopulateProvisioningProfiles() {
 			if [ "${uuid}" != "" ]; then
 				if [ -f ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision ]; then
 					# Silently ignore
-					printf "${profileName} exists in the Library\n"
 				else
 					# Copy file to UUID folder
 					cp -f "${profileName}" ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision
 					printf "Moving ${profileName} [${uuid}] to Library\n"
 				fi
-				foundProfiles=true
 			fi
 		done
-
-		if [ "$foundProfiles" == true ]; then
-			exit 0
-		else
-			printf "Dude, You need to add some provisioning profiles in .private\n"
-			exit 1
-		fi
-	else
-		printf "Hey, you need to add your provisioning profiles in .private\n"
-		exit 1
 	fi
+	exit 0
 }
 
 AndroidStartActivity() {
@@ -336,27 +350,5 @@ AddSwiftSources() {
 		zip -r ../$2.ipa .
 		cd ../..
 		rm -rf .upshift/tmp
-	fi
-}
-
-IOSIncrementBuildNumber() {
-	PROJECT_NAME=$1
-
-	commitCount=$(git rev-list --all --count)
-	currentBuildNumber=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $1/Info.plist)
-
-	newBuildNumber=""
-	if [ "$commitCount" -gt "$currentBuildNumber" ]; then
-		newBuildNumber=$commitCount
-	else
-		newBuildNumber=$(($currentBuildNumber+1))
-	fi
-
-	/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $newBuildNumber" "$1/Info.plist"
-
-	# Add ITSAppUsesNonExemptEncryption as false if it isn't set
-	answerToEncryption=$(/usr/libexec/PlistBuddy -c "Print ITSAppUsesNonExemptEncryption" "$1/Info.plist")
-	if [[ $answerToEncryption == *"Does Not Exist"* ]]; then
-		/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$1/Info.plist"
 	fi
 }

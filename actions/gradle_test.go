@@ -1,9 +1,10 @@
 package actions
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Gradle_Version(t *testing.T) {
