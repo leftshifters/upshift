@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"upshift/basher"
-	c "upshift/colours"
 	"upshift/command"
 	"upshift/config"
 	"upshift/utils"
@@ -120,8 +119,6 @@ func AndroidBuild() int {
 
 func launchEmulator() bool {
 
-	var b basher.Basher
-
 	// 1. Check if any devices are connected, if yes, use one of those
 	// 2. If nothing so far, see if any avds are listed and start the first one
 	// 3. If still nothing, create an avd and launch it
@@ -135,36 +132,25 @@ func launchEmulator() bool {
 		return true
 	}
 
-	avds := avdsAvailable()
-	if len(avds) == 0 {
-		// No AVDs found, create one
-		// to view a list of available avds you can create, run 'android list targets'
-		// we prefer to use the latest one possible, and we only feed in the required fields
-		// look for ones with ABIs
-		// android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
-		return false
-	}
+	// avds := avdsAvailable()
+	// if len(avds) == 0 {
+	// No AVDs found, create one
+	// to view a list of available avds you can create, run 'android list targets'
+	// we prefer to use the latest one possible, and we only feed in the required fields
+	// look for ones with ABIs
+	// android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
+	// return false
+	// }
 
-	fmt.Println("Time to load up the emulator " + c.Blue + avds[0] + c.Default)
-	logPath, _ := filepath.Abs(".upshift/logs/android-emulator.log")
-	_, err := b.Run("AndroidLaunchEmulator", []string{avds[0], logPath})
-	if err != nil {
-		utils.LogError("We could not start loading up the emulator.\n" + err.Error())
-		return false
-	}
+	// fmt.Println("Time to load up the emulator " + c.Blue + avds[0] + c.Default)
+	// logPath, _ := filepath.Abs(".upshift/logs/android-emulator.log")
+	// _, err := b.Run("AndroidLaunchEmulator", []string{avds[0], logPath})
+	// if err != nil {
+	// utils.LogError("We could not start loading up the emulator.\n" + err.Error())
+	// return false
+	// }
 
 	return true
-}
-
-func avdsAvailable() []string {
-	out, err := command.Run([]string{"emulator", "-list-avds"}, "")
-	if err != nil {
-		fmt.Println("We couldn't start finding devices\n" + err.Error())
-		return []string{}
-	}
-
-	avds := utils.CreateList(out, []string{})
-	return avds
 }
 
 func devicesConnected() []string {
