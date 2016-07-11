@@ -20,6 +20,10 @@ func Test_Gradle_AddWrapper(t *testing.T) {
 	g.Version()
 	g.AddWrapper()
 	assert.Equal(t, true, g.wrapperInstalled)
+
+	os.Remove(".gradlew")
+	g.AddWrapper()
+	assert.Equal(t, true, g.wrapperInstalled)
 }
 
 func Test_Gradle_Clean(t *testing.T) {
