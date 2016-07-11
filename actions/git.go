@@ -122,3 +122,31 @@ func (g *Git) Pull(remote string, branch string) (int, error) {
 	utils.LogMessage("$ git pull " + remote + " " + branch)
 	return b.RunAndTail("GitPull", []string{remote, branch, ".upshift/logs/git-pull.log"}, ".upshift/logs/git-pull.log", []string{}, []string{"fatal:", "error:"})
 }
+
+// AddRemote : add a new remote
+func (g *Git) AddRemote(remote string, url string) error {
+	if g.IsRepo() == false {
+		return errors.New("This is not a git repo")
+	}
+
+	_, err := command.Run([]string{"git", "remote", "add", remote, url}, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveRemote : remove a remote
+func (g *Git) RemoveRemote(remote string) error {
+	if g.IsRepo() == false {
+		return errors.New("This is not a git repo")
+	}
+
+	_, err := command.Run([]string{"git", "remote", "rm", remote}, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
