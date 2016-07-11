@@ -236,9 +236,7 @@ PopulateProvisioningProfiles() {
 
 			# If a UUID exist, then copy it, if it hasn't already been copied
 			if [ "${uuid}" != "" ]; then
-				if [ -f ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision ]; then
-					# Silently ignore
-				else
+				if [ ! -f ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision ]; then
 					# Copy file to UUID folder
 					cp -f "${profileName}" ~/Library/MobileDevice/Provisioning\ Profiles/${uuid}.mobileprovision
 					printf "Moving ${profileName} [${uuid}] to Library\n"
