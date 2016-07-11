@@ -19,7 +19,6 @@ GradleWrapper() {
 GradlewTask() {
 	PARAMS=$1
 	LOG_PATH=$2
-	MakeFolders
 	./gradlew "$1" 2>&1 | tee $2
 }
 
@@ -65,7 +64,6 @@ UninstallGem() {
 
 PodInstall() {
 	LOGFILE=$1
-	MakeFolders
 	pod install 2>&1 | tee $1
 }
 
