@@ -26,3 +26,9 @@ func Test_Upshift_Upgrade(t *testing.T) {
 	err = upshift.Upgrade("true")
 	assert.Nil(t, err)
 }
+
+func Test_Upshift_All(t *testing.T) {
+	var upshift Upshift
+	upshift.ShowVersion()
+	upshift.ShowHelp()
+}
