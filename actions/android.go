@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"upshift/basher"
-	"upshift/command"
 	"upshift/config"
 	"upshift/utils"
 )
@@ -152,37 +151,3 @@ func launchEmulator() bool {
 
 	return true
 }
-
-func devicesConnected() []string {
-	out, err := command.Run([]string{"adb", "devices"}, "")
-	if err != nil {
-		fmt.Println("We couldn't start finding devices\n" + err.Error())
-		return []string{}
-	}
-
-	devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
-
-	return devices
-}
-
-//     printf "\n\n${greenColour}Super${noColour}! The build was fine.\n"
-//     # Check if package is empty
-//     if [ "${package}" != "" ];then
-//       if [ "${mainActivity}" != "" ]; then
-//         printf "Starting activity ${blueColour}${mainActivity}${noColour} in package ${blueColour}${package}${noColour}\n"
-
-//         # Start the activity and package
-//         adb shell am start -n ${package}/${package}.${mainActivity}
-
-//         # Tell the user everything is nice and easy
-//         printf "\nAlright, the build was ${greenColour}successful${noColour} 🍺\n\n"
-//       else
-//         # The mainActivity is empty it seems
-//         printf "Alright, the build was ${greenColour}successful${noColour}, but there was no ${blueColour}mainActivity${noColour} defined, so couldn't start it automatically 🍺\n\n"
-//       fi
-//     else
-//       # The package is empty it seems
-//       printf "Alright, the build was ${greenColour}successful${noColour}, but there was no ${blueColour}package${noColour} defined, so couldn't start it automatically 🍺\n\n"
-//     fi
-//   fi
-// }
