@@ -3,6 +3,7 @@ package actions
 import (
 	"errors"
 	"fmt"
+	"upshift/basher"
 	"upshift/command"
 	"upshift/utils"
 )
@@ -11,8 +12,40 @@ import (
 type AndroidEmulator struct{}
 
 // Launch : launch the available emulator
-func (a *AndroidEmulator) Launch() {
+func (a *AndroidEmulator) Launch() error {
 
+	// 1. Check if any devices are connected, if yes, use one of those
+	devices, err := a.ConnectedDevices()
+	if err != nil {
+		return err
+	}
+
+	// If a device is available, we can do everything there
+	if len(devices) > 0 {
+		return nil
+	}
+
+	// 2. If nothing so far, see if any avds are listed and start the first one
+	avds, err := a.AVDsAvailable()
+	if err != nil {
+		return err
+	}
+
+	if len(avds) == 0 {
+		// 3. If still nothing, create an avd and launch it
+		err = a.CreateAVD()
+		if err != nil {
+			return err
+		}
+	}
+
+	var b basher.Basher
+	_, err = b.Run("AndroidLaunchEmulator", []string{avds[0], ".upshift/logs/android-emulator.log"})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // AVDsAvailable : find which AVDs are available
@@ -54,4 +87,12 @@ func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) err
 	fmt.Println(out)
 
 	return nil
+}
+
+// CreateAVD : Create an AVD
+func (a *AndroidEmulator) CreateAVD() error {
+	// to view a list of available avds you can create, run 'android list targets'
+	// look for ones with ABIs
+	// android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
+	return errors.New("Creating an AVD has not been implemented yet")
 }
