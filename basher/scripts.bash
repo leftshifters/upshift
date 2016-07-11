@@ -218,6 +218,13 @@ FindProvisioningProfile() {
 	sigh -u $1 -a $2
 }
 
+CreateAppOnItunes() {
+	DEVELOPER_ACCOUNT=$1
+	BUNDLE_IDENTIFIER=$2
+	PROJECT_NAME=$3
+	produce -u $1 -a $2 --app_name "$3"
+}
+
 
 
 
@@ -340,11 +347,4 @@ AndroidInstallSDK() {
 	echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
 	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
-}
-
-CreateAppOnItunes() {
-	DEVELOPER_ACCOUNT=$1
-	BUNDLE_IDENTIFIER=$2
-	PROJECT_NAME=$3
-	produce -u $1 -a $2 --app_name "$3"
 }
