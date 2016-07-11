@@ -251,28 +251,6 @@ PopulateProvisioningProfiles() {
 	exit 0
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-AndroidStartActivity() {
-	PACKAGE=$1
-	MAIN_ACTIVITY=$2
-	adb shell am start -n $1/$1.$2
-}
-
 AndroidLaunchEmulator() {
 
 	redColour='\033[0;31m'
@@ -328,6 +306,22 @@ AndroidLaunchEmulator() {
 	fi
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 AndroidUpgradeSDK() {
 	# Copied from here - http://stackoverflow.com/a/31900427/57914
