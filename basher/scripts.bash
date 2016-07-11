@@ -212,25 +212,26 @@ UploadIPAoniTunes() {
 	pilot upload --username $1 --ipa "$2" --skip_waiting_for_build_processing true --verbose
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 FindProvisioningProfile() {
 	DEVELOPER_ACCOUNT=$1
 	BUNDLE_IDENTIFIER=$2
 	sigh -u $1 -a $2
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 PopulateProvisioningProfiles() {
 	# Get the UUID from .private
