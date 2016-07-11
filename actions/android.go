@@ -12,10 +12,6 @@ import (
 	"upshift/utils"
 )
 
-func init() {
-
-}
-
 // UpgradeAndroid : Upgrade the android sdk
 func UpgradeAndroid() int {
 	var b basher.Basher
@@ -46,20 +42,17 @@ func SetupAndroid() int {
 func AndroidBuild() int {
 
 	var b basher.Basher
+	var gradle Gradle
 	conf := config.Get()
 	cleanOnStart := conf.Settings.CleanBeforeBuild
 
 	if cleanOnStart == true {
-		// Clean the project first, we might not ALWAYS want to do this
 		fmt.Println("Let's clean the project before starting")
-		// #TODO : Replace with Gradle.Clean
-		logPath, _ := filepath.Abs(".upshift/logs/android-clean.log")
-		_, err := b.Run("AndroidClean", []string{logPath})
+		_, err := gradle.Clean(".upshift/logs/android-clean.log")
 		if err != nil {
 			utils.LogError("We could not clean your project. It's really dirty\n" + err.Error())
 			return 1
 		}
-		// #END
 	}
 
 	launchEmulator()

@@ -179,7 +179,7 @@ IOSExport() {
 }
 
 FetchAndRepairProvisioningProfiles() {
-	# NOT USING THIS ANYWHERE, NEED TO DECIDE IF WE NEED TO DO THIS
+	# #TODO NOT USING THIS ANYWHERE, NEED TO DECIDE IF WE NEED TO DO THIS
 	# this uses sigh
 	# download all into .private folder
 	# and then run the function PopulateProvisioningProfiles
@@ -225,22 +225,8 @@ CreateAppOnItunes() {
 	produce -u $1 -a $2 --app_name "$3"
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 PopulateProvisioningProfiles() {
+	# #TODO NOT USING THIS ANYMORE, NEED TO DECIDE IF WE WILL DO THIS
 	# Get the UUID from .private
 	# https://gist.github.com/mxpr/8208289a63ca4e3a35a4
 	# Loop through all files, if you get a UDID, add them to the list of profiles
@@ -264,6 +250,22 @@ PopulateProvisioningProfiles() {
 	fi
 	exit 0
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 AndroidStartActivity() {
 	PACKAGE=$1
