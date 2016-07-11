@@ -22,14 +22,14 @@ func (g *Git) AreSubmodulesUsed() bool {
 func (g *Git) SubmoduleInit() (int, error) {
 	var b basher.Basher
 	utils.LogMessage("$ git submodule init")
-	return b.RunAndTail("GitSubmoduleInit", []string{".upshift/logs/git-submodule-init"}, ".upshift/logs/git-submodule-init", []string{}, []string{"error"})
+	return b.RunAndTail("GitSubmoduleInit", []string{".upshift/logs/git-submodule-init.log"}, ".upshift/logs/git-submodule-init.log", []string{}, []string{"error"})
 }
 
 // SubmoduleUpdate : Update submodules
 func (g *Git) SubmoduleUpdate() (int, error) {
 	var b basher.Basher
 	utils.LogMessage("$ git submodule update")
-	return b.RunAndTail("GitSubmoduleUpdate", []string{".upshift/logs/git-submodule-update"}, ".upshift/logs/git-submodule-update", []string{}, []string{"error:", "fatal:"})
+	return b.RunAndTail("GitSubmoduleUpdate", []string{".upshift/logs/git-submodule-update.log"}, ".upshift/logs/git-submodule-update.log", []string{}, []string{"error:", "fatal:"})
 }
 
 // IsRepo : Find out if you are in a git repo, if yes, throw the output of git status
