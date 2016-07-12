@@ -2,8 +2,8 @@ package actions
 
 import (
 	"testing"
-	"upshift/config"
 
+	"github.com/leftshifters/upshift/config"
 	"github.com/stretchr/testify/assert"
 )
 
