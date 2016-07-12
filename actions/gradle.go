@@ -16,13 +16,26 @@ type Gradle struct {
 	basher           basher.Basher
 }
 
+// Install : install gradle on a machine
+func (g *Gradle) Install() error {
+	var b basher.Basher
+	_, err := b.Run("GradleInstall", []string{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Version : Find the version number of gradle installed
 func (g *Gradle) Version() error {
 	// Run gradle -v to figure out if it is install
 	utils.LogMessage("$ gradle -v")
 	out, err := command.Run([]string{"gradle", "-v"}, "")
 	if err != nil {
-		return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
+		err = g.Install()
+		if err != nil {
+			return err
+		}
 	}
 
 	list := utils.CreateList(out, []string{"Build time", "Build number:", "Revision:", "Groovy:", "Ant:", "JVM:", "OS:", "--------------"})

@@ -12,6 +12,15 @@ TestScript2() {
 	ls -la 2>&1 | tee $2
 }
 
+GradleInstall() {
+	INSTALL_URL="https://services.gradle.org/distributions/gradle-2.14-bin.zip"
+	curl --show-error --progress-bar --fail --location "${INSTALL_URL}" > gradle-2.14-bin.zip
+	unzip gradle-2.14-bin.zip
+	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	export GRADLE_HOME="${DIR}/gradle-2.14"
+	export PATH=$PATH:$GRADLE_HOME/bin
+}
+
 GradleWrapper() {
 	gradle wrapper
 }
