@@ -33,8 +33,10 @@ func (g *Gradle) Version() error {
 func (g *Gradle) AddWrapper() (int, error) {
 	// Check if gradle is installed
 	if g.version == "" {
-		g.wrapperInstalled = false
-		return 1, errors.New("Gradle version not known. Please check version first")
+		err := g.Version()
+		if err != nil {
+			return 1, err
+		}
 	}
 
 	// Check if gradlew file exists
@@ -65,12 +67,18 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
 
 	// Check if gradle is installed
 	if g.version == "" {
-		return 1, errors.New("Gradle version not known. Please check version first")
+		err := g.Version()
+		if err != nil {
+			return 1, err
+		}
 	}
 
 	// Check if gradlew file exists
 	if utils.FileExists("./gradlew") == false {
-		return 1, errors.New("Gradle wrapper is not installed")
+		status, err := g.AddWrapper()
+		if err != nil {
+			return status, err
+		}
 	}
 
 	utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
