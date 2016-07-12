@@ -3,6 +3,8 @@ package actions
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"upshift/basher"
 	"upshift/command"
 	"upshift/utils"
@@ -93,6 +95,49 @@ func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) err
 func (a *AndroidEmulator) CreateAVD() error {
 	// to view a list of available avds you can create, run 'android list targets'
 	// look for ones with ABIs
-	// android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
-	return errors.New("Creating an AVD has not been implemented yet")
+	// android create avd --name "Android_22_AVD" --target android-22
+
+	// check if the ABI is available
+	if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-22", "default", "armeabi-v7a", "system.img")) == false {
+		var b basher.Basher
+		_, err := b.Run("AndroidInstallABI", []string{})
+		if err != nil {
+			return err
+		}
+	}
+
+	var b basher.Basher
+	_, err := b.Run("AndroidCreateAVD", []string{"Android_22_AVD", "Google Inc.:Google APIs:22"})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteAVD : delete an AVD
+func (a *AndroidEmulator) DeleteAVD(avd string) error {
+	// Check if AVD is available
+	avds, err := a.AVDsAvailable()
+	if err != nil {
+		return err
+	}
+
+	var found bool
+	for _, item := range avds {
+		if avd == item {
+			found = true
+		}
+	}
+
+	if found == false {
+		return errors.New("This avd does not exist")
+	}
+
+	_, err = command.Run([]string{"android", "delete", "avd", "-n", avd}, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

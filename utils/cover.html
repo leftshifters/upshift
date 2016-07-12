@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/utils/utils.go (93.5%)</option>
+				<option value="file0">upshift/utils/utils.go (79.6%)</option>
 				
 				</select>
 			</div>
@@ -80,24 +80,24 @@ import (
         c "upshift/colours"
 )
 
-// Log Message, this shows up in green and underlined
+// LogMessage : this shows up in green and underlined
 func LogMessage(message string) <span class="cov8" title="1">{
         fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
 }</span>
 
-// Log Information, this shows up in blue
+// LogInfo : this shows up in blue
 func LogInfo(message string) <span class="cov8" title="1">{
         fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
         fmt.Println(message)
 }</span>
 
-// Log an error, show them this shit in color, red most probably
+// LogError : Log an error, show them this shit in color, red most probably
 func LogError(message string) <span class="cov8" title="1">{
         fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
         fmt.Println(message)
 }</span>
 
-// Create a string array from an bash output
+// CreateList : Create a string array from an bash output
 func CreateList(data string, ignore []string) []string <span class="cov8" title="1">{
         rows := strings.Split(data, "\n")
         var items []string
@@ -116,7 +116,28 @@ func CreateList(data string, ignore []string) []string <span class="cov8" title=
         <span class="cov8" title="1">return items</span>
 }
 
-// Read last few bytes of a file
+// SetupFolders : for us with the rest of upshift
+func SetupFolders() <span class="cov0" title="0">{
+
+        // mkdir -p .upshift/logs/
+        logs, _ := filepath.Abs(filepath.Join(".upshift", "logs"))
+        os.MkdirAll(logs, os.ModePerm)
+
+        // mkdir -p .upshift/build/
+        build, _ := filepath.Abs(filepath.Join(".upshift", "build"))
+        os.MkdirAll(build, os.ModePerm)
+
+        // mkdir -p .private
+        private, _ := filepath.Abs(filepath.Join(".private"))
+        os.MkdirAll(private, os.ModePerm)
+
+        // mkdir -p ~/.upshift
+        machine, _ := filepath.Abs(filepath.Join(os.Getenv("HOME"), ".upshift"))
+        os.MkdirAll(machine, os.ModePerm)
+
+}</span>
+
+// FileTail : Read last few bytes of a file
 func FileTail(filePath string, size int64) (string, error) <span class="cov8" title="1">{
         filePath, _ = filepath.Abs(filePath)
         // Check if file exits, if it doesn't just return an error
@@ -156,7 +177,7 @@ func FileTail(filePath string, size int64) (string, error) <span class="cov8" ti
         <span class="cov8" title="1">return string(byteBuffer), nil</span>
 }
 
-// Read a file if it exists
+// FileRead : Read a file if it exists
 func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
         filePath, _ = filepath.Abs(filePath)
         // Check if file exits, if it doesn't just return an error
@@ -173,15 +194,14 @@ func FileRead(filePath string) (string, error) <span class="cov8" title="1">{
         <span class="cov8" title="1">return string(fileBytes), nil</span>
 }
 
-// Simply to check if a file exists or not
+// FileExists : Simply to check if a file exists or not
 func FileExists(filePath string) bool <span class="cov8" title="1">{
         filePath, _ = filepath.Abs(filePath)
         _, err := os.Stat(filePath)
         if err == nil </span><span class="cov8" title="1">{
                 return true
-        }</span><span class="cov8" title="1"> else {
-                return false
         }</span>
+        <span class="cov8" title="1">return false</span>
 }
 </pre>
 		

@@ -340,3 +340,13 @@ AndroidInstallSDK() {
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
 	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
 }
+
+AndroidInstallABI() {
+	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
+}
+
+AndroidCreateAVD() {
+	NAME=$1
+	TARGET=$2
+	echo no | android create avd -n "$1" -t "$2"
+}
