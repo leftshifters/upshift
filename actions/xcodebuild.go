@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"upshift/basher"
-	c "upshift/colours"
-	"upshift/command"
-	"upshift/config"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/colours"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/config"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Xcodebuild : construct to handle all xcode functions
@@ -146,7 +147,7 @@ func (x *Xcodebuild) FindSchemes() error {
 
 	// Throw an error if there are no schemes available
 	if len(schemeRows) == 0 {
-		return errors.New("You have no " + c.Red + "schemes" + c.Default + " defined in your project. You need to share them.")
+		return errors.New("You have no " + colours.Red + "schemes" + colours.Default + " defined in your project. You need to share them.")
 	}
 
 	// 1. If scheme defined in config exists, use that
@@ -156,13 +157,13 @@ func (x *Xcodebuild) FindSchemes() error {
 	// Condition 1 : has already been checked, check the error condition
 	// If we didn't find a matching scheme, but your config has marked one, it means we didn't find it
 	if conf.Settings.IOSScheme != "" && x.Scheme == "" {
-		return errors.New("Your config says we should use " + c.Red + conf.Settings.IOSScheme + c.Default + " to build the project. But that scheme is missing!")
+		return errors.New("Your config says we should use " + colours.Red + conf.Settings.IOSScheme + colours.Default + " to build the project. But that scheme is missing!")
 	}
 
 	// Condition 2 : Checking
 	if len(schemeRows) == 1 {
 		// There is only one scheme, you can set this in projectSettings
-		fmt.Println("It seems you didn't define a scheme in your config, but Xcode told us about " + c.Blue + schemeRows[0] + c.Default + " so we are using that")
+		fmt.Println("It seems you didn't define a scheme in your config, but Xcode told us about " + colours.Blue + schemeRows[0] + colours.Default + " so we are using that")
 		x.Scheme = schemeRows[0]
 		return nil
 	}
@@ -293,7 +294,7 @@ func (x *Xcodebuild) SwitchXcode() error {
 	if err != nil {
 		return errors.New("We couldn't switch Xcodes, you're going to be stuck with this one")
 	}
-	fmt.Println("We are now on the " + c.Underline + "Xcode-" + x.XcodeVersion + c.Default)
+	fmt.Println("We are now on the " + colours.Underline + "Xcode-" + x.XcodeVersion + colours.Default)
 	return nil
 }
 

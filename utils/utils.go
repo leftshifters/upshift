@@ -7,23 +7,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	c "upshift/colours"
+
+	"github.com/leftshifters/upshift/colours"
 )
 
 // LogMessage : this shows up in green and underlined
 func LogMessage(message string) {
-	fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
+	fmt.Println("✅  " + colours.Green + colours.Bold + message + colours.Default)
 }
 
 // LogInfo : this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
+	fmt.Println("🔰  " + colours.Green + colours.Bold + "Maybe you should " + colours.Underline + "know this" + colours.Default)
 	fmt.Println(message)
 }
 
 // LogError : Log an error, show them this shit in color, red most probably
 func LogError(message string) {
-	fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
+	fmt.Println("☎️  " + colours.Red + colours.Bold + "Shit! Something broke" + colours.Default)
 	fmt.Println(message)
 }
 

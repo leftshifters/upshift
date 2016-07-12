@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	c "upshift/colours"
-	"upshift/utils"
 
+	"github.com/leftshifters/upshift/colours"
+	"github.com/leftshifters/upshift/utils"
 	gobasher "github.com/progrium/go-basher"
 )
 
@@ -37,7 +37,7 @@ func (b *Basher) Run(command string, params []string) (int, error) {
 
 	status, err := b.bash.Run(command, params)
 	if status > 0 || err != nil {
-		errorString := "There was a problem running " + c.Red + command + c.Default + "\n"
+		errorString := "There was a problem running " + colours.Red + command + colours.Default + "\n"
 		if err != nil {
 			errorString += "We were stopped by the following error\n" + err.Error()
 		}

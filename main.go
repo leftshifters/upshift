@@ -1,8 +1,8 @@
 package main
 
 import (
-	"upshift/tasks"
-	"upshift/utils"
+	"github.com/leftshifters/upshift/tasks"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Main Function

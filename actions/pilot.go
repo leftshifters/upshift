@@ -3,7 +3,8 @@ package actions
 import (
 	"errors"
 	"fmt"
-	"upshift/basher"
+
+	"github.com/leftshifters/upshift/basher"
 )
 
 // Pilot : Handle everything related to pilot

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"upshift/basher"
-	c "upshift/colours"
-	"upshift/command"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/colours"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // IOSSimulator : Construct to handle everything on the ios simulator
@@ -72,7 +73,7 @@ func (i *IOSSimulator) FindDevice(device string) bool {
 
 		if uuid != "" {
 			instrument = strings.TrimSpace(strings.Replace(instrument, uuid, "", 1))
-			instruments = append(instruments, c.Gray+simulatorString+c.Default+" "+c.Bold+c.Green+instrument+c.Default+" "+uuid)
+			instruments = append(instruments, colours.Gray+simulatorString+colours.Default+" "+colours.Bold+colours.Green+instrument+colours.Default+" "+uuid)
 		}
 
 		if instrument == device {
@@ -81,7 +82,7 @@ func (i *IOSSimulator) FindDevice(device string) bool {
 	}
 
 	// If device is not available, show all devices that are available
-	utils.LogError("Your device " + c.Red + device + c.Default + " was not found\nThe following devices are available")
+	utils.LogError("Your device " + colours.Red + device + colours.Default + " was not found\nThe following devices are available")
 	for _, item := range instruments {
 		fmt.Println(item)
 	}

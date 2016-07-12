@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"upshift/basher"
-	"upshift/utils"
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Pod : Handle everything related to install pods

@@ -5,9 +5,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"upshift/actions"
-	c "upshift/colours"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/actions"
+	"github.com/leftshifters/upshift/colours"
+	"github.com/leftshifters/upshift/utils"
 )
 
 type taskList struct {
@@ -38,12 +39,12 @@ func Setup() {
 	var status int
 
 	for i, action := range tasks.actions {
-		fmt.Println(c.Blue + c.Bold + "🛢  Starting " + c.Underline + strings.ToUpper(action) + c.Default + c.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + c.Default)
+		fmt.Println(colours.Blue + colours.Bold + "🛢  Starting " + colours.Underline + strings.ToUpper(action) + colours.Default + colours.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default)
 		status = loadTask(action)
 		fmt.Print("\n")
 
 		if status > 0 {
-			fmt.Println(c.Gray + "➡️  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + c.Default)
+			fmt.Println(colours.Gray + "➡️  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + colours.Default)
 			break
 		}
 	}
@@ -52,7 +53,7 @@ func Setup() {
 		os.Exit(status)
 	}
 
-	fmt.Println("🍻  " + c.Yellow + "All done!" + c.Default)
+	fmt.Println("🍻  " + colours.Yellow + "All done!" + colours.Default)
 }
 
 func findTask(job string, action string) taskList {
@@ -177,19 +178,19 @@ func findTask(job string, action string) taskList {
 func loadTask(task string) int {
 	switch task {
 	case "upgradeScript":
-		return actions.UpgradeScript()
+		// return actions.UpgradeScript()
 	case "upgradeAndroid":
-		return actions.UpgradeAndroid()
+		// return actions.UpgradeAndroid()
 	case "showVersion":
-		return actions.ShowVersion()
+		// return actions.ShowVersion()
 	case "showHelp":
-		return actions.ShowHelp()
+		// return actions.ShowHelp()
 	case "setupXcode":
-		return actions.SetupXcode()
+		// return actions.SetupXcode()
 	case "setupXcpretty":
-		return actions.SetupXcpretty()
+		// return actions.SetupXcpretty()
 	case "setupXctool":
-		return actions.SetupXctool()
+		// return actions.SetupXctool()
 	case "setupPods":
 		// return actions.SetupPods(false)
 	case "setupFastlane":
@@ -197,42 +198,42 @@ func loadTask(task string) int {
 	case "setupGradleW":
 		return actions.GradleWrapper()
 	case "setupConfig":
-		return actions.SetupConfig()
+		// return actions.SetupConfig()
 	case "setupProfiles":
-		return actions.SetupProfiles()
+		// return actions.SetupProfiles()
 	// case "setupScript":
 	// case "setupSsh":
 	case "setupExportPlist":
-		return actions.SetupExportPlist()
+		// return actions.SetupExportPlist()
 	case "setupAndroid":
-		return actions.SetupAndroid()
+		// return actions.SetupAndroid()
 	case "gitPull":
-		return actions.GitPull()
+		// return actions.GitPull()
 	case "gitSubmodules":
-		return actions.GitSubmodules()
+		// return actions.GitSubmodules()
 	// SKIP case "gitClone":
 	case "installPods":
 		// return actions.InstallPods()
 	case "iosBuild":
-		return actions.IosBuild()
+		// return actions.IosBuild()
 	case "iosPrepare":
-		return actions.IosPrepare()
+		// return actions.IosPrepare()
 	case "iosTest":
-		return actions.IosTest()
+		// return actions.IosTest()
 	case "iosDeploySimulator":
-		return actions.IosDeploySimulator()
+		// return actions.IosDeploySimulator()
 	case "iosProvisioning":
-		return actions.IosProvisioning()
+		// return actions.IosProvisioning()
 	case "iosCertificates":
-		return actions.IosCertificates()
+		// return actions.IosCertificates()
 	case "iosArchive":
-		return actions.IosArchive()
+		// return actions.IosArchive()
 	case "iosExportIPA":
-		return actions.IosExportIPA()
+		// return actions.IosExportIPA()
 	case "iosCreateApp":
-		return actions.IosCreateApp()
+		// return actions.IosCreateApp()
 	case "iosUploadBuild":
-		return actions.IosUploadBuild()
+		// return actions.IosUploadBuild()
 	// case "iosRun":
 	// case "iosSimulator":
 	// case "iosDeploy":
@@ -242,7 +243,7 @@ func loadTask(task string) int {
 	// case "androidEmulator":
 	// case "androidDeploy":
 	default:
-		utils.LogError("It's sad, but we don't know how to " + c.Underline + "handle this effing case" + c.Default + "\nYou should try upshift -v to find out what do we support")
+		utils.LogError("It's sad, but we don't know how to " + colours.Underline + "handle this effing case" + colours.Default + "\nYou should try upshift -v to find out what do we support")
 		return 1
 	}
 	return 0

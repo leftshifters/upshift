@@ -2,8 +2,9 @@ package actions
 
 import (
 	"fmt"
-	"upshift/config"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/config"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // GradleWrapper : Action to install the gradle wrapper

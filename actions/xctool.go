@@ -2,8 +2,9 @@ package actions
 
 import (
 	"errors"
-	"upshift/basher"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Xctool : Construct to handle all things related to xctool

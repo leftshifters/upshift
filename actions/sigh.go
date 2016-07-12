@@ -3,8 +3,9 @@ package actions
 import (
 	"errors"
 	"fmt"
-	"upshift/basher"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Sigh : Handle everything related to sigh

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"upshift/basher"
-	"upshift/command"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // AndroidEmulator : Construct to handle all things related to the emulator

@@ -5,9 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"upshift/basher"
-	c "upshift/colours"
-	"upshift/config"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/colours"
+	"github.com/leftshifters/upshift/config"
 )
 
 // Upshift : Construct to handle all upshift related things
@@ -68,14 +69,14 @@ func (u *Upshift) ShowVersion() {
 // ShowHelp : Show help, so that the user knows what to do
 func (u *Upshift) ShowHelp() {
 	fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
-	fmt.Println(c.Bold + "\nNAME" + c.Default)
+	fmt.Println(colours.Bold + "\nNAME" + colours.Default)
 	fmt.Println("\tupshift -- the creative mobile app builder")
-	fmt.Println(c.Bold + "\nSYNOPSIS" + c.Default)
-	fmt.Println("\tupshift " + c.Underline + "job" + c.Default + " " + c.Underline + "action" + c.Default)
-	fmt.Println(c.Bold + "\nDESCRIPTION" + c.Default)
+	fmt.Println(colours.Bold + "\nSYNOPSIS" + colours.Default)
+	fmt.Println("\tupshift " + colours.Underline + "job" + colours.Default + " " + colours.Underline + "action" + colours.Default)
+	fmt.Println(colours.Bold + "\nDESCRIPTION" + colours.Default)
 	fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
 
-	fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
+	fmt.Println(colours.Bold + "\nOPTIONS (job queues)" + colours.Default)
 	fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do")
 	fmt.Println("\tupshift ios build\n\t\tto build your iOS project")
 	fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator")
@@ -89,7 +90,7 @@ func (u *Upshift) ShowHelp() {
 	fmt.Println("\tupshift install\n\t\tto install this binary for the first time")
 	fmt.Println("\tupshift -v\n\t\tto view the version number")
 
-	fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
+	fmt.Println(colours.Bold + "\nOPTIONS (specific actions)" + colours.Default)
 	fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions")
 	fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
 	fmt.Println("\tupshift action setupScript -- to setup this very script")
@@ -113,7 +114,7 @@ func (u *Upshift) ShowHelp() {
 	fmt.Println("\tupshift action androidRun -- to run an android project")
 	fmt.Println("\tupshift action androidDeploy -- to deploy an android project")
 
-	fmt.Println(c.Bold + "\nCOMPATIBILITY" + c.Default)
+	fmt.Println(colours.Bold + "\nCOMPATIBILITY" + colours.Default)
 	fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
-	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
+	fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + colours.Underline + "https://leftshift.io\n" + colours.Default)
 }

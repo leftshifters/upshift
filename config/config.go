@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"upshift/utils"
 
 	"github.com/BurntSushi/toml"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Config : Construct to store the app's main config

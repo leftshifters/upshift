@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"upshift/basher"
-	"upshift/command"
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/command"
 )
 
 // Brew : Construct to take care of all brew tasks

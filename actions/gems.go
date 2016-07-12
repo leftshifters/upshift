@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"upshift/basher"
-	"upshift/command"
-	"upshift/config"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/config"
 )
 
 // Gems structure to install, upgrade, uninstall gems

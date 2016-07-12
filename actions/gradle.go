@@ -3,9 +3,10 @@ package actions
 import (
 	"errors"
 	"strings"
-	"upshift/basher"
-	"upshift/command"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Gradle : Keep track of everything related to gradle in upshift

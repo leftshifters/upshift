@@ -3,8 +3,9 @@ package actions
 import (
 	"errors"
 	"fmt"
-	"upshift/basher"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Produce : Construct to handle all things related to produce

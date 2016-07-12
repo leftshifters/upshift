@@ -3,10 +3,11 @@ package actions
 import (
 	"errors"
 	"strings"
-	"upshift/basher"
-	"upshift/command"
-	"upshift/config"
-	"upshift/utils"
+
+	"github.com/leftshifters/upshift/basher"
+	"github.com/leftshifters/upshift/command"
+	"github.com/leftshifters/upshift/config"
+	"github.com/leftshifters/upshift/utils"
 )
 
 // Git : Strucut to handle everything related to git
