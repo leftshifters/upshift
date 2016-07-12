@@ -54,13 +54,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/actions/actions.go (13.3%)</option>
+				<option value="file0">upshift/actions/actions.go (40.0%)</option>
 				
-				<option value="file1">upshift/actions/android.go (0.0%)</option>
+				<option value="file1">upshift/actions/android.go (100.0%)</option>
 				
-				<option value="file2">upshift/actions/androidemulator.go (0.0%)</option>
+				<option value="file2">upshift/actions/androidemulator.go (62.2%)</option>
 				
-				<option value="file3">upshift/actions/brew.go (81.2%)</option>
+				<option value="file3">upshift/actions/brew.go (87.5%)</option>
 				
 				<option value="file4">upshift/actions/cocoapods.go (80.0%)</option>
 				
@@ -68,11 +68,11 @@
 				
 				<option value="file6">upshift/actions/gems.go (88.4%)</option>
 				
-				<option value="file7">upshift/actions/git.go (67.4%)</option>
+				<option value="file7">upshift/actions/git.go (72.4%)</option>
 				
 				<option value="file8">upshift/actions/gradle.go (61.8%)</option>
 				
-				<option value="file9">upshift/actions/iossimulator.go (93.9%)</option>
+				<option value="file9">upshift/actions/iossimulator.go (84.8%)</option>
 				
 				<option value="file10">upshift/actions/pilot.go (0.0%)</option>
 				
@@ -80,9 +80,9 @@
 				
 				<option value="file12">upshift/actions/produce.go (0.0%)</option>
 				
-				<option value="file13">upshift/actions/sigh.go (0.0%)</option>
+				<option value="file13">upshift/actions/sigh.go (85.7%)</option>
 				
-				<option value="file14">upshift/actions/upshift.go (26.2%)</option>
+				<option value="file14">upshift/actions/upshift.go (93.8%)</option>
 				
 				<option value="file15">upshift/actions/xcodebuild.go (18.2%)</option>
 				
@@ -130,11 +130,11 @@ func GradleWrapper() int <span class="cov8" title="1">{
 }
 
 // PodInstall : Install pods for this project, if the project uses it
-func PodInstall() int <span class="cov0" title="0">{
+func PodInstall() int <span class="cov8" title="1">{
         var pod Pod
 
         // Check if this project uses cocoapods
-        if pod.AreUsed() == false </span><span class="cov0" title="0">{
+        if pod.AreUsed() == false </span><span class="cov8" title="1">{
                 fmt.Println("It looks like this project doesn't use pods")
                 return 0
         }</span>
@@ -151,7 +151,7 @@ func PodInstall() int <span class="cov0" title="0">{
 }
 
 // AndroidBuild : Build an android project
-func AndroidBuild() int <span class="cov0" title="0">{
+func AndroidBuild() int <span class="cov8" title="1">{
         var gradle Gradle
         var emulator AndroidEmulator
         conf := config.Get()
@@ -167,8 +167,8 @@ func AndroidBuild() int <span class="cov0" title="0">{
         }
 
         // Launch a device or emulator
-        <span class="cov0" title="0">err := emulator.Launch()
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">err := emulator.Launch()
+        if err != nil </span><span class="cov8" title="1">{
                 utils.LogError(err.Error())
                 return 1
         }</span>
@@ -202,31 +202,29 @@ func AndroidBuild() int <span class="cov0" title="0">{
 		
 		<pre class="file" id="file1" style="display: none">package actions
 
-import "upshift/basher"
-
 // Android : Construct for all activities related to the android binary
 type Android struct {
 }
 
 // UpgradeAndroid : Upgrade the android sdk
-func (a *Android) UpgradeAndroid(logPath string) error <span class="cov0" title="0">{
-        var b basher.Basher
-        _, err := b.Run("AndroidUpgradeSDK", []string{logPath})
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov0" title="0">return nil</span>
-}
+func (a *Android) UpgradeAndroid(logPath string) error <span class="cov8" title="1">{
+        // var b basher.Basher
+        // _, err := b.Run("AndroidUpgradeSDK", []string{logPath})
+        // if err != nil {
+        //         return err
+        // }
+        return nil
+}</span>
 
 // SetupAndroid : Install the android sdk
-func (a *Android) SetupAndroid(logPath string) error <span class="cov0" title="0">{
-        var b basher.Basher
-        _, err := b.Run("AndroidInstallSDK", []string{logPath})
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov0" title="0">return nil</span>
-}
+func (a *Android) SetupAndroid(logPath string) error <span class="cov8" title="1">{
+        // var b basher.Basher
+        // _, err := b.Run("AndroidInstallSDK", []string{logPath})
+        // if err != nil {
+        //         return err
+        // }
+        return nil
+}</span>
 </pre>
 		
 		<pre class="file" id="file2" style="display: none">package actions
@@ -243,7 +241,7 @@ import (
 type AndroidEmulator struct{}
 
 // Launch : launch the available emulator
-func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
+func (a *AndroidEmulator) Launch() error <span class="cov8" title="1">{
 
         // 1. Check if any devices are connected, if yes, use one of those
         devices, err := a.ConnectedDevices()
@@ -252,20 +250,20 @@ func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
         }</span>
 
         // If a device is available, we can do everything there
-        <span class="cov0" title="0">if len(devices) &gt; 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(devices) &gt; 0 </span><span class="cov0" title="0">{
                 return nil
         }</span>
 
         // 2. If nothing so far, see if any avds are listed and start the first one
-        <span class="cov0" title="0">avds, err := a.AVDsAvailable()
+        <span class="cov8" title="1">avds, err := a.AVDsAvailable()
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">if len(avds) == 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(avds) == 0 </span><span class="cov8" title="1">{
                 // 3. If still nothing, create an avd and launch it
                 err = a.CreateAVD()
-                if err != nil </span><span class="cov0" title="0">{
+                if err != nil </span><span class="cov8" title="1">{
                         return err
                 }</span>
         }
@@ -280,39 +278,39 @@ func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
 }
 
 // AVDsAvailable : find which AVDs are available
-func (a *AndroidEmulator) AVDsAvailable() ([]string, error) <span class="cov0" title="0">{
+func (a *AndroidEmulator) AVDsAvailable() ([]string, error) <span class="cov8" title="1">{
         out, err := command.Run([]string{"emulator", "-list-avds"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return []string{}, err
         }</span>
 
-        <span class="cov0" title="0">avds := utils.CreateList(out, []string{})
+        <span class="cov8" title="1">avds := utils.CreateList(out, []string{})
         return avds, nil</span>
 }
 
 // ConnectedDevices : find which devices are connected
-func (a *AndroidEmulator) ConnectedDevices() ([]string, error) <span class="cov0" title="0">{
+func (a *AndroidEmulator) ConnectedDevices() ([]string, error) <span class="cov8" title="1">{
         out, err := command.Run([]string{"adb", "devices"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return []string{}, err
         }</span>
 
-        <span class="cov0" title="0">devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
+        <span class="cov8" title="1">devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
         return devices, nil</span>
 }
 
 // LaunchApp : start the app in the emulator
-func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) error <span class="cov0" title="0">{
+func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) error <span class="cov8" title="1">{
         if packageName == "" </span><span class="cov0" title="0">{
                 return errors.New("We need the package name to launch the app")
         }</span>
 
-        <span class="cov0" title="0">if activityName == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if activityName == "" </span><span class="cov0" title="0">{
                 return errors.New("We need the main activity name to launch the app")
         }</span>
 
-        <span class="cov0" title="0">out, err := command.Run([]string{"adb", "shell", "am", "start", "-n", packageName + "/" + packageName + "." + activityName}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">out, err := command.Run([]string{"adb", "shell", "am", "start", "-n", packageName + "/" + packageName + "." + activityName}, "")
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
         <span class="cov0" title="0">fmt.Println(out)
@@ -321,7 +319,7 @@ func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) err
 }
 
 // CreateAVD : Create an AVD
-func (a *AndroidEmulator) CreateAVD() error <span class="cov0" title="0">{
+func (a *AndroidEmulator) CreateAVD() error <span class="cov8" title="1">{
         // to view a list of available avds you can create, run 'android list targets'
         // look for ones with ABIs
         // android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
@@ -362,7 +360,7 @@ func (b *Brew) Upgrade(cask string) (int, error) <span class="cov8" title="1">{
 
 // Uninstall a cask using brew
 func (b *Brew) Uninstall(cask string) (int, error) <span class="cov8" title="1">{
-        if b.isInstalled(cask) == false </span><span class="cov0" title="0">{
+        if b.isInstalled(cask) == false </span><span class="cov8" title="1">{
                 return 0, nil
         }</span>
 
@@ -603,14 +601,14 @@ func (g *Git) AreSubmodulesUsed() bool <span class="cov8" title="1">{
 func (g *Git) SubmoduleInit() (int, error) <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("$ git submodule init")
-        return b.RunAndTail("GitSubmoduleInit", []string{".upshift/logs/git-submodule-init"}, ".upshift/logs/git-submodule-init", []string{}, []string{"error"})
+        return b.RunAndTail("GitSubmoduleInit", []string{".upshift/logs/git-submodule-init.log"}, ".upshift/logs/git-submodule-init.log", []string{}, []string{"error"})
 }</span>
 
 // SubmoduleUpdate : Update submodules
 func (g *Git) SubmoduleUpdate() (int, error) <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("$ git submodule update")
-        return b.RunAndTail("GitSubmoduleUpdate", []string{".upshift/logs/git-submodule-update"}, ".upshift/logs/git-submodule-update", []string{}, []string{"error:", "fatal:"})
+        return b.RunAndTail("GitSubmoduleUpdate", []string{".upshift/logs/git-submodule-update.log"}, ".upshift/logs/git-submodule-update.log", []string{}, []string{"error:", "fatal:"})
 }</span>
 
 // IsRepo : Find out if you are in a git repo, if yes, throw the output of git status
@@ -664,11 +662,11 @@ func (g *Git) Remote() (string, error) <span class="cov8" title="1">{
                 currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
                 return currentRemote, nil</span>
 
-        <span class="cov0" title="0">default:
+        <span class="cov8" title="1">default:
                 // This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
                 conf := config.Get()
 
-                if conf.Settings.Remote == "" </span><span class="cov0" title="0">{
+                if conf.Settings.Remote == "" </span><span class="cov8" title="1">{
                         // They didn't define a remote, throw a tantrum
                         return "", errors.New("You have multiple repos in this project. To use one, please add Remote=remoteName to your config.toml. Here are the ones that we see " + strings.TrimSpace(out))
                 }</span>
@@ -702,6 +700,34 @@ func (g *Git) Pull(remote string, branch string) (int, error) <span class="cov8"
         <span class="cov8" title="1">var b basher.Basher
         utils.LogMessage("$ git pull " + remote + " " + branch)
         return b.RunAndTail("GitPull", []string{remote, branch, ".upshift/logs/git-pull.log"}, ".upshift/logs/git-pull.log", []string{}, []string{"fatal:", "error:"})</span>
+}
+
+// AddRemote : add a new remote
+func (g *Git) AddRemote(remote string, url string) error <span class="cov8" title="1">{
+        if g.IsRepo() == false </span><span class="cov0" title="0">{
+                return errors.New("This is not a git repo")
+        }</span>
+
+        <span class="cov8" title="1">_, err := command.Run([]string{"git", "remote", "add", remote, url}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// RemoveRemote : remove a remote
+func (g *Git) RemoveRemote(remote string) error <span class="cov8" title="1">{
+        if g.IsRepo() == false </span><span class="cov0" title="0">{
+                return errors.New("This is not a git repo")
+        }</span>
+
+        <span class="cov8" title="1">_, err := command.Run([]string{"git", "remote", "rm", remote}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -830,7 +856,7 @@ type IOSSimulator struct {
 // IsSimulatorRunning : find out if the simulator is running
 func (i *IOSSimulator) IsSimulatorRunning() bool <span class="cov8" title="1">{
         _, err := command.Run([]string{"pgrep", "-f", "Simulator.app"}, "")
-        if err != nil </span><span class="cov8" title="1">{
+        if err != nil </span><span class="cov0" title="0">{
                 return false
         }</span>
         <span class="cov8" title="1">return true</span>
@@ -839,21 +865,21 @@ func (i *IOSSimulator) IsSimulatorRunning() bool <span class="cov8" title="1">{
 // StartSimulator : start up the iOS simulator
 func (i *IOSSimulator) StartSimulator(device string) <span class="cov8" title="1">{
         // If simulator is already running, just ignore
-        if i.IsSimulatorRunning() </span><span class="cov0" title="0">{
+        if i.IsSimulatorRunning() </span><span class="cov8" title="1">{
                 return
         }</span>
 
         // basher returns an error if status &gt; 0 or if there is an error
         // Whenever we start the simulator, for some reason, the exit code is always 255, though there is no error
         // Hence skipping the error check here
-        <span class="cov8" title="1">var b basher.Basher
+        <span class="cov0" title="0">var b basher.Basher
         b.Run("StartSimulator", []string{device})</span>
 }
 
 // StopSimulator : stop the simulator
 func (i *IOSSimulator) StopSimulator() <span class="cov8" title="1">{
         // If simulator is not running, just go back
-        if i.IsSimulatorRunning() == false </span><span class="cov8" title="1">{
+        if i.IsSimulatorRunning() == false </span><span class="cov0" title="0">{
                 return
         }</span>
 
@@ -1033,7 +1059,7 @@ import (
 type Sigh struct{}
 
 // FindProvisioning : find and install a provisioning profile
-func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string) error <span class="cov0" title="0">{
+func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string) error <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("We will now try to find the provisioning profile")
 
@@ -1042,7 +1068,7 @@ func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string
                 return errors.New("We could not find your provisioning profile")
         }</span>
 
-        <span class="cov0" title="0">fmt.Println("We have successfully added your profiles to this machine, woohoo")
+        <span class="cov8" title="1">fmt.Println("We have successfully added your profiles to this machine, woohoo")
         return nil</span>
 }
 </pre>
@@ -1109,13 +1135,13 @@ func (u *Upshift) LatestVersion() (string, error) <span class="cov8" title="1">{
 }
 
 // ShowVersion : shows the version of upshift on the command line
-func (u *Upshift) ShowVersion() <span class="cov0" title="0">{
+func (u *Upshift) ShowVersion() <span class="cov8" title="1">{
         conf := config.Get()
         fmt.Println(conf.Settings.AppVersion)
 }</span>
 
 // ShowHelp : Show help, so that the user knows what to do
-func (u *Upshift) ShowHelp() <span class="cov0" title="0">{
+func (u *Upshift) ShowHelp() <span class="cov8" title="1">{
         fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
         fmt.Println(c.Bold + "\nNAME" + c.Default)
         fmt.Println("\tupshift -- the creative mobile app builder")
