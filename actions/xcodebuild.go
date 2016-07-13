@@ -389,22 +389,22 @@ func (x *Xcodebuild) InstallCertificates() error {
 	}
 
 	outApple, err := command.Run([]string{"security", "import", appleCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-	if err != nil {
-		return err
-	}
 	fmt.Println(outApple)
-
-	outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
-	if err != nil {
+	if err != nil && strings.Contains(outApple, "already exists in the keychain") == false {
 		return err
 	}
+
+	outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
 	fmt.Println(outCert)
-
-	outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-	if err != nil {
+	if err != nil && strings.Contains(outCert, "already exists in the keychain") == false {
 		return err
 	}
+
+	outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
 	fmt.Println(outP12)
+	if err != nil && strings.Contains(outP12, "already exists in the keychain") == false {
+		return err
+	}
 
 	return nil
 }
