@@ -18,8 +18,7 @@ func LogMessage(message string) {
 
 // LogInfo : this shows up in blue
 func LogInfo(message string) {
-	fmt.Println("🔰  " + colours.Green + colours.Bold + "Maybe you should " + colours.Underline + "know this" + colours.Default)
-	fmt.Println(message)
+	fmt.Println("🔰  " + colours.Yellow + message + colours.Default)
 }
 
 // LogError : Log an error, show them this shit in color, red most probably

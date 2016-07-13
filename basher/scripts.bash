@@ -151,6 +151,7 @@ IOSIncrementBuildNumber() {
 	answerToEncryption=$(/usr/libexec/PlistBuddy -c "Print ITSAppUsesNonExemptEncryption" "$1/Info.plist")
 	if [[ $answerToEncryption == *"Does Not Exist"* ]]; then
 		/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$1/Info.plist"
+		printf "Alright, added\n"
 	fi
 }
 

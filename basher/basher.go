@@ -35,6 +35,7 @@ func (b *Basher) Run(command string, params []string) (int, error) {
 		b.Load()
 	}
 
+	utils.LogMessage("$ <" + command + "> <" + strings.Join(params, "> <") + ">")
 	status, err := b.bash.Run(command, params)
 	if status > 0 || err != nil {
 		errorString := "There was a problem running " + colours.Red + command + colours.Default + "\n"
