@@ -26,3 +26,11 @@ func (c *Cocoapods) Uninstall() error {
 
 	return nil
 }
+
+// IsInstalled : check if cocoapods is installed
+func (c *Cocoapods) IsInstalled() bool {
+	var g Gems
+
+	installed, _ := g.version("pod")
+	return installed
+}
