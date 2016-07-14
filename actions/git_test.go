@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/leftshifters/upshift/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,21 +45,42 @@ func Test_Git_IsRepo(t *testing.T) {
 func Test_Git_Branch(t *testing.T) {
 	var g Git
 	branch, err := g.Branch()
-	assert.Equal(t, "go", branch)
+
+	conf := config.Get()
+	if conf.IsCI() {
+		assert.Contains(t, branch, "HEAD detached at")
+	} else {
+		assert.Equal(t, "go", branch)
+
+	}
 	assert.Nil(t, err)
 }
 
 func Test_Git_Remote(t *testing.T) {
 	var g Git
+	conf := config.Get()
+
 	remote, err := g.Remote()
-	assert.Equal(t, "", remote)
-	assert.Contains(t, err.Error(), "multiple repos")
+
+	if conf.IsCI() {
+		assert.Equal(t, "origin", remote)
+		assert.Nil(t, err)
+	} else {
+		assert.Equal(t, "", remote)
+		assert.Contains(t, err.Error(), "multiple repos")
+	}
 
 	// Remove origin
 	err = g.RemoveRemote("origin")
 	remote, err = g.Remote()
-	assert.Equal(t, "betas", remote)
-	assert.Nil(t, err)
+
+	if conf.IsCI() {
+		assert.Equal(t, "", remote)
+		assert.Nil(t, err)
+	} else {
+		assert.Equal(t, "betas", remote)
+		assert.Nil(t, err)
+	}
 
 	// Add origin and fake remote
 	err = g.AddRemote("origin", "git@github.com:leftshifters/upshift.git")
