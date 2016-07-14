@@ -41,14 +41,14 @@ SetupGem() {
 	if [ "$2" == "true" ]; then
 		# CI is true, we now need password
 		if [ "$3" != "" ]; then
-			echo -e "$3" | sudo -k -S gem install $1
+			echo -e "$3" | sudo -k -S gem install $1 --no-ri --no-rdoc
 			exit 0
 		else
 			exit 1
 		fi
 	else
 		# User should type in the password
-		sudo -k gem install $1
+		sudo -k gem install $1 --no-ri --no-rdoc
 		exit 0
 	fi
 }
