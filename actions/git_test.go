@@ -51,21 +51,21 @@ func Test_Git_Branch(t *testing.T) {
 func Test_Git_Remote(t *testing.T) {
 	var g Git
 	remote, err := g.Remote()
-	assert.Equal(t, "origin", remote)
-	assert.Nil(t, err)
+	assert.Equal(t, "", remote)
+	assert.Contains(t, err.Error(), "multiple repos")
 
 	// Remove origin
 	err = g.RemoveRemote("origin")
 	remote, err = g.Remote()
-	assert.Equal(t, "origin", remote)
+	assert.Equal(t, "betas", remote)
 	assert.Nil(t, err)
 
 	// Add origin and fake remote
 	err = g.AddRemote("origin", "git@github.com:leftshifters/upshift.git")
 	err = g.AddRemote("fake", "git@github.com:leftshifters/upshift1.git")
 	remote, err = g.Remote()
-	assert.Equal(t, "origin", remote)
-	assert.Nil(t, err)
+	assert.Equal(t, "", remote)
+	assert.Contains(t, err.Error(), "multiple repos")
 
 	// Remove fake
 	g.RemoveRemote("fake")
@@ -73,9 +73,8 @@ func Test_Git_Remote(t *testing.T) {
 
 func Test_Git_Pull(t *testing.T) {
 	var g Git
-	remote, _ := g.Remote()
 	branch, _ := g.Branch()
-	status, err := g.Pull(remote, branch)
+	status, err := g.Pull("origin", branch)
 	assert.Equal(t, 0, status)
 	assert.Nil(t, err)
 }

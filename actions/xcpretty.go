@@ -26,3 +26,10 @@ func (x *Xcpretty) Uninstall() error {
 
 	return nil
 }
+
+// IsInstalled : check if xcpretty is installed or not
+func (x *Xcpretty) IsInstalled() bool {
+	var g Gems
+	found, _ := g.version("xcpretty")
+	return found
+}

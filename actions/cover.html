@@ -54,41 +54,41 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/actions/actions.go (44.4%)</option>
+				<option value="file0">github.com/leftshifters/upshift/actions/actions.go (44.4%)</option>
 				
-				<option value="file1">upshift/actions/android.go (0.0%)</option>
+				<option value="file1">github.com/leftshifters/upshift/actions/android.go (100.0%)</option>
 				
-				<option value="file2">upshift/actions/androidemulator.go (0.0%)</option>
+				<option value="file2">github.com/leftshifters/upshift/actions/androidemulator.go (35.6%)</option>
 				
-				<option value="file3">upshift/actions/brew.go (0.0%)</option>
+				<option value="file3">github.com/leftshifters/upshift/actions/brew.go (87.5%)</option>
 				
-				<option value="file4">upshift/actions/cocoapods.go (0.0%)</option>
+				<option value="file4">github.com/leftshifters/upshift/actions/cocoapods.go (90.0%)</option>
 				
-				<option value="file5">upshift/actions/fastlane.go (0.0%)</option>
+				<option value="file5">github.com/leftshifters/upshift/actions/fastlane.go (80.0%)</option>
 				
-				<option value="file6">upshift/actions/gems.go (0.0%)</option>
+				<option value="file6">github.com/leftshifters/upshift/actions/gems.go (67.4%)</option>
 				
-				<option value="file7">upshift/actions/git.go (0.0%)</option>
+				<option value="file7">github.com/leftshifters/upshift/actions/git.go (74.1%)</option>
 				
-				<option value="file8">upshift/actions/gradle.go (41.2%)</option>
+				<option value="file8">github.com/leftshifters/upshift/actions/gradle.go (67.4%)</option>
 				
-				<option value="file9">upshift/actions/iossimulator.go (0.0%)</option>
+				<option value="file9">github.com/leftshifters/upshift/actions/iossimulator.go (33.3%)</option>
 				
-				<option value="file10">upshift/actions/pilot.go (0.0%)</option>
+				<option value="file10">github.com/leftshifters/upshift/actions/pilot.go (77.8%)</option>
 				
-				<option value="file11">upshift/actions/pod.go (30.8%)</option>
+				<option value="file11">github.com/leftshifters/upshift/actions/pod.go (92.3%)</option>
 				
-				<option value="file12">upshift/actions/produce.go (0.0%)</option>
+				<option value="file12">github.com/leftshifters/upshift/actions/produce.go (87.5%)</option>
 				
-				<option value="file13">upshift/actions/sigh.go (0.0%)</option>
+				<option value="file13">github.com/leftshifters/upshift/actions/sigh.go (85.7%)</option>
 				
-				<option value="file14">upshift/actions/upshift.go (0.0%)</option>
+				<option value="file14">github.com/leftshifters/upshift/actions/upshift.go (93.8%)</option>
 				
-				<option value="file15">upshift/actions/xcodebuild.go (0.0%)</option>
+				<option value="file15">github.com/leftshifters/upshift/actions/xcodebuild.go (30.3%)</option>
 				
-				<option value="file16">upshift/actions/xcpretty.go (0.0%)</option>
+				<option value="file16">github.com/leftshifters/upshift/actions/xcpretty.go (80.0%)</option>
 				
-				<option value="file17">upshift/actions/xctool.go (0.0%)</option>
+				<option value="file17">github.com/leftshifters/upshift/actions/xctool.go (52.2%)</option>
 				
 				</select>
 			</div>
@@ -106,8 +106,9 @@
 
 import (
         "fmt"
-        "upshift/config"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/config"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // GradleWrapper : Action to install the gradle wrapper
@@ -207,7 +208,7 @@ type Android struct {
 }
 
 // UpgradeAndroid : Upgrade the android sdk
-func (a *Android) UpgradeAndroid(logPath string) error <span class="cov0" title="0">{
+func (a *Android) UpgradeAndroid(logPath string) error <span class="cov8" title="1">{
         // var b basher.Basher
         // _, err := b.Run("AndroidUpgradeSDK", []string{logPath})
         // if err != nil {
@@ -217,7 +218,7 @@ func (a *Android) UpgradeAndroid(logPath string) error <span class="cov0" title=
 }</span>
 
 // SetupAndroid : Install the android sdk
-func (a *Android) SetupAndroid(logPath string) error <span class="cov0" title="0">{
+func (a *Android) SetupAndroid(logPath string) error <span class="cov8" title="1">{
         // var b basher.Basher
         // _, err := b.Run("AndroidInstallSDK", []string{logPath})
         // if err != nil {
@@ -232,16 +233,19 @@ func (a *Android) SetupAndroid(logPath string) error <span class="cov0" title="0
 import (
         "errors"
         "fmt"
-        "upshift/basher"
-        "upshift/command"
-        "upshift/utils"
+        "os"
+        "path/filepath"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // AndroidEmulator : Construct to handle all things related to the emulator
 type AndroidEmulator struct{}
 
 // Launch : launch the available emulator
-func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
+func (a *AndroidEmulator) Launch() error <span class="cov8" title="1">{
 
         // 1. Check if any devices are connected, if yes, use one of those
         devices, err := a.ConnectedDevices()
@@ -250,7 +254,7 @@ func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
         }</span>
 
         // If a device is available, we can do everything there
-        <span class="cov0" title="0">if len(devices) &gt; 0 </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(devices) &gt; 0 </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
@@ -278,9 +282,9 @@ func (a *AndroidEmulator) Launch() error <span class="cov0" title="0">{
 }
 
 // AVDsAvailable : find which AVDs are available
-func (a *AndroidEmulator) AVDsAvailable() ([]string, error) <span class="cov0" title="0">{
+func (a *AndroidEmulator) AVDsAvailable() ([]string, error) <span class="cov8" title="1">{
         out, err := command.Run([]string{"emulator", "-list-avds"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return []string{}, err
         }</span>
 
@@ -289,28 +293,28 @@ func (a *AndroidEmulator) AVDsAvailable() ([]string, error) <span class="cov0" t
 }
 
 // ConnectedDevices : find which devices are connected
-func (a *AndroidEmulator) ConnectedDevices() ([]string, error) <span class="cov0" title="0">{
+func (a *AndroidEmulator) ConnectedDevices() ([]string, error) <span class="cov8" title="1">{
         out, err := command.Run([]string{"adb", "devices"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return []string{}, err
         }</span>
 
-        <span class="cov0" title="0">devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
+        <span class="cov8" title="1">devices := utils.CreateList(out, []string{"List of devices attached", "daemon not running. starting it now on port", "daemon started successfully", "offline"})
         return devices, nil</span>
 }
 
 // LaunchApp : start the app in the emulator
-func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) error <span class="cov0" title="0">{
+func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) error <span class="cov8" title="1">{
         if packageName == "" </span><span class="cov0" title="0">{
                 return errors.New("We need the package name to launch the app")
         }</span>
 
-        <span class="cov0" title="0">if activityName == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if activityName == "" </span><span class="cov0" title="0">{
                 return errors.New("We need the main activity name to launch the app")
         }</span>
 
-        <span class="cov0" title="0">out, err := command.Run([]string{"adb", "shell", "am", "start", "-n", packageName + "/" + packageName + "." + activityName}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">out, err := command.Run([]string{"adb", "shell", "am", "start", "-n", packageName + "/" + packageName + "." + activityName}, "")
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
         <span class="cov0" title="0">fmt.Println(out)
@@ -319,19 +323,62 @@ func (a *AndroidEmulator) LaunchApp(packageName string, activityName string) err
 }
 
 // CreateAVD : Create an AVD
-func (a *AndroidEmulator) CreateAVD() error <span class="cov0" title="0">{
+func (a *AndroidEmulator) CreateAVD() error <span class="cov8" title="1">{
         // to view a list of available avds you can create, run 'android list targets'
         // look for ones with ABIs
-        // android create avd --target android-23 --name "Google Inc.:Google APIs:22" -b "google_apis/x86_64"
-        return errors.New("Creating an AVD has not been implemented yet")
-}</span>
+        // android create avd --name "Android_22_AVD" --target android-22
+
+        // check if the ABI is available
+        if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-23", "google_apis", "x86", "system.img")) == false </span><span class="cov8" title="1">{
+                var b basher.Basher
+                status, _ := b.Run("AndroidInstallABI", []string{})
+                if status &gt; 0 </span><span class="cov8" title="1">{
+                        return errors.New("We could not install the ABI")
+                }</span>
+        }
+
+        <span class="cov0" title="0">var b basher.Basher
+        _, err := b.Run("AndroidCreateAVD", []string{"Android23", "android-23", "google_apis/x86_64", "Nexus 6"})
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DeleteAVD : delete an AVD
+func (a *AndroidEmulator) DeleteAVD(avd string) error <span class="cov0" title="0">{
+        // Check if AVD is available
+        avds, err := a.AVDsAvailable()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">var found bool
+        for _, item := range avds </span><span class="cov0" title="0">{
+                if avd == item </span><span class="cov0" title="0">{
+                        found = true
+                }</span>
+        }
+
+        <span class="cov0" title="0">if found == false </span><span class="cov0" title="0">{
+                return errors.New("This avd does not exist")
+        }</span>
+
+        <span class="cov0" title="0">_, err = command.Run([]string{"android", "delete", "avd", "-n", avd}, "")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
 </pre>
 		
 		<pre class="file" id="file3" style="display: none">package actions
 
 import (
-        "upshift/basher"
-        "upshift/command"
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/command"
 )
 
 // Brew : Construct to take care of all brew tasks
@@ -339,18 +386,18 @@ type Brew struct {
 }
 
 // Install a cask using brew
-func (b *Brew) Install(cask string) (int, error) <span class="cov0" title="0">{
-        if b.isInstalled(cask) == true </span><span class="cov0" title="0">{
+func (b *Brew) Install(cask string) (int, error) <span class="cov8" title="1">{
+        if b.isInstalled(cask) == true </span><span class="cov8" title="1">{
                 return 0, nil
         }</span>
 
-        <span class="cov0" title="0">var basher basher.Basher
+        <span class="cov8" title="1">var basher basher.Basher
         return basher.Run("BrewInstall", []string{cask})</span>
 }
 
 // Upgrade a cask using brew
-func (b *Brew) Upgrade(cask string) (int, error) <span class="cov0" title="0">{
-        if b.isInstalled(cask) == false </span><span class="cov0" title="0">{
+func (b *Brew) Upgrade(cask string) (int, error) <span class="cov8" title="1">{
+        if b.isInstalled(cask) == false </span><span class="cov8" title="1">{
                 return b.Install(cask)
         }</span>
 
@@ -359,26 +406,26 @@ func (b *Brew) Upgrade(cask string) (int, error) <span class="cov0" title="0">{
 }
 
 // Uninstall a cask using brew
-func (b *Brew) Uninstall(cask string) (int, error) <span class="cov0" title="0">{
-        if b.isInstalled(cask) == false </span><span class="cov0" title="0">{
+func (b *Brew) Uninstall(cask string) (int, error) <span class="cov8" title="1">{
+        if b.isInstalled(cask) == false </span><span class="cov8" title="1">{
                 return 0, nil
         }</span>
 
-        <span class="cov0" title="0">var basher basher.Basher
+        <span class="cov8" title="1">var basher basher.Basher
         return basher.Run("BrewUninstall", []string{cask})</span>
 }
 
-func (b *Brew) isInstalled(cask string) bool <span class="cov0" title="0">{
+func (b *Brew) isInstalled(cask string) bool <span class="cov8" title="1">{
         // Check if the cask is installed
         _, err := command.Run([]string{cask, "--version"}, "")
-        if err == nil </span><span class="cov0" title="0">{
+        if err == nil </span><span class="cov8" title="1">{
                 // Remove the name of the tool if it is part of the version string
                 // version = strings.Replace(version, cask, "", 1)
                 // Now trim whatever is left
                 // version = strings.TrimSpace(version)
                 return true
         }</span>
-        <span class="cov0" title="0">return false</span>
+        <span class="cov8" title="1">return false</span>
 }
 </pre>
 		
@@ -390,25 +437,25 @@ import "errors"
 type Cocoapods struct{}
 
 // Install : Install cocoapods on the machine
-func (c *Cocoapods) Install() error <span class="cov0" title="0">{
+func (c *Cocoapods) Install() error <span class="cov8" title="1">{
         var g Gems
         err := g.Install("cocoapods", "pod")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("Could not install cocoapods\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // Uninstall : Uninstall cocoapods on the machine
-func (c *Cocoapods) Uninstall() error <span class="cov0" title="0">{
+func (c *Cocoapods) Uninstall() error <span class="cov8" title="1">{
         var g Gems
         err := g.Uninstall("cocoapods", "pod")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not uninstall cocoapods\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -420,10 +467,10 @@ import "errors"
 type Fastlane struct{}
 
 // Install : Install fastlane on the machine
-func (f *Fastlane) Install() error <span class="cov0" title="0">{
+func (f *Fastlane) Install() error <span class="cov8" title="1">{
         var g Gems
         err := g.InstallSimple("fastlane")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("Could not install fastlane\n" + err.Error())
         }</span>
 
@@ -431,14 +478,14 @@ func (f *Fastlane) Install() error <span class="cov0" title="0">{
 }
 
 // Uninstall : Uninstall fastlane on the machine
-func (f *Fastlane) Uninstall() error <span class="cov0" title="0">{
+func (f *Fastlane) Uninstall() error <span class="cov8" title="1">{
         var g Gems
         err := g.UninstallSimple("fastlane")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not uninstall fastlane\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -449,72 +496,73 @@ import (
         "fmt"
         "strconv"
         "strings"
-        "upshift/basher"
-        "upshift/command"
-        "upshift/config"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/config"
 )
 
 // Gems structure to install, upgrade, uninstall gems
 type Gems struct{}
 
 // InstallSimple a gem with gem name only
-func (g *Gems) InstallSimple(gem string) error <span class="cov0" title="0">{
+func (g *Gems) InstallSimple(gem string) error <span class="cov8" title="1">{
         return g.Install(gem, "")
 }</span>
 
 // Install a gem with gem name and scriptName
-func (g *Gems) Install(gem string, scriptName string) error <span class="cov0" title="0">{
+func (g *Gems) Install(gem string, scriptName string) error <span class="cov8" title="1">{
         // Get the global config
         conf := config.Get()
 
         // If scriptName is empty, use the gem name
-        if scriptName == "" </span><span class="cov0" title="0">{
+        if scriptName == "" </span><span class="cov8" title="1">{
                 scriptName = gem
         }</span>
 
         // Check if gem is installed
-        <span class="cov0" title="0">installed, _ := g.version(scriptName)
+        <span class="cov8" title="1">installed, _ := g.version(scriptName)
         if installed == true </span><span class="cov0" title="0">{
                 return nil
         }</span>
 
         // Okay, so the gem was not installed, big deal
         // Let's install the effing thing
-        <span class="cov0" title="0">var b basher.Basher
+        <span class="cov8" title="1">var b basher.Basher
         RootPassword, err := conf.GetRootPassword()
-        if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov0" title="0">{
+        if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov8" title="1">{
                 return errors.New("Unable to find the RootPassword\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
+        <span class="cov8" title="1">status, err := b.Run("SetupGem", []string{gem, strconv.FormatBool(conf.IsCI()), RootPassword})
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not install " + gem + " [Error Code &lt;" + strconv.Itoa(status) + "&gt;]\n" + err.Error())
         }</span>
 
         // Verify if gem was installed
-        <span class="cov0" title="0">installed, _ = g.version(scriptName)
-        if installed == true </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">installed, _ = g.version(scriptName)
+        if installed == true </span><span class="cov8" title="1">{
                 // It was successfull installed
                 return nil
         }</span>
-        <span class="cov0" title="0">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
+        <span class="cov8" title="1">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
 }
 
 // UninstallSimple a gem with gem name only
-func (g *Gems) UninstallSimple(gem string) error <span class="cov0" title="0">{
+func (g *Gems) UninstallSimple(gem string) error <span class="cov8" title="1">{
         return g.Uninstall(gem, "")
 }</span>
 
 // Uninstall : remove a gem from the system
-func (g *Gems) Uninstall(gem string, scriptName string) error <span class="cov0" title="0">{
+func (g *Gems) Uninstall(gem string, scriptName string) error <span class="cov8" title="1">{
         // If scriptName is not set, use the gem name
-        if scriptName == "" </span><span class="cov0" title="0">{
+        if scriptName == "" </span><span class="cov8" title="1">{
                 scriptName = gem
         }</span>
 
         // Check if the gem is installed
-        <span class="cov0" title="0">installed, _ := g.version(scriptName)
-        if installed == false </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">installed, _ := g.version(scriptName)
+        if installed == false </span><span class="cov8" title="1">{
                 // If it is not installed then return
                 return nil
         }</span>
@@ -544,10 +592,10 @@ func (g *Gems) Uninstall(gem string, scriptName string) error <span class="cov0"
         <span class="cov0" title="0">return errors.New("The script ran but the gem " + gem + " was not installed on the machine")</span>
 }
 
-func (g *Gems) version(gem string) (bool, string) <span class="cov0" title="0">{
+func (g *Gems) version(gem string) (bool, string) <span class="cov8" title="1">{
         // Check which version of the gem was installed
         ver, err := command.Run([]string{gem, "--version"}, "")
-        if err == nil </span><span class="cov0" title="0">{
+        if err == nil </span><span class="cov8" title="1">{
                 // This means that the gem is installed
                 // Get rid of the name and get the version number
                 ver = strings.Replace(ver, gem, "", 1)
@@ -558,7 +606,7 @@ func (g *Gems) version(gem string) (bool, string) <span class="cov0" title="0">{
         }</span>
 
         // Not installed
-        <span class="cov0" title="0">return false, ""</span>
+        <span class="cov8" title="1">return false, ""</span>
 }
 
 // #TODO : Find out how do we know that an update is available and update it
@@ -582,10 +630,11 @@ func (g *Gems) version(gem string) (bool, string) <span class="cov0" title="0">{
 import (
         "errors"
         "strings"
-        "upshift/basher"
-        "upshift/command"
-        "upshift/config"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/config"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Git : Strucut to handle everything related to git
@@ -593,80 +642,80 @@ type Git struct {
 }
 
 // AreSubmodulesUsed : Find out if the system uses git submodules
-func (g *Git) AreSubmodulesUsed() bool <span class="cov0" title="0">{
+func (g *Git) AreSubmodulesUsed() bool <span class="cov8" title="1">{
         return utils.FileExists(".gitmodules")
 }</span>
 
 // SubmoduleInit : Initialize submodules
-func (g *Git) SubmoduleInit() (int, error) <span class="cov0" title="0">{
+func (g *Git) SubmoduleInit() (int, error) <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("$ git submodule init")
         return b.RunAndTail("GitSubmoduleInit", []string{".upshift/logs/git-submodule-init.log"}, ".upshift/logs/git-submodule-init.log", []string{}, []string{"error"})
 }</span>
 
 // SubmoduleUpdate : Update submodules
-func (g *Git) SubmoduleUpdate() (int, error) <span class="cov0" title="0">{
+func (g *Git) SubmoduleUpdate() (int, error) <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("$ git submodule update")
         return b.RunAndTail("GitSubmoduleUpdate", []string{".upshift/logs/git-submodule-update.log"}, ".upshift/logs/git-submodule-update.log", []string{}, []string{"error:", "fatal:"})
 }</span>
 
 // IsRepo : Find out if you are in a git repo, if yes, throw the output of git status
-func (g *Git) IsRepo() bool <span class="cov0" title="0">{
+func (g *Git) IsRepo() bool <span class="cov8" title="1">{
         _, err := command.Run([]string{"git", "status"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return false
         }</span>
-        <span class="cov0" title="0">return true</span>
+        <span class="cov8" title="1">return true</span>
 }
 
 // Branch : find the branch that you are on in the git repo
-func (g *Git) Branch() (string, error) <span class="cov0" title="0">{
+func (g *Git) Branch() (string, error) <span class="cov8" title="1">{
         // Run git status
         out, err := command.Run([]string{"git", "status"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return "", err
         }</span>
 
         // Read the first row of git status which says 'on branch xyz'
-        <span class="cov0" title="0">gitStatusOutputRows := strings.Split(out, "\n")
+        <span class="cov8" title="1">gitStatusOutputRows := strings.Split(out, "\n")
         var firstRow string
-        if len(gitStatusOutputRows) &gt; 0 </span><span class="cov0" title="0">{
+        if len(gitStatusOutputRows) &gt; 0 </span><span class="cov8" title="1">{
                 firstRow = gitStatusOutputRows[0]
         }</span><span class="cov0" title="0"> else {
                 return "", errors.New("You are probably not in a git repository. Quit messing around.")
         }</span>
 
         // Alright find the correct branch and show it to the user
-        <span class="cov0" title="0">currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
+        <span class="cov8" title="1">currentBranch := strings.TrimSpace(strings.Replace(firstRow, "On branch ", "", 1))
         return currentBranch, nil</span>
 }
 
 // Remote : find the remote they are working with
-func (g *Git) Remote() (string, error) <span class="cov0" title="0">{
+func (g *Git) Remote() (string, error) <span class="cov8" title="1">{
         // Check how many remotes does the user have
         out, err := command.Run([]string{"git", "remote"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return "", err
         }</span>
 
-        <span class="cov0" title="0">var currentRemote string
+        <span class="cov8" title="1">var currentRemote string
         gitRemoteOutputRows := strings.Split(strings.TrimSpace(out), "\n")
         switch len(gitRemoteOutputRows) </span>{
 
         <span class="cov0" title="0">case 0:
                 return "", errors.New("You have no remotes!")</span>
 
-        <span class="cov0" title="0">case 1:
+        <span class="cov8" title="1">case 1:
                 // If there's only one remote, use it
                 currentRemote = strings.TrimSpace(gitRemoteOutputRows[0])
                 return currentRemote, nil</span>
 
-        <span class="cov0" title="0">default:
+        <span class="cov8" title="1">default:
                 // This means that the user has multiple remotes, read the config to see if they have mentioned a remote there
                 conf := config.Get()
 
-                if conf.Settings.Remote == "" </span><span class="cov0" title="0">{
+                if conf.Settings.Remote == "" </span><span class="cov8" title="1">{
                         // They didn't define a remote, throw a tantrum
                         return "", errors.New("You have multiple repos in this project. To use one, please add Remote=remoteName to your config.toml. Here are the ones that we see " + strings.TrimSpace(out))
                 }</span>
@@ -688,12 +737,12 @@ func (g *Git) Remote() (string, error) <span class="cov0" title="0">{
 }
 
 // Pull : pull a git repo
-func (g *Git) Pull(remote string, branch string) (int, error) <span class="cov0" title="0">{
+func (g *Git) Pull(remote string, branch string) (int, error) <span class="cov8" title="1">{
         if remote == "" </span><span class="cov0" title="0">{
                 return 1, errors.New("Please select a remote that you want to pull from")
         }</span>
 
-        <span class="cov0" title="0">if branch == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if branch == "" </span><span class="cov8" title="1">{
                 return 1, errors.New("Please select a branch that you want to pull from")
         }</span>
 
@@ -703,31 +752,31 @@ func (g *Git) Pull(remote string, branch string) (int, error) <span class="cov0"
 }
 
 // AddRemote : add a new remote
-func (g *Git) AddRemote(remote string, url string) error <span class="cov0" title="0">{
+func (g *Git) AddRemote(remote string, url string) error <span class="cov8" title="1">{
         if g.IsRepo() == false </span><span class="cov0" title="0">{
                 return errors.New("This is not a git repo")
         }</span>
 
-        <span class="cov0" title="0">_, err := command.Run([]string{"git", "remote", "add", remote, url}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">_, err := command.Run([]string{"git", "remote", "add", remote, url}, "")
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // RemoveRemote : remove a remote
-func (g *Git) RemoveRemote(remote string) error <span class="cov0" title="0">{
+func (g *Git) RemoveRemote(remote string) error <span class="cov8" title="1">{
         if g.IsRepo() == false </span><span class="cov0" title="0">{
                 return errors.New("This is not a git repo")
         }</span>
 
-        <span class="cov0" title="0">_, err := command.Run([]string{"git", "remote", "rm", remote}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">_, err := command.Run([]string{"git", "remote", "rm", remote}, "")
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -736,9 +785,10 @@ func (g *Git) RemoveRemote(remote string) error <span class="cov0" title="0">{
 import (
         "errors"
         "strings"
-        "upshift/basher"
-        "upshift/command"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Gradle : Keep track of everything related to gradle in upshift
@@ -748,14 +798,27 @@ type Gradle struct {
         basher           basher.Basher
 }
 
+// Install : install gradle on a machine
+func (g *Gradle) Install() error <span class="cov8" title="1">{
+        var b basher.Basher
+        _, err := b.Run("GradleInstall", []string{})
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
 // Version : Find the version number of gradle installed
 func (g *Gradle) Version() error <span class="cov8" title="1">{
         // Run gradle -v to figure out if it is install
         utils.LogMessage("$ gradle -v")
         out, err := command.Run([]string{"gradle", "-v"}, "")
-        if err != nil </span><span class="cov0" title="0">{
-                return errors.New("Gradle is not installed, you can download it from http://gradle.com.")
-        }</span>
+        if err != nil </span><span class="cov8" title="1">{
+                err = g.Install()
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
 
         <span class="cov8" title="1">list := utils.CreateList(out, []string{"Build time", "Build number:", "Revision:", "Groovy:", "Ant:", "JVM:", "OS:", "--------------"})
         g.version = strings.TrimSpace(strings.Replace(strings.Join(list[:], ""), "Gradle", "", 1))
@@ -765,10 +828,12 @@ func (g *Gradle) Version() error <span class="cov8" title="1">{
 // AddWrapper : Check and confirm if gradlew exists in the project
 func (g *Gradle) AddWrapper() (int, error) <span class="cov8" title="1">{
         // Check if gradle is installed
-        if g.version == "" </span><span class="cov0" title="0">{
-                g.wrapperInstalled = false
-                return 1, errors.New("Gradle version not known. Please check version first")
-        }</span>
+        if g.version == "" </span><span class="cov8" title="1">{
+                err := g.Version()
+                if err != nil </span><span class="cov0" title="0">{
+                        return 1, err
+                }</span>
+        }
 
         // Check if gradlew file exists
         <span class="cov8" title="1">if utils.FileExists("./gradlew") == true </span><span class="cov8" title="1">{
@@ -798,15 +863,21 @@ func (g *Gradle) Task(task string, params []string, logPath string, success stri
 
         // Check if gradle is installed
         <span class="cov8" title="1">if g.version == "" </span><span class="cov8" title="1">{
-                return 1, errors.New("Gradle version not known. Please check version first")
-        }</span>
+                err := g.Version()
+                if err != nil </span><span class="cov0" title="0">{
+                        return 1, err
+                }</span>
+        }
 
         // Check if gradlew file exists
-        <span class="cov0" title="0">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
-                return 1, errors.New("Gradle wrapper is not installed")
-        }</span>
+        <span class="cov8" title="1">if utils.FileExists("./gradlew") == false </span><span class="cov0" title="0">{
+                status, err := g.AddWrapper()
+                if err != nil </span><span class="cov0" title="0">{
+                        return status, err
+                }</span>
+        }
 
-        <span class="cov0" title="0">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
+        <span class="cov8" title="1">utils.LogMessage("$ ./gradlew " + task + " " + strings.Join(params[:], " "))
         status, err := g.basher.RunAndTail("GradlewTask", []string{task, logPath}, logPath, []string{success}, []string{})
         return status, err</span>
 }
@@ -817,22 +888,22 @@ func (g *Gradle) Clean(logPath string) (int, error) <span class="cov8" title="1"
 }</span>
 
 // Lint : Execute gradle lint on the Android project
-func (g *Gradle) Lint(logPath string) (int, error) <span class="cov0" title="0">{
+func (g *Gradle) Lint(logPath string) (int, error) <span class="cov8" title="1">{
         return g.Task("lint", []string{}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
 // Uninstall : Remove installed versions of the app from connected devices
-func (g *Gradle) Uninstall(logPath string) (int, error) <span class="cov0" title="0">{
+func (g *Gradle) Uninstall(logPath string) (int, error) <span class="cov8" title="1">{
         return g.Task("uninstallAll", []string{}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
 // InstallDebug : Install the debug app on to connected devices
-func (g *Gradle) InstallDebug(logPath string) (int, error) <span class="cov0" title="0">{
+func (g *Gradle) InstallDebug(logPath string) (int, error) <span class="cov8" title="1">{
         return g.Task("installDebug", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }</span>
 
 // Assemble : Build an android project
-func (g *Gradle) Assemble(logPath string) (int, error) <span class="cov0" title="0">{
+func (g *Gradle) Assemble(logPath string) (int, error) <span class="cov8" title="1">{
         return g.Task("assemble", []string{"--stacktrace"}, logPath, "BUILD SUCCESSFUL")
 }</span>
 </pre>
@@ -843,10 +914,11 @@ import (
         "fmt"
         "regexp"
         "strings"
-        "upshift/basher"
-        c "upshift/colours"
-        "upshift/command"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/colours"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // IOSSimulator : Construct to handle everything on the ios simulator
@@ -854,18 +926,18 @@ type IOSSimulator struct {
 }
 
 // IsSimulatorRunning : find out if the simulator is running
-func (i *IOSSimulator) IsSimulatorRunning() bool <span class="cov0" title="0">{
+func (i *IOSSimulator) IsSimulatorRunning() bool <span class="cov8" title="1">{
         _, err := command.Run([]string{"pgrep", "-f", "Simulator.app"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return false
         }</span>
-        <span class="cov0" title="0">return true</span>
+        <span class="cov8" title="1">return true</span>
 }
 
 // StartSimulator : start up the iOS simulator
-func (i *IOSSimulator) StartSimulator(device string) <span class="cov0" title="0">{
+func (i *IOSSimulator) StartSimulator(device string) <span class="cov8" title="1">{
         // If simulator is already running, just ignore
-        if i.IsSimulatorRunning() </span><span class="cov0" title="0">{
+        if i.IsSimulatorRunning() </span><span class="cov8" title="1">{
                 return
         }</span>
 
@@ -877,20 +949,20 @@ func (i *IOSSimulator) StartSimulator(device string) <span class="cov0" title="0
 }
 
 // StopSimulator : stop the simulator
-func (i *IOSSimulator) StopSimulator() <span class="cov0" title="0">{
+func (i *IOSSimulator) StopSimulator() <span class="cov8" title="1">{
         // If simulator is not running, just go back
         if i.IsSimulatorRunning() == false </span><span class="cov0" title="0">{
                 return
         }</span>
 
         // #TODO : If simulator is running, kill it
-        <span class="cov0" title="0">fmt.Println("We don't know how to kill the simular yet")</span>
+        <span class="cov8" title="1">fmt.Println("We don't know how to kill the simular yet")</span>
 }
 
 // FindDevice : find if the suggested device is available on this machine
-func (i *IOSSimulator) FindDevice(device string) bool <span class="cov0" title="0">{
+func (i *IOSSimulator) FindDevice(device string) bool <span class="cov8" title="1">{
         instrumentsDump, err := command.Run([]string{"instruments", "-s", "devices"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return false
         }</span>
 
@@ -911,7 +983,7 @@ func (i *IOSSimulator) FindDevice(device string) bool <span class="cov0" title="
 
                 <span class="cov0" title="0">if uuid != "" </span><span class="cov0" title="0">{
                         instrument = strings.TrimSpace(strings.Replace(instrument, uuid, "", 1))
-                        instruments = append(instruments, c.Gray+simulatorString+c.Default+" "+c.Bold+c.Green+instrument+c.Default+" "+uuid)
+                        instruments = append(instruments, colours.Gray+simulatorString+colours.Default+" "+colours.Bold+colours.Green+instrument+colours.Default+" "+uuid)
                 }</span>
 
                 <span class="cov0" title="0">if instrument == device </span><span class="cov0" title="0">{
@@ -920,7 +992,7 @@ func (i *IOSSimulator) FindDevice(device string) bool <span class="cov0" title="
         }
 
         // If device is not available, show all devices that are available
-        <span class="cov0" title="0">utils.LogError("Your device " + c.Red + device + c.Default + " was not found\nThe following devices are available")
+        <span class="cov0" title="0">utils.LogError("Your device " + colours.Red + device + colours.Default + " was not found\nThe following devices are available")
         for _, item := range instruments </span><span class="cov0" title="0">{
                 fmt.Println(item)
         }</span>
@@ -933,14 +1005,15 @@ func (i *IOSSimulator) FindDevice(device string) bool <span class="cov0" title="
 import (
         "errors"
         "fmt"
-        "upshift/basher"
+
+        "github.com/leftshifters/upshift/basher"
 )
 
 // Pilot : Handle everything related to pilot
 type Pilot struct{}
 
 // UploadToITunes : upload the binary to itunes
-func (p *Pilot) UploadToITunes(developerAccount string, scheme string, name string) error <span class="cov0" title="0">{
+func (p *Pilot) UploadToITunes(developerAccount string, scheme string, name string) error <span class="cov8" title="1">{
         var b basher.Basher
 
         // Add SwitSources if required - AddSwiftSources
@@ -949,12 +1022,12 @@ func (p *Pilot) UploadToITunes(developerAccount string, scheme string, name stri
                 return errors.New("We could not add SwiftSources to the IPA\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">_, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + scheme + ".ipa"})
+        <span class="cov8" title="1">_, err = b.Run("UploadIPAoniTunes", []string{developerAccount, ".upshift/" + scheme + ".ipa"})
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("We could not upload the IPA on iTunes\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">fmt.Println("We have successfully uploaded this IPA on iTunes, it's all yours now")
+        <span class="cov8" title="1">fmt.Println("We have successfully uploaded this IPA on iTunes, it's all yours now")
         return nil</span>
 
 }
@@ -963,18 +1036,18 @@ func (p *Pilot) UploadToITunes(developerAccount string, scheme string, name stri
 		<pre class="file" id="file11" style="display: none">package actions
 
 import (
-        "upshift/basher"
-        "upshift/utils"
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Pod : Handle everything related to install pods
 type Pod struct{}
 
 // IsInstalled : Check if cocoapods is installed
-func (p *Pod) IsInstalled() bool <span class="cov0" title="0">{
+func (p *Pod) IsInstalled() bool <span class="cov8" title="1">{
         var c Cocoapods
         err := c.Install()
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 utils.LogError("Could not install underlying cocoapods\n" + err.Error())
                 return false
         }</span>
@@ -994,7 +1067,7 @@ func (p *Pod) Install() (int, error) <span class="cov8" title="1">{
 }</span>
 
 // RepoUpdate : Update the pod repo, not sure who will call it
-func (p *Pod) RepoUpdate() (int, error) <span class="cov0" title="0">{
+func (p *Pod) RepoUpdate() (int, error) <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("$ pod repo update --verbose")
         return b.RunAndTail("PodRepoUpdate", []string{".upshift/logs/pod-repo-update.log"}, ".upshift/logs/pod-repo-update.log", []string{}, []string{"error"})
@@ -1021,8 +1094,9 @@ func (p *Pod) RepoUpdate() (int, error) <span class="cov0" title="0">{
 import (
         "errors"
         "fmt"
-        "upshift/basher"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Produce : Construct to handle all things related to produce
@@ -1030,7 +1104,7 @@ type Produce struct {
 }
 
 // CreateAppOnITunes : create an app on iTunes if it does not exist
-func (p *Produce) CreateAppOnITunes(developerAccount string, bundleIdentifier string, name string) error <span class="cov0" title="0">{
+func (p *Produce) CreateAppOnITunes(developerAccount string, bundleIdentifier string, name string) error <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("Create an app on iTunesConnect if it doesn't exist")
 
@@ -1040,7 +1114,7 @@ func (p *Produce) CreateAppOnITunes(developerAccount string, bundleIdentifier st
                 return errors.New("We could not create the app on iTunes\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">fmt.Println("We have successfully added this app on iTunes, woohoo")
+        <span class="cov8" title="1">fmt.Println("We have successfully added this app on iTunes, woohoo")
         return nil</span>
 
 }
@@ -1051,15 +1125,16 @@ func (p *Produce) CreateAppOnITunes(developerAccount string, bundleIdentifier st
 import (
         "errors"
         "fmt"
-        "upshift/basher"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Sigh : Handle everything related to sigh
 type Sigh struct{}
 
 // FindProvisioning : find and install a provisioning profile
-func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string) error <span class="cov0" title="0">{
+func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string) error <span class="cov8" title="1">{
         var b basher.Basher
         utils.LogMessage("We will now try to find the provisioning profile")
 
@@ -1068,7 +1143,7 @@ func (s *Sigh) FindProvisioning(developerAccount string, bundleIdentifier string
                 return errors.New("We could not find your provisioning profile")
         }</span>
 
-        <span class="cov0" title="0">fmt.Println("We have successfully added your profiles to this machine, woohoo")
+        <span class="cov8" title="1">fmt.Println("We have successfully added your profiles to this machine, woohoo")
         return nil</span>
 }
 </pre>
@@ -1080,9 +1155,10 @@ import (
         "io/ioutil"
         "net/http"
         "strings"
-        "upshift/basher"
-        c "upshift/colours"
-        "upshift/config"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/colours"
+        "github.com/leftshifters/upshift/config"
 )
 
 // Upshift : Construct to handle all upshift related things
@@ -1090,7 +1166,7 @@ type Upshift struct {
 }
 
 // Upgrade : upgrade the upshift binary to the latest one
-func (u *Upshift) Upgrade(beta string) error <span class="cov0" title="0">{
+func (u *Upshift) Upgrade(beta string) error <span class="cov8" title="1">{
         conf := config.Get()
 
         // Get Latest version
@@ -1099,22 +1175,22 @@ func (u *Upshift) Upgrade(beta string) error <span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">if version == conf.Settings.AppVersion </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if version == conf.Settings.AppVersion </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
-        <span class="cov0" title="0">var b basher.Basher
+        <span class="cov8" title="1">var b basher.Basher
         _, err = b.Run("UpgradeScript", []string{beta})
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">fmt.Println("The new version of awesomeness is v", version)
+        <span class="cov8" title="1">fmt.Println("The new version of awesomeness is v", version)
         return nil</span>
 }
 
 // LatestVersion : get the latest version of upshift from the server
-func (u *Upshift) LatestVersion() (string, error) <span class="cov0" title="0">{
+func (u *Upshift) LatestVersion() (string, error) <span class="cov8" title="1">{
         versionURL := "https://raw.githubusercontent.com/leftshifters/upshift/master/release"
 
         // Get the latest version from the server
@@ -1125,32 +1201,32 @@ func (u *Upshift) LatestVersion() (string, error) <span class="cov0" title="0">{
         }</span>
 
         // Read the response received
-        <span class="cov0" title="0">body, err := ioutil.ReadAll(resp.Body)
+        <span class="cov8" title="1">body, err := ioutil.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
                 return "", err
         }</span>
 
         // Trim and send the version back
-        <span class="cov0" title="0">return strings.TrimSpace(string(body)), nil</span>
+        <span class="cov8" title="1">return strings.TrimSpace(string(body)), nil</span>
 }
 
 // ShowVersion : shows the version of upshift on the command line
-func (u *Upshift) ShowVersion() <span class="cov0" title="0">{
+func (u *Upshift) ShowVersion() <span class="cov8" title="1">{
         conf := config.Get()
         fmt.Println(conf.Settings.AppVersion)
 }</span>
 
 // ShowHelp : Show help, so that the user knows what to do
-func (u *Upshift) ShowHelp() <span class="cov0" title="0">{
+func (u *Upshift) ShowHelp() <span class="cov8" title="1">{
         fmt.Println("\nUPSHIFT(1)               Upshift Commands Manual               UPSHIFT(1)")
-        fmt.Println(c.Bold + "\nNAME" + c.Default)
+        fmt.Println(colours.Bold + "\nNAME" + colours.Default)
         fmt.Println("\tupshift -- the creative mobile app builder")
-        fmt.Println(c.Bold + "\nSYNOPSIS" + c.Default)
-        fmt.Println("\tupshift " + c.Underline + "job" + c.Default + " " + c.Underline + "action" + c.Default)
-        fmt.Println(c.Bold + "\nDESCRIPTION" + c.Default)
+        fmt.Println(colours.Bold + "\nSYNOPSIS" + colours.Default)
+        fmt.Println("\tupshift " + colours.Underline + "job" + colours.Default + " " + colours.Underline + "action" + colours.Default)
+        fmt.Println(colours.Bold + "\nDESCRIPTION" + colours.Default)
         fmt.Println("\tThis tool helps you run, build, test and deploy your iOS and Android\n\tapps while you dream about the next big thing")
 
-        fmt.Println(c.Bold + "\nOPTIONS (job queues)" + c.Default)
+        fmt.Println(colours.Bold + "\nOPTIONS (job queues)" + colours.Default)
         fmt.Println("\tIt is still not as awesome as we want it to be. But here are the things\n\tthat you can currently do")
         fmt.Println("\tupshift ios build\n\t\tto build your iOS project")
         fmt.Println("\tupshift ios run\n\t\tto run your iOS project in a simulator")
@@ -1164,7 +1240,7 @@ func (u *Upshift) ShowHelp() <span class="cov0" title="0">{
         fmt.Println("\tupshift install\n\t\tto install this binary for the first time")
         fmt.Println("\tupshift -v\n\t\tto view the version number")
 
-        fmt.Println(c.Bold + "\nOPTIONS (specific actions)" + c.Default)
+        fmt.Println(colours.Bold + "\nOPTIONS (specific actions)" + colours.Default)
         fmt.Println("\tWe combine actions like these to create the jobs above, you should ideally\n\tbe running jobs not actions")
         fmt.Println("\tupshift action setupSsh -- to setup your ssh keys")
         fmt.Println("\tupshift action setupScript -- to setup this very script")
@@ -1188,9 +1264,9 @@ func (u *Upshift) ShowHelp() <span class="cov0" title="0">{
         fmt.Println("\tupshift action androidRun -- to run an android project")
         fmt.Println("\tupshift action androidDeploy -- to deploy an android project")
 
-        fmt.Println(c.Bold + "\nCOMPATIBILITY" + c.Default)
+        fmt.Println(colours.Bold + "\nCOMPATIBILITY" + colours.Default)
         fmt.Println("\tWe've only tested this on Mac OSX, Linux and Docker. If you're on\n\twindows, you should switch operating systems because nobody can help\n\tyou there.")
-        fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + c.Underline + "https://leftshift.io\n" + c.Default)
+        fmt.Println("\nLeftshift Technologies           Made with ❤️  in India                " + colours.Underline + "https://leftshift.io\n" + colours.Default)
 }</span>
 </pre>
 		
@@ -1203,11 +1279,12 @@ import (
         "os"
         "path/filepath"
         "strings"
-        "upshift/basher"
-        c "upshift/colours"
-        "upshift/command"
-        "upshift/config"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/colours"
+        "github.com/leftshifters/upshift/command"
+        "github.com/leftshifters/upshift/config"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Xcodebuild : construct to handle all xcode functions
@@ -1227,9 +1304,9 @@ type Xcodebuild struct {
 }
 
 // LoadSettings : load settings from xcodebuild
-func (x *Xcodebuild) LoadSettings() error <span class="cov0" title="0">{
+func (x *Xcodebuild) LoadSettings() error <span class="cov8" title="1">{
         settings, err := command.Run([]string{"xcodebuild", "-showBuildSettings"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("We are unable to read settings for this iOS Project\n" + err.Error())
         }</span>
 
@@ -1257,7 +1334,7 @@ func (x *Xcodebuild) LoadSettings() error <span class="cov0" title="0">{
         conf := config.Get()
 
         x.UseWorkspace = conf.Settings.IOSUseWorkspace
-        x.UsePods = pod.IsInstalled()
+        x.UsePods = pod.AreUsed()
 
         x.Type = "project"
         x.Extension = ".xcodeproj"
@@ -1306,12 +1383,12 @@ func (x *Xcodebuild) LoadSettings() error <span class="cov0" title="0">{
 }
 
 // FindSchemes : find a scheme which we can use
-func (x *Xcodebuild) FindSchemes() error <span class="cov0" title="0">{
+func (x *Xcodebuild) FindSchemes() error <span class="cov8" title="1">{
         conf := config.Get()
 
         // Get the list of schemes from xcode
         listDump, err := command.Run([]string{"xcodebuild", "-list"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("We could not get a list from xcode\n" + err.Error())
         }</span>
 
@@ -1342,7 +1419,7 @@ func (x *Xcodebuild) FindSchemes() error <span class="cov0" title="0">{
 
         // Throw an error if there are no schemes available
         <span class="cov0" title="0">if len(schemeRows) == 0 </span><span class="cov0" title="0">{
-                return errors.New("You have no " + c.Red + "schemes" + c.Default + " defined in your project. You need to share them.")
+                return errors.New("You have no " + colours.Red + "schemes" + colours.Default + " defined in your project. You need to share them.")
         }</span>
 
         // 1. If scheme defined in config exists, use that
@@ -1352,13 +1429,13 @@ func (x *Xcodebuild) FindSchemes() error <span class="cov0" title="0">{
         // Condition 1 : has already been checked, check the error condition
         // If we didn't find a matching scheme, but your config has marked one, it means we didn't find it
         <span class="cov0" title="0">if conf.Settings.IOSScheme != "" &amp;&amp; x.Scheme == "" </span><span class="cov0" title="0">{
-                return errors.New("Your config says we should use " + c.Red + conf.Settings.IOSScheme + c.Default + " to build the project. But that scheme is missing!")
+                return errors.New("Your config says we should use " + colours.Red + conf.Settings.IOSScheme + colours.Default + " to build the project. But that scheme is missing!")
         }</span>
 
         // Condition 2 : Checking
         <span class="cov0" title="0">if len(schemeRows) == 1 </span><span class="cov0" title="0">{
                 // There is only one scheme, you can set this in projectSettings
-                fmt.Println("It seems you didn't define a scheme in your config, but Xcode told us about " + c.Blue + schemeRows[0] + c.Default + " so we are using that")
+                fmt.Println("It seems you didn't define a scheme in your config, but Xcode told us about " + colours.Blue + schemeRows[0] + colours.Default + " so we are using that")
                 x.Scheme = schemeRows[0]
                 return nil
         }</span>
@@ -1368,15 +1445,15 @@ func (x *Xcodebuild) FindSchemes() error <span class="cov0" title="0">{
 }
 
 // Build : compile an iOS project
-func (x *Xcodebuild) Build() error <span class="cov0" title="0">{
-        if x.DeviceName == "" || x.Scheme == "" || x.Type == "" || x.Path == "" </span><span class="cov0" title="0">{
-                return errors.New("We need the DeviceName, Scheme, Type, Path to proceed")
+func (x *Xcodebuild) Build() error <span class="cov8" title="1">{
+        if x.TestDevice == "" || x.Scheme == "" || x.Type == "" || x.Path == "" </span><span class="cov8" title="1">{
+                return errors.New("We need the TestDevice, Scheme, Type, Path to proceed")
         }</span>
 
-        <span class="cov0" title="0">utils.LogMessage("$ xcodebuild -" + x.Type + " " + x.Path + " -scheme " + x.Scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + x.DeviceName + "\" -derivedDataPath .upshift/build")
+        <span class="cov0" title="0">utils.LogMessage("$ xcodebuild -" + x.Type + " " + x.Path + " -scheme " + x.Scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + x.TestDevice + "\" -derivedDataPath .upshift/build")
 
         var b basher.Basher
-        _, err := b.RunAndTail("IOSBuild", []string{x.Type, x.Path, x.Scheme, x.DeviceName, ".upshift/logs/xcode-build.log"}, ".upshift/logs/xcode-build.log", []string{"BUILD SUCCEEDED"}, []string{})
+        _, err := b.RunAndTail("IOSBuild", []string{x.Type, x.Path, x.Scheme, x.TestDevice, ".upshift/logs/xcode-build.log"}, ".upshift/logs/xcode-build.log", []string{"BUILD SUCCEEDED"}, []string{})
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -1385,8 +1462,8 @@ func (x *Xcodebuild) Build() error <span class="cov0" title="0">{
 }
 
 // Archive : archive a project
-func (x *Xcodebuild) Archive() error <span class="cov0" title="0">{
-        if x.Name == "" || x.Scheme == "" || x.Type == "" || x.Path == "" </span><span class="cov0" title="0">{
+func (x *Xcodebuild) Archive() error <span class="cov8" title="1">{
+        if x.Name == "" || x.Scheme == "" || x.Type == "" || x.Path == "" </span><span class="cov8" title="1">{
                 return errors.New("We need the Name, Scheme, Type, Path to proceed")
         }</span>
 
@@ -1402,8 +1479,8 @@ func (x *Xcodebuild) Archive() error <span class="cov0" title="0">{
 }
 
 // ExportIPA : export an IPA
-func (x *Xcodebuild) ExportIPA() error <span class="cov0" title="0">{
-        if x.Name == "" </span><span class="cov0" title="0">{
+func (x *Xcodebuild) ExportIPA() error <span class="cov8" title="1">{
+        if x.Name == "" </span><span class="cov8" title="1">{
                 return errors.New("We need a project name to proceed")
         }</span>
 
@@ -1419,9 +1496,9 @@ func (x *Xcodebuild) ExportIPA() error <span class="cov0" title="0">{
 }
 
 // SetupExportPlist : create an export.plist file if it doesn't exist
-func (x *Xcodebuild) SetupExportPlist() error <span class="cov0" title="0">{
+func (x *Xcodebuild) SetupExportPlist() error <span class="cov8" title="1">{
         // Check if the export.plist exists
-        if utils.FileExists(".private/export.plist") </span><span class="cov0" title="0">{
+        if utils.FileExists(".private/export.plist") </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
@@ -1450,8 +1527,8 @@ func (x *Xcodebuild) SetupExportPlist() error <span class="cov0" title="0">{
 }
 
 // IncrementBuildNumber : increment the build number.
-func (x *Xcodebuild) IncrementBuildNumber() error <span class="cov0" title="0">{
-        if x.Name == "" </span><span class="cov0" title="0">{
+func (x *Xcodebuild) IncrementBuildNumber() error <span class="cov8" title="1">{
+        if x.Name == "" </span><span class="cov8" title="1">{
                 return errors.New("Please find the project name first")
         }</span>
 
@@ -1465,55 +1542,61 @@ func (x *Xcodebuild) IncrementBuildNumber() error <span class="cov0" title="0">{
 }
 
 // SwitchXcode : change the xcode version
-func (x *Xcodebuild) SwitchXcode() error <span class="cov0" title="0">{
+func (x *Xcodebuild) SwitchXcode() error <span class="cov8" title="1">{
         currentVersion, err := x.Version()
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">if currentVersion == x.XcodeVersion </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if currentVersion == x.XcodeVersion </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
-        <span class="cov0" title="0">if utils.FileExists("/Applications/Xcode-"+x.XcodeVersion+".app/") == false </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if utils.FileExists("/Applications/Xcode-"+x.XcodeVersion+".app/") == false </span><span class="cov0" title="0">{
                 return errors.New("It seems you don't have /Applications/Xcode-" + x.XcodeVersion + ".app/\nWe expect XCode versions to be placed like this\n/Applications/Xcode-7.2.app\n/Applications/Xcode-7.3.app")
         }</span>
 
-        <span class="cov0" title="0">conf := config.Get()
+        <span class="cov8" title="1">conf := config.Get()
         RootPassword, err := conf.GetRootPassword()
         if conf.IsCI() == true &amp;&amp; err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">_, err = command.Run([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + x.XcodeVersion + ".app/"}, RootPassword+"\n")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">inputVia := "-S"
+        if conf.IsCI() == false &amp;&amp; RootPassword == "" </span><span class="cov8" title="1">{
+                inputVia = "-k"
+        }</span>
+
+        <span class="cov8" title="1">out, err := command.Run([]string{"sudo", inputVia, "xcode-select", "--switch", "/Applications/Xcode-" + x.XcodeVersion + ".app/"}, RootPassword+"\n")
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("We couldn't switch Xcodes, you're going to be stuck with this one")
         }</span>
-        <span class="cov0" title="0">fmt.Println("We are now on the " + c.Underline + "Xcode-" + x.XcodeVersion + c.Default)
+        <span class="cov0" title="0">fmt.Println(out)
+        fmt.Println("We are now on the " + colours.Underline + "Xcode-" + x.XcodeVersion + colours.Default)
         return nil</span>
 }
 
 // Version : current xcodebuild version
-func (x *Xcodebuild) Version() (string, error) <span class="cov0" title="0">{
+func (x *Xcodebuild) Version() (string, error) <span class="cov8" title="1">{
         versionData, err := command.Run([]string{"xcodebuild", "-version"}, "")
         if err != nil </span><span class="cov0" title="0">{
                 return "", errors.New("We were unable to get the Xcode version\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">var currentXcodeVersion string
+        <span class="cov8" title="1">var currentXcodeVersion string
         versionRows := strings.Split(versionData, "\n")
-        for _, row := range versionRows </span><span class="cov0" title="0">{
-                if strings.Contains(row, "Xcode") == true </span><span class="cov0" title="0">{
+        for _, row := range versionRows </span><span class="cov8" title="1">{
+                if strings.Contains(row, "Xcode") == true </span><span class="cov8" title="1">{
                         currentXcodeVersion = strings.TrimSpace(strings.Trim(row, "Xcode"))
                 }</span>
         }
 
-        <span class="cov0" title="0">return currentXcodeVersion, nil</span>
+        <span class="cov8" title="1">return currentXcodeVersion, nil</span>
 }
 
 // Run : run a build in the simulator
-func (x *Xcodebuild) Run() error <span class="cov0" title="0">{
-        if x.BundleIdentifier == "" </span><span class="cov0" title="0">{
+func (x *Xcodebuild) Run() error <span class="cov8" title="1">{
+        if x.BundleIdentifier == "" </span><span class="cov8" title="1">{
                 return errors.New("We need the bundle identifier to proceed")
         }</span>
 
@@ -1547,7 +1630,7 @@ func (x *Xcodebuild) Run() error <span class="cov0" title="0">{
 }
 
 // InstallCertificates : Find where are the certificates and install them
-func (x *Xcodebuild) InstallCertificates() error <span class="cov0" title="0">{
+func (x *Xcodebuild) InstallCertificates() error <span class="cov8" title="1">{
         utils.LogMessage("Checking for apple.cer, distribution.p12 and distribution.cer in .private")
 
         var appleCert, distributionCert, distributionP12Cert string
@@ -1557,7 +1640,7 @@ func (x *Xcodebuild) InstallCertificates() error <span class="cov0" title="0">{
                 appleCert, _ = filepath.Abs(".private/apple.cer")
                 distributionCert, _ = filepath.Abs(".private/distribution.cer")
                 distributionP12Cert, _ = filepath.Abs(".private/distribution.p12")
-        }</span><span class="cov0" title="0"> else {
+        }</span><span class="cov8" title="1"> else {
                 // Since they don't exist in .private, look in machine config
                 conf := config.Get()
                 base := conf.Settings.IOSCertificatePath
@@ -1566,36 +1649,36 @@ func (x *Xcodebuild) InstallCertificates() error <span class="cov0" title="0">{
                         return errors.New("The certificates don't exist in both .private and global conf")
                 }</span>
 
-                <span class="cov0" title="0">if utils.FileExists(base+"/apple.cer") &amp;&amp; utils.FileExists(base+"/distribution.cer") &amp;&amp; utils.FileExists(base+"/distribution.p12") </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if utils.FileExists(base+"/apple.cer") &amp;&amp; utils.FileExists(base+"/distribution.cer") &amp;&amp; utils.FileExists(base+"/distribution.p12") </span><span class="cov8" title="1">{
                         appleCert, _ = filepath.Abs(base + "/apple.cer")
                         distributionCert, _ = filepath.Abs(base + "/distribution.cer")
                         distributionP12Cert, _ = filepath.Abs(base + "/distribution.p12")
                 }</span>
         }
 
-        <span class="cov0" title="0">if appleCert == "" </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if appleCert == "" </span><span class="cov0" title="0">{
                 return errors.New("All the certificates don't exist in both .private and global conf")
         }</span>
 
-        <span class="cov0" title="0">outApple, err := command.Run([]string{"security", "import", appleCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">outApple, err := command.Run([]string{"security", "import", appleCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
+        fmt.Println(outApple)
+        if err != nil &amp;&amp; strings.Contains(outApple, "already exists in the keychain") == false </span><span class="cov8" title="1">{
                 return err
         }</span>
-        <span class="cov0" title="0">fmt.Println(outApple)
 
-        outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
+        fmt.Println(outCert)
+        if err != nil &amp;&amp; strings.Contains(outCert, "already exists in the keychain") == false </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov0" title="0">fmt.Println(outCert)
 
-        outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-        if err != nil </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
+        fmt.Println(outP12)
+        if err != nil &amp;&amp; strings.Contains(outP12, "already exists in the keychain") == false </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov0" title="0">fmt.Println(outP12)
 
-        return nil</span>
+        <span class="cov0" title="0">return nil</span>
 }
 </pre>
 		
@@ -1607,10 +1690,10 @@ import "errors"
 type Xcpretty struct{}
 
 // Install : Install xcpretty on the machine
-func (x *Xcpretty) Install() error <span class="cov0" title="0">{
+func (x *Xcpretty) Install() error <span class="cov8" title="1">{
         var g Gems
         err := g.InstallSimple("xcpretty")
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return errors.New("Could not install xcpretty\n" + err.Error())
         }</span>
 
@@ -1618,14 +1701,14 @@ func (x *Xcpretty) Install() error <span class="cov0" title="0">{
 }
 
 // Uninstall : Uninstall xcpretty on the machine
-func (x *Xcpretty) Uninstall() error <span class="cov0" title="0">{
+func (x *Xcpretty) Uninstall() error <span class="cov8" title="1">{
         var g Gems
         err := g.UninstallSimple("xcpretty")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not uninstall xcpretty\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -1633,44 +1716,45 @@ func (x *Xcpretty) Uninstall() error <span class="cov0" title="0">{
 
 import (
         "errors"
-        "upshift/basher"
-        "upshift/utils"
+
+        "github.com/leftshifters/upshift/basher"
+        "github.com/leftshifters/upshift/utils"
 )
 
 // Xctool : Construct to handle all things related to xctool
 type Xctool struct{}
 
 // Install : Install Xctool on the machine
-func (x *Xctool) Install() error <span class="cov0" title="0">{
+func (x *Xctool) Install() error <span class="cov8" title="1">{
         var b Brew
         _, err := b.Install("xctool")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not install xctool\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // Upgrade : Upgrade Xctool on the machine
-func (x *Xctool) Upgrade() error <span class="cov0" title="0">{
+func (x *Xctool) Upgrade() error <span class="cov8" title="1">{
         var b Brew
         _, err := b.Upgrade("xctool")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not upgrade xctool\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // Uninstall : Uninstall xctool on the machine
-func (x *Xctool) Uninstall() error <span class="cov0" title="0">{
+func (x *Xctool) Uninstall() error <span class="cov8" title="1">{
         var b Brew
         _, err := b.Uninstall("xctool")
         if err != nil </span><span class="cov0" title="0">{
                 return errors.New("Could not uninstall xctool\n" + err.Error())
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // Test : run tests for an iOS project

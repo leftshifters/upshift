@@ -99,16 +99,16 @@ func (a *AndroidEmulator) CreateAVD() error {
 	// android create avd --name "Android_22_AVD" --target android-22
 
 	// check if the ABI is available
-	if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-22", "default", "armeabi-v7a", "system.img")) == false {
+	if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-23", "google_apis", "x86", "system.img")) == false {
 		var b basher.Basher
-		_, err := b.Run("AndroidInstallABI", []string{})
-		if err != nil {
-			return err
+		status, _ := b.Run("AndroidInstallABI", []string{})
+		if status > 0 {
+			return errors.New("We could not install the ABI")
 		}
 	}
 
 	var b basher.Basher
-	_, err := b.Run("AndroidCreateAVD", []string{"Android_22_AVD", "Google Inc.:Google APIs:22"})
+	_, err := b.Run("AndroidCreateAVD", []string{"Android23", "android-23", "google_apis/x86_64", "Nexus 6"})
 	if err != nil {
 		return err
 	}

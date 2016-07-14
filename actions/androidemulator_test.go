@@ -29,6 +29,6 @@ func Test_AndroidEmulator_All(t *testing.T) {
 	err = emulator.Launch()
 	assert.Nil(t, err)
 
-	// err = emulator.LaunchApp("test", "MainActivity")
-	// assert.Nil(t, err)
+	err = emulator.LaunchApp("test", "MainActivity")
+	assert.Nil(t, err)
 }

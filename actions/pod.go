@@ -26,6 +26,9 @@ func (p *Pod) AreUsed() bool {
 
 // Install : Install pods which are being used in the system
 func (p *Pod) Install() (int, error) {
+
+	p.IsInstalled()
+
 	var b basher.Basher
 	utils.LogMessage("$ pod install")
 	return b.RunAndTail("PodInstall", []string{".upshift/logs/pod-install.log"}, ".upshift/logs/pod-install.log", []string{}, []string{})

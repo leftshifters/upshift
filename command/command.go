@@ -5,8 +5,11 @@ import (
 	"errors"
 	"os/exec"
 	"strings"
+
+	"github.com/leftshifters/upshift/utils"
 )
 
+// Run : run a command
 func Run(params []string, input string) (string, error) {
 	var name string
 	var out bytes.Buffer
@@ -32,6 +35,8 @@ func Run(params []string, input string) (string, error) {
 	}
 
 	cmd.Stdout = &out
+	cmd.Stderr = &out
+	utils.LogMessage("$ " + name + " " + strings.Join(args, " "))
 	err := cmd.Run()
 	if err != nil {
 		return out.String(), errors.New("We were unable to run this command\n" + err.Error())

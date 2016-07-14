@@ -62,7 +62,7 @@ func (x *Xcodebuild) LoadSettings() error {
 	conf := config.Get()
 
 	x.UseWorkspace = conf.Settings.IOSUseWorkspace
-	x.UsePods = pod.IsInstalled()
+	x.UsePods = pod.AreUsed()
 
 	x.Type = "project"
 	x.Extension = ".xcodeproj"
@@ -174,14 +174,14 @@ func (x *Xcodebuild) FindSchemes() error {
 
 // Build : compile an iOS project
 func (x *Xcodebuild) Build() error {
-	if x.DeviceName == "" || x.Scheme == "" || x.Type == "" || x.Path == "" {
-		return errors.New("We need the DeviceName, Scheme, Type, Path to proceed")
+	if x.TestDevice == "" || x.Scheme == "" || x.Type == "" || x.Path == "" {
+		return errors.New("We need the TestDevice, Scheme, Type, Path to proceed")
 	}
 
-	utils.LogMessage("$ xcodebuild -" + x.Type + " " + x.Path + " -scheme " + x.Scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + x.DeviceName + "\" -derivedDataPath .upshift/build")
+	utils.LogMessage("$ xcodebuild -" + x.Type + " " + x.Path + " -scheme " + x.Scheme + " -sdk iphonesimulator -destination \"platform=iphonesimulator,name=" + x.TestDevice + "\" -derivedDataPath .upshift/build")
 
 	var b basher.Basher
-	_, err := b.RunAndTail("IOSBuild", []string{x.Type, x.Path, x.Scheme, x.DeviceName, ".upshift/logs/xcode-build.log"}, ".upshift/logs/xcode-build.log", []string{"BUILD SUCCEEDED"}, []string{})
+	_, err := b.RunAndTail("IOSBuild", []string{x.Type, x.Path, x.Scheme, x.TestDevice, ".upshift/logs/xcode-build.log"}, ".upshift/logs/xcode-build.log", []string{"BUILD SUCCEEDED"}, []string{})
 	if err != nil {
 		return err
 	}
@@ -290,10 +290,16 @@ func (x *Xcodebuild) SwitchXcode() error {
 		return err
 	}
 
-	_, err = command.Run([]string{"sudo", "-S", "xcode-select", "-switch", "/Applications/Xcode-" + x.XcodeVersion + ".app/"}, RootPassword+"\n")
+	inputVia := "-S"
+	if conf.IsCI() == false && RootPassword == "" {
+		inputVia = "-k"
+	}
+
+	out, err := command.Run([]string{"sudo", inputVia, "xcode-select", "--switch", "/Applications/Xcode-" + x.XcodeVersion + ".app/"}, RootPassword+"\n")
 	if err != nil {
 		return errors.New("We couldn't switch Xcodes, you're going to be stuck with this one")
 	}
+	fmt.Println(out)
 	fmt.Println("We are now on the " + colours.Underline + "Xcode-" + x.XcodeVersion + colours.Default)
 	return nil
 }
@@ -383,22 +389,22 @@ func (x *Xcodebuild) InstallCertificates() error {
 	}
 
 	outApple, err := command.Run([]string{"security", "import", appleCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-	if err != nil {
-		return err
-	}
 	fmt.Println(outApple)
-
-	outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
-	if err != nil {
+	if err != nil && strings.Contains(outApple, "already exists in the keychain") == false {
 		return err
 	}
+
+	outCert, err := command.Run([]string{"security", "import", distributionCert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
 	fmt.Println(outCert)
-
-	outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security"}, "")
-	if err != nil {
+	if err != nil && strings.Contains(outCert, "already exists in the keychain") == false {
 		return err
 	}
+
+	outP12, err := command.Run([]string{"security", "import", distributionP12Cert, "-k", os.Getenv("HOME") + "/Library/Keychains/login.keychain", "-T", "/usr/bin/codesign", "-T", "/usr/bin/security", "-P", ""}, "")
 	fmt.Println(outP12)
+	if err != nil && strings.Contains(outP12, "already exists in the keychain") == false {
+		return err
+	}
 
 	return nil
 }

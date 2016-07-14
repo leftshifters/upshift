@@ -1,8 +1,9 @@
 package command
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Run(t *testing.T) {
@@ -12,6 +13,6 @@ func Test_Run(t *testing.T) {
 	out, _ := Run([]string{"ls"}, "")
 	assert.Contains(t, out, "command_test.go")
 
-	out, err = Run([]string{"ls1"}, "")
+	_, err = Run([]string{"ls1"}, "")
 	assert.Contains(t, err.Error(), "unable to run")
 }

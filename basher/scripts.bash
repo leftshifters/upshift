@@ -14,7 +14,9 @@ TestScript2() {
 
 GradleInstall() {
 	INSTALL_URL="https://services.gradle.org/distributions/gradle-2.14-bin.zip"
-	curl --show-error --progress-bar --fail --location "${INSTALL_URL}" > gradle-2.14-bin.zip
+	if [ -f "gradle-2.14-bin.zip" ]; then
+		curl --show-error --progress-bar --fail --location "${INSTALL_URL}" > gradle-2.14-bin.zip
+	fi
 	unzip gradle-2.14-bin.zip
 	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 	export GRADLE_HOME="${DIR}/gradle-2.14"
@@ -39,14 +41,14 @@ SetupGem() {
 	if [ "$2" == "true" ]; then
 		# CI is true, we now need password
 		if [ "$3" != "" ]; then
-			echo -e "$3" | sudo -k -S gem install $1
+			echo -e "$3" | sudo -k -S gem install $1 --no-ri --no-rdoc
 			exit 0
 		else
 			exit 1
 		fi
 	else
 		# User should type in the password
-		sudo -k gem install $1
+		sudo -k gem install $1 --no-ri --no-rdoc
 		exit 0
 	fi
 }
@@ -149,6 +151,7 @@ IOSIncrementBuildNumber() {
 	answerToEncryption=$(/usr/libexec/PlistBuddy -c "Print ITSAppUsesNonExemptEncryption" "$1/Info.plist")
 	if [[ $answerToEncryption == *"Does Not Exist"* ]]; then
 		/usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$1/Info.plist"
+		printf "Alright, added\n"
 	fi
 }
 
@@ -335,27 +338,32 @@ AndroidUpgradeSDK() {
 }
 
 AndroidInstallSDK() {
-	echo y | android update sdk --all --no-ui --filter "android-23"
+	#echo y | android update sdk --all --no-ui --filter "android-23"
 	echo y | android update sdk --all --no-ui --filter "android-22"
-	echo y | android update sdk --all --no-ui --filter "android-21"
-	echo y | android update sdk --all --no-ui --filter "android-20"
-	echo y | android update sdk --all --no-ui --filter "android-19"
-	echo y | android update sdk --all --no-ui --filter "android-18"
-	echo y | android update sdk --all --no-ui --filter "android-17"
-	echo y | android update sdk --all --no-ui --filter "android-16"
+	#echo y | android update sdk --all --no-ui --filter "android-21"
+	#echo y | android update sdk --all --no-ui --filter "android-20"
+	#echo y | android update sdk --all --no-ui --filter "android-19"
+	#echo y | android update sdk --all --no-ui --filter "android-18"
+	#echo y | android update sdk --all --no-ui --filter "android-17"
+	#echo y | android update sdk --all --no-ui --filter "android-16"
 	echo y | android update sdk --all --no-ui --filter "tools"
 	echo y | android update sdk --all --no-ui --filter "platform-tools"
 	echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"
 	echo y | android update sdk --all --no-ui --filter "extra-google-m2repository"
-	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
+	echo y | android update sdk --all --no-ui --filter "sys-img-x86-android-22"
 }
 
 AndroidInstallABI() {
-	echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
+	#echo y | android update sdk --all --no-ui --filter "sys-img-armeabi-v7a-android-22"
+	#echo y | android update sdk --all --no-ui --filter "sys-img-x86-android-22"
+	printf "Please install the google x86-64 abi\n"
+	exit 1
 }
 
 AndroidCreateAVD() {
 	NAME=$1
 	TARGET=$2
-	echo no | android create avd -n "$1" -t "$2"
+	ABI=$3
+	DEVICE=$4
+	echo no | android -v create avd -n "$1" -t "$2" --abi "$3" --device "$4" --force
 }
