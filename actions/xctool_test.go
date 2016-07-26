@@ -9,12 +9,12 @@ import (
 func Test_Xctool_All(t *testing.T) {
 	var xctool Xctool
 
-	// Remove xctool
-	err := xctool.Uninstall()
-	assert.Nil(t, err)
+	// Remove xctool - not removing, increases test time
+	// err := xctool.Uninstall()
+	// assert.Nil(t, err)
 
 	// Install xctool again
-	err = xctool.Install()
+	err := xctool.Install()
 	assert.Nil(t, err)
 
 	// Upgrade xctool

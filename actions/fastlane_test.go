@@ -1,31 +1,19 @@
 package actions
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_Fastlane_Install(t *testing.T) {
-	// var fastlane Fastlane
-	// var g Gems
+	var fastlane Fastlane
 
-	// Check if it is installed or not
-	// installed, _ := g.version("fastlane")
-
-	// Change env setting, simulate CI
-	// os.Setenv("GITLAB_CI", "true")
-
-	// Remove fastlane
+	// Remove fastlane - not removing, it bumps up test time substantially
 	// err := fastlane.Uninstall()
 	// assert.Nil(t, err)
 
 	// Install fastlane again
-	// err = fastlane.Install()
-	// assert.Nil(t, err)
-
-	// Reset CI flag
-	// os.Unsetenv("GITLAB_CI")
-
-	// Bring gem back to original state
-	// if installed == true {
-	// err := g.InstallSimple("fastlane")
-	// assert.Nil(t, err)
-	// }
+	err := fastlane.Install()
+	assert.Nil(t, err)
 }
