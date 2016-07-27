@@ -21,3 +21,5 @@ Pods
 profile.out
 
 android-test/gradle*
+android-test/app/build*
+android-test/build*
