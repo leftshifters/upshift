@@ -2,6 +2,7 @@ package actions
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/leftshifters/upshift/config"
@@ -10,7 +11,7 @@ import (
 
 func Test_Actions_GradleWrapper(t *testing.T) {
 	currentWD, _ := os.Getwd()
-	os.Chdir("android-chat")
+	os.Chdir(filepath.Join("..", "android-test"))
 
 	status := GradleWrapper()
 	assert.Equal(t, 0, status)
@@ -20,20 +21,18 @@ func Test_Actions_GradleWrapper(t *testing.T) {
 
 func Test_Actions_PodInstall(t *testing.T) {
 	currentWD, _ := os.Getwd()
-	os.Chdir(os.Getenv("HOME") + "/code/deezeno-ios")
-	os.Create(os.Getenv("HOME") + "/code/deezeno-ios/Podfile")
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
 
 	status := PodInstall()
 	assert.Equal(t, 0, status)
 
-	os.Remove(os.Getenv("HOME") + "/code/deezeno-ios/Podfile")
 	os.Chdir(currentWD)
 }
 
 func Test_Actions_AndroidBuild(t *testing.T) {
 	conf := config.Get()
 	currentWD, _ := os.Getwd()
-	os.Chdir("android-chat")
+	os.Chdir(filepath.Join("..", "android-test"))
 	conf.Settings.CleanBeforeBuild = true
 
 	status := AndroidBuild()
