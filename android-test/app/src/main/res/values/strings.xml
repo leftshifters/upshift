@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TaskoApp</string>
+    <string name="action_settings">Settings</string>
+
+    <string-array name="array_list">
+        <item>Creating Observables</item>
+        <item>Retrive Contacts</item>
+        <item>Create a Tasko</item>
+        <item>Network Calls</item>
+    </string-array>
+</resources>
