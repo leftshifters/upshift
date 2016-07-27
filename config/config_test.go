@@ -39,20 +39,23 @@ func Test_readConfig(t *testing.T) {
 
 func Test_ReadRepoConfig(t *testing.T) {
 	c := Get()
-	_ = c.ReadRepoConfig()
-	assert.Equal(t, "testGitURL", c.repo.URL)
-	assert.Equal(t, "testGitRemote", c.repo.Remote)
-	assert.Equal(t, true, c.repo.CleanBeforeBuild)
-	assert.Equal(t, true, c.repo.UninstallOlderBuilds)
-	assert.Equal(t, "testDeveloperAccount", c.repo.IOSDeveloperAccount)
-	assert.Equal(t, "testProjectName", c.repo.IOSProjectName)
-	assert.Equal(t, true, c.repo.IOSUseWorkspace)
-	assert.Equal(t, "testScheme", c.repo.IOSScheme)
-	assert.Equal(t, "testDevice", c.repo.IOSTestDevice)
-	assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
-	assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
-	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
-	assert.Contains(t, c.repo.IOSCertificatePath, "ios-distribution-certificates")
+
+	if c.IsCI() == false {
+		_ = c.ReadRepoConfig()
+		assert.Equal(t, "testGitURL", c.repo.URL)
+		assert.Equal(t, "testGitRemote", c.repo.Remote)
+		assert.Equal(t, true, c.repo.CleanBeforeBuild)
+		assert.Equal(t, true, c.repo.UninstallOlderBuilds)
+		assert.Equal(t, "testDeveloperAccount", c.repo.IOSDeveloperAccount)
+		assert.Equal(t, "testProjectName", c.repo.IOSProjectName)
+		assert.Equal(t, true, c.repo.IOSUseWorkspace)
+		assert.Equal(t, "testScheme", c.repo.IOSScheme)
+		assert.Equal(t, "testDevice", c.repo.IOSTestDevice)
+		assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
+		assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
+		assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
+		assert.Contains(t, c.repo.IOSCertificatePath, "ios-distribution-certificates")
+	}
 }
 
 func Test_ReadMachineConfig(t *testing.T) {
