@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/leftshifters/upshift/basher"
 	"github.com/leftshifters/upshift/command"
@@ -13,6 +14,15 @@ import (
 
 // AndroidEmulator : Construct to handle all things related to the emulator
 type AndroidEmulator struct{}
+
+// IsEmulatorRunning : find out if the simulator is running
+func (a *AndroidEmulator) IsEmulatorRunning() bool {
+	_, err := command.Run([]string{"pgrep", "-f", "AndroidEmulator"}, "")
+	if err != nil {
+		return false
+	}
+	return true
+}
 
 // Launch : launch the available emulator
 func (a *AndroidEmulator) Launch() error {
@@ -49,6 +59,28 @@ func (a *AndroidEmulator) Launch() error {
 	}
 
 	return nil
+}
+
+// StopEmulator : stop the emulator
+func (a *AndroidEmulator) StopEmulator() {
+	// If emulator is not running, just go back
+	if a.IsEmulatorRunning() == false {
+		return
+	}
+
+	// #TODO : If emulator is running, kill it
+	out, err := command.Run([]string{"pgrep", "-f", "qemu"}, "")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	out = strings.TrimSpace(out)
+	_, err = command.Run([]string{"kill", "-9", out}, "")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
 
 // AVDsAvailable : find which AVDs are available
@@ -99,7 +131,7 @@ func (a *AndroidEmulator) CreateAVD() error {
 	// android create avd --name "Android_22_AVD" --target android-22
 
 	// check if the ABI is available
-	if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-23", "google_apis", "x86", "system.img")) == false {
+	if utils.FileExists(filepath.Join(os.Getenv("ANDROID_HOME"), "system-images", "android-23", "google_apis", "x86_64", "system.img")) == false {
 		var b basher.Basher
 		status, _ := b.Run("AndroidInstallABI", []string{})
 		if status > 0 {
