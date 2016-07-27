@@ -2,6 +2,7 @@ package actions
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -12,6 +13,8 @@ func Test_AndroidEmulator_All(t *testing.T) {
 	if emulator.IsEmulatorRunning() {
 		emulator.StopEmulator()
 	}
+
+	time.Sleep(time.Second * 10)
 
 	devices, err := emulator.ConnectedDevices()
 	assert.Equal(t, 0, len(devices))
