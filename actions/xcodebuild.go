@@ -105,7 +105,6 @@ func (x *Xcodebuild) LoadSettings() error {
 	}
 
 	x.DeviceName = x.TestDevice + " (" + x.iPhoneOS + ")"
-	fmt.Println(x)
 
 	return nil
 }
@@ -235,11 +234,11 @@ func (x *Xcodebuild) SetupExportPlist() error {
 <plist version="1.0">
 <dict>
         <key>method</key>
-        <string>ad-hoc</string>
+        <string>app-store</string>
         <key>uploadSymbols</key>
         <true/>
 	<key>uploadBitcode</key>
-	<true/>
+	<false/>
 </dict>
 </plist>"`
 
