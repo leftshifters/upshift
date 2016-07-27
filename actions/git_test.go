@@ -99,7 +99,7 @@ func Test_Git_Remote(t *testing.T) {
 
 func Test_Git_Pull(t *testing.T) {
 	conf := config.Get()
-	if conf.IsCI() {
+	if conf.IsCI() == false {
 		var g Git
 		branch, _ := g.Branch()
 		status, err := g.Pull("origin", branch)
