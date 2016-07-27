@@ -12,3 +12,8 @@ coverage.txt
 
 actions/android-chat/build
 actions/android-chat/Application/build
+
+.private
+.upshift
+Pods
+*.mobileprovision

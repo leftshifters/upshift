@@ -13,17 +13,25 @@ func Test_Xcodebuild_LoadSettings(t *testing.T) {
 	currentWD, _ := os.Getwd()
 
 	// Move to the new directory
-	os.Chdir(filepath.Join(os.Getenv("HOME"), "code", "deezeno-ios"))
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
+
+	// Remove pods, .private, .upshift
+	os.RemoveAll("Pods")
+	os.RemoveAll(".private")
+	os.RemoveAll(".upshift")
 
 	var xcodebuild Xcodebuild
 
 	err := xcodebuild.LoadSettings()
-	assert.Equal(t, "project", xcodebuild.Type)
+	assert.Equal(t, "workspace", xcodebuild.Type)
 	assert.Nil(t, err)
 
 	err = xcodebuild.FindSchemes()
 	assert.Nil(t, err)
-	assert.Equal(t, "deezeno-ios", xcodebuild.Scheme)
+	assert.Equal(t, "SwiftDemo", xcodebuild.Scheme)
+
+	var p Pod
+	p.Install()
 
 	err = xcodebuild.Build()
 	assert.Nil(t, err)
@@ -33,6 +41,12 @@ func Test_Xcodebuild_LoadSettings(t *testing.T) {
 
 	err = xcodebuild.Run()
 	assert.Nil(t, err)
+
+	var produce Produce
+	err = produce.CreateAppOnITunes("ci@leftshift.io", "com.leftshift.SwiftDemo", "SwiftDemo")
+
+	var sigh Sigh
+	err = sigh.FindProvisioning("ci@leftshift.io", "com.leftshift.SwiftDemo")
 
 	err = xcodebuild.InstallCertificates()
 	assert.Nil(t, err)
@@ -58,7 +72,7 @@ func Test_Xcodebuild_SwitchXcode(t *testing.T) {
 	currentWD, _ := os.Getwd()
 
 	// Move to the new directory
-	os.Chdir(filepath.Join(os.Getenv("HOME"), "code", "deezeno-ios"))
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
 
 	var xcodebuild Xcodebuild
 
