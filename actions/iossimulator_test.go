@@ -1,7 +1,9 @@
 package actions
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +14,8 @@ func Test_IOSSimulator_All(t *testing.T) {
 
 	simulator.StartSimulator("iPhone 6 (9.3)")
 
-	// time.Sleep(time.Minute)
+	fmt.Println("Sleeping for 15 seconds while the simulator loads up")
+	time.Sleep(time.Second * 15)
 
 	if simulator.IsSimulatorRunning() {
 		simulator.StopSimulator()

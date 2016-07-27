@@ -46,7 +46,18 @@ func (i *IOSSimulator) StopSimulator() {
 	}
 
 	// #TODO : If simulator is running, kill it
-	fmt.Println("We don't know how to kill the simular yet")
+	out, err := command.Run([]string{"pgrep", "-f", "Simulator.app"}, "")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	out = strings.TrimSpace(out)
+	_, err = command.Run([]string{"kill", "-9", out}, "")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
 
 // FindDevice : find if the suggested device is available on this machine
