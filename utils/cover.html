@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/utils/utils.go (79.6%)</option>
+				<option value="file0">github.com/leftshifters/upshift/utils/utils.go (79.2%)</option>
 				
 				</select>
 			</div>
@@ -77,23 +77,23 @@ import (
         "os"
         "path/filepath"
         "strings"
-        c "upshift/colours"
+
+        "github.com/leftshifters/upshift/colours"
 )
 
 // LogMessage : this shows up in green and underlined
 func LogMessage(message string) <span class="cov8" title="1">{
-        fmt.Println("✅  " + c.Green + c.Bold + message + c.Default)
+        fmt.Println("✅  " + colours.Green + colours.Bold + message + colours.Default)
 }</span>
 
 // LogInfo : this shows up in blue
 func LogInfo(message string) <span class="cov8" title="1">{
-        fmt.Println("🔰  " + c.Green + c.Bold + "Maybe you should " + c.Underline + "know this" + c.Default)
-        fmt.Println(message)
+        fmt.Println("🔰  " + colours.Yellow + message + colours.Default)
 }</span>
 
 // LogError : Log an error, show them this shit in color, red most probably
 func LogError(message string) <span class="cov8" title="1">{
-        fmt.Println("☎️  " + c.Red + c.Bold + "Shit! Something broke" + c.Default)
+        fmt.Println("☎️  " + colours.Red + colours.Bold + "Shit! Something broke" + colours.Default)
         fmt.Println(message)
 }</span>
 
