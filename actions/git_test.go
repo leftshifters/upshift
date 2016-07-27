@@ -98,9 +98,12 @@ func Test_Git_Remote(t *testing.T) {
 }
 
 func Test_Git_Pull(t *testing.T) {
-	var g Git
-	branch, _ := g.Branch()
-	status, err := g.Pull("origin", branch)
-	assert.Equal(t, 0, status)
-	assert.Nil(t, err)
+	conf := config.Get()
+	if conf.IsCI() {
+		var g Git
+		branch, _ := g.Branch()
+		status, err := g.Pull("origin", branch)
+		assert.Equal(t, 0, status)
+		assert.Nil(t, err)
+	}
 }
