@@ -83,7 +83,7 @@ func scriptsBash() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "scripts.bash", size: 9860, mode: os.FileMode(420), modTime: time.Unix(1468510883, 0)}
+	info := bindataFileInfo{name: "scripts.bash", size: 9860, mode: os.FileMode(420), modTime: time.Unix(1469637306, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
