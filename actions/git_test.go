@@ -2,6 +2,7 @@ package actions
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/leftshifters/upshift/config"
@@ -10,12 +11,14 @@ import (
 
 func Test_Git_AreSubmodulesUsed(t *testing.T) {
 	var g Git
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
 	used := g.AreSubmodulesUsed()
-	assert.Equal(t, false, used)
+	assert.Equal(t, true, used)
 }
 
 func Test_Git_SubmoduleInit(t *testing.T) {
 	var g Git
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
 	status, err := g.SubmoduleInit()
 	assert.Equal(t, 0, status)
 	assert.Nil(t, err)
@@ -23,6 +26,7 @@ func Test_Git_SubmoduleInit(t *testing.T) {
 
 func Test_Git_SubmoduleUpdate(t *testing.T) {
 	var g Git
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
 	status, err := g.SubmoduleUpdate()
 	assert.Equal(t, 0, status)
 	assert.Nil(t, err)
