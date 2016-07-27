@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">upshift/command/command.go (88.2%)</option>
+				<option value="file0">github.com/leftshifters/upshift/command/command.go (89.5%)</option>
 				
 				</select>
 			</div>
@@ -75,8 +75,11 @@ import (
         "errors"
         "os/exec"
         "strings"
+
+        "github.com/leftshifters/upshift/utils"
 )
 
+// Run : run a command
 func Run(params []string, input string) (string, error) <span class="cov8" title="1">{
         var name string
         var out bytes.Buffer
@@ -102,6 +105,8 @@ func Run(params []string, input string) (string, error) <span class="cov8" title
         }</span>
 
         <span class="cov8" title="1">cmd.Stdout = &amp;out
+        cmd.Stderr = &amp;out
+        utils.LogMessage("$ " + name + " " + strings.Join(args, " "))
         err := cmd.Run()
         if err != nil </span><span class="cov8" title="1">{
                 return out.String(), errors.New("We were unable to run this command\n" + err.Error())
