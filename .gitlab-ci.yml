@@ -2,4 +2,4 @@ dev:
   script:
     - ./test.sh
   after_script:
-    - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash) -t 90ae9329-bedf-4fa5-9f3f-783ba089fcc5
