@@ -31,7 +31,7 @@ func Test_readConfig(t *testing.T) {
 	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
 
 	err := c.readConfig("fileDoesNotExist")
-	assert.Equal(t, "File does not exist "+os.Getenv("GOPATH")+"/src/upshift/config/fileDoesNotExist", err.Error())
+	assert.Contains(t, err.Error(), "File does not exist")
 
 	err = c.readConfig("invalid.toml")
 	assert.Contains(t, err.Error(), "Damn, we couldn't understand your TOML file")
@@ -45,7 +45,6 @@ func Test_ReadRepoConfig(t *testing.T) {
 	assert.Equal(t, true, c.repo.CleanBeforeBuild)
 	assert.Equal(t, true, c.repo.UninstallOlderBuilds)
 	assert.Equal(t, "testDeveloperAccount", c.repo.IOSDeveloperAccount)
-	assert.Equal(t, "testCertificatePath", c.repo.IOSCertificatePath)
 	assert.Equal(t, "testProjectName", c.repo.IOSProjectName)
 	assert.Equal(t, true, c.repo.IOSUseWorkspace)
 	assert.Equal(t, "testScheme", c.repo.IOSScheme)
@@ -53,6 +52,7 @@ func Test_ReadRepoConfig(t *testing.T) {
 	assert.Equal(t, "8.0", c.repo.IOSXcodeVersion)
 	assert.Equal(t, "testPackage", c.repo.AndroidPackageName)
 	assert.Equal(t, "testActivity", c.repo.AndroidMainActivityName)
+	assert.Contains(t, c.repo.IOSCertificatePath, "ios-distribution-certificates")
 }
 
 func Test_ReadMachineConfig(t *testing.T) {
