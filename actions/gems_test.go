@@ -9,7 +9,7 @@ import (
 func Test_Gem_Install(t *testing.T) {
 	var g Gems
 
-	gem := "small"
+	gem := "xcpretty"
 
 	// Uninstall gem first
 	err := g.UninstallSimple(gem)
