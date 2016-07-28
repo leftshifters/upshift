@@ -102,7 +102,27 @@ func AndroidUpgrade() int {
 
 // GitPull : Pull the current git repo
 func GitPull() int {
-	return 1
+	var git Git
+
+	remote, err := git.Remote()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	branch, err := git.Branch()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	status, err := git.Pull(remote, branch)
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	return status
 }
 
 // GitSubmodules : Setup git modules for this project

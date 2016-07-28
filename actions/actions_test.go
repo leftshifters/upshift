@@ -43,7 +43,8 @@ func Test_Actions_AndroidUpgrade(t *testing.T) {
 }
 
 func Test_Actions_GitPull(t *testing.T) {
-
+	status := GitPull()
+	assert.Equal(t, 1, status)
 }
 
 func Test_Actions_GitSubmodules(t *testing.T) {

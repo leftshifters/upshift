@@ -90,7 +90,7 @@ func (g *Git) Remote() (string, error) {
 
 		if conf.Settings.Remote == "" {
 			// They didn't define a remote, throw a tantrum
-			return "", errors.New("You have multiple repos in this project. To use one, please add Remote=remoteName to your config.toml. Here are the ones that we see " + strings.TrimSpace(out))
+			return "", errors.New("You have multiple repos in this project. To use one, please add Remote=remoteName to your config.toml. Here are the ones that we see \n" + strings.TrimSpace(out))
 		}
 
 		// Alright, so they have defined a remote, let's check if it exits in our list of remotes
