@@ -204,11 +204,6 @@ func IosTest() int {
 	return 1
 }
 
-// PodsInstall : Install cocoapods
-func PodsInstall() int {
-	return 1
-}
-
 // SetupConfig : Setup the config.toml for this project
 func SetupConfig() int {
 	return 1

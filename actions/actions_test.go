@@ -97,16 +97,6 @@ func Test_Actions_IosTest(t *testing.T) {
 
 }
 
-func Test_Actions_PodsInstall(t *testing.T) {
-	currentWD, _ := os.Getwd()
-	os.Chdir(filepath.Join("..", "ios-test-swift"))
-
-	status := SetupPods()
-	assert.Equal(t, 0, status)
-
-	os.Chdir(currentWD)
-}
-
 func Test_Actions_SetupConfig(t *testing.T) {
 
 }

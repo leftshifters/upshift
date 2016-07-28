@@ -67,13 +67,13 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "podsInstall", "iosPrepare", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "iosPrepare", "iosBuild"}}
 		case "test":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXctool", "gitPull", "gitSubmodules", "setupPods", "podsInstall", "iosPrepare", "iosTest"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXctool", "gitPull", "gitSubmodules", "setupPods", "iosPrepare", "iosTest"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "podsInstall", "iosPrepare", "iosBuild", "iosRun"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "iosPrepare", "iosBuild", "iosRun"}}
 		case "deploy":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "podsInstall", "iosPrepare", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "iosPrepare", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -101,7 +101,7 @@ func findTask(job string, action string) taskList {
 	case "-v", "--version", "-version":
 		return taskList{actions: []string{"showVersion"}}
 	case "action", "act", "do":
-		allActions := []string{"androidBuild", "androidDeploy", "androidLoadEmulator", "androidRun", "androidTest", "androidUpgrade", "gitPull", "gitSubmodules", "iosArchive", "iosBuild", "iosCertificates", "iosCreateApp", "iosDeploy", "iosExportIPA", "iosPrepare", "iosProvisioning", "iosRun", "iosSimulator", "iosTest", "podsInstall", "setupConfig", "setupFastlane", "setupGradleWrapper", "setupPods", "setupXcode", "setupXcpretty", "setupXctool", "showHelp", "showVersion", "upgradeScript"}
+		allActions := []string{"androidBuild", "androidDeploy", "androidLoadEmulator", "androidRun", "androidTest", "androidUpgrade", "gitPull", "gitSubmodules", "iosArchive", "iosBuild", "iosCertificates", "iosCreateApp", "iosDeploy", "iosExportIPA", "iosPrepare", "iosProvisioning", "iosRun", "iosSimulator", "iosTest", "setupConfig", "setupFastlane", "setupGradleWrapper", "setupPods", "setupXcode", "setupXcpretty", "setupXctool", "showHelp", "showVersion", "upgradeScript"}
 
 		for _, item := range allActions {
 			if item == action {
@@ -152,8 +152,6 @@ func loadTask(task string) int {
 		return actions.IosSimulator()
 	case "iosTest":
 		return actions.IosTest()
-	case "podsInstall":
-		return actions.PodsInstall()
 	case "setupConfig":
 		return actions.SetupConfig()
 	case "setupFastlane":
