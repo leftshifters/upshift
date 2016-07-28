@@ -127,7 +127,26 @@ func GitPull() int {
 
 // GitSubmodules : Setup git modules for this project
 func GitSubmodules() int {
-	return 1
+	var git Git
+
+	if git.AreSubmodulesUsed() == false {
+		utils.LogInfo("This project does not use submodules, skipping")
+		return 0
+	}
+
+	status, err := git.SubmoduleInit()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	status, err = git.SubmoduleUpdate()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	return status
 }
 
 // IosArchive : Archive the current project

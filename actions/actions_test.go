@@ -48,7 +48,9 @@ func Test_Actions_GitPull(t *testing.T) {
 }
 
 func Test_Actions_GitSubmodules(t *testing.T) {
-
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
+	status := GitSubmodules()
+	assert.Equal(t, 0, status)
 }
 
 func Test_Actions_IosArchive(t *testing.T) {
