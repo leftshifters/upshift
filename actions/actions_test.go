@@ -147,7 +147,8 @@ func Test_Actions_ShowHelp(t *testing.T) {
 }
 
 func Test_Actions_ShowVersion(t *testing.T) {
-
+	status := ShowVersion()
+	assert.Equal(t, 0, status)
 }
 
 func Test_Actions_UpgradeScript(t *testing.T) {
