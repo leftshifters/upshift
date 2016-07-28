@@ -92,7 +92,7 @@ func (c *Config) PrepareSettings() error {
 	// Read the Repo config first
 	err := c.ReadRepoConfig()
 	if err != nil {
-		utils.LogInfo("Your can setup your repo config at config.toml\n" + err.Error())
+		// utils.LogInfo("Your can setup your repo config at config.toml\n" + err.Error())
 	}
 
 	// Move repo to settings

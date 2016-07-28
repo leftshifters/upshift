@@ -34,11 +34,17 @@ func Setup() {
 
 	tasks := findTask(job, action)
 
-	fmt.Print("\n")
-
 	var status int
 
 	for i, action := range tasks.actions {
+
+		// Don't show any extra info if the user is requesting for version
+		if action == "showVersion" {
+			var upshift actions.Upshift
+			upshift.ShowVersion()
+			os.Exit(0)
+		}
+
 		fmt.Println(colours.Blue + colours.Bold + "🛢  Starting " + colours.Underline + strings.ToUpper(action) + colours.Default + colours.Light + " " + strconv.Itoa(i+1) + "/" + strconv.Itoa((len(tasks.actions))) + colours.Default)
 		status = loadTask(action)
 		fmt.Print("\n")

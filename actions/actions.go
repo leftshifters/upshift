@@ -231,7 +231,9 @@ func ShowHelp() int {
 
 // ShowVersion : Show the version of the upshift binary
 func ShowVersion() int {
-	return 1
+	var upshift Upshift
+	upshift.ShowVersion()
+	return 0
 }
 
 // UpgradeScript : check if you are on the latest version of upshift
