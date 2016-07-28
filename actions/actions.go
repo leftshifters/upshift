@@ -211,7 +211,21 @@ func SetupPods() int {
 
 // SetupXcode : SetupXcode for this project
 func SetupXcode() int {
-	return 1
+	var xcodebuild Xcodebuild
+
+	err := xcodebuild.LoadSettings()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	err = xcodebuild.SwitchXcode()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	return 0
 }
 
 // SetupXcpretty : Setup xcpretty

@@ -276,6 +276,7 @@ func (x *Xcodebuild) SwitchXcode() error {
 	}
 
 	if currentVersion == x.XcodeVersion {
+		fmt.Println("You are already on Xcode v" + currentVersion)
 		return nil
 	}
 
