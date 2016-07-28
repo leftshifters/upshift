@@ -26,6 +26,7 @@ func (u *Upshift) Upgrade(beta string) error {
 	}
 
 	if version == conf.Settings.AppVersion {
+		fmt.Println("You are already at the latest versin " + version)
 		return nil
 	}
 
