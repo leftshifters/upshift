@@ -44,7 +44,7 @@ func Setup() {
 		fmt.Print("\n")
 
 		if status > 0 {
-			fmt.Println(colours.Gray + "➡️  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + colours.Default)
+			fmt.Println(colours.Gray + "👽  We are stopping because the last step failed with status (" + strconv.Itoa(status) + ")" + colours.Default)
 			break
 		}
 	}
