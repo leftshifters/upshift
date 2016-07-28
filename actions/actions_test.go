@@ -108,7 +108,8 @@ func Test_Actions_SetupConfig(t *testing.T) {
 }
 
 func Test_Actions_SetupFastlane(t *testing.T) {
-
+	status := SetupFastlane()
+	assert.Equal(t, 0, status)
 }
 
 func Test_Actions_SetupGradleWrapper(t *testing.T) {
