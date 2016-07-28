@@ -26,7 +26,8 @@ func Test_Actions_AndroidDeploy(t *testing.T) {
 }
 
 func Test_Actions_AndroidLoadEmulator(t *testing.T) {
-
+	status := AndroidLoadEmulator()
+	assert.Equal(t, 0, status)
 }
 
 func Test_Actions_AndroidRun(t *testing.T) {

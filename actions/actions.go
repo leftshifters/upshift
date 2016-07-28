@@ -63,7 +63,26 @@ func AndroidDeploy() int {
 
 // AndroidLoadEmulator : Start up the android emulator
 func AndroidLoadEmulator() int {
-	return 1
+	var emulator AndroidEmulator
+
+	if emulator.IsEmulatorRunning() {
+		utils.LogInfo("The android emulator is already running")
+		return 0
+	}
+
+	devices, err := emulator.ConnectedDevices()
+	if len(devices) > 0 {
+		utils.LogInfo("Some android devices or emulators are already connected to this machine")
+		return 0
+	}
+
+	err = emulator.Launch()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	return 0
 }
 
 // AndroidRun : Run an app on the android emulator or device
