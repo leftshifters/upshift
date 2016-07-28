@@ -129,7 +129,9 @@ func Test_Actions_SetupPods(t *testing.T) {
 }
 
 func Test_Actions_SetupXcode(t *testing.T) {
-
+	os.Chdir(filepath.Join("..", "ios-test-swift"))
+	status := SetupXcode()
+	assert.Equal(t, 0, status)
 }
 
 func Test_Actions_SetupXcpretty(t *testing.T) {
