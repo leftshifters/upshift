@@ -7,6 +7,18 @@ import (
 	"github.com/leftshifters/upshift/utils"
 )
 
+// UpgradeScript : check if you are on the latest version of upshift
+func UpgradeScript() int {
+	var upshift Upshift
+
+	err := upshift.Upgrade("false")
+	if err != nil {
+		utils.LogError(err.Error())
+	}
+
+	return 0
+}
+
 // GradleWrapper : Action to install the gradle wrapper
 func GradleWrapper() int {
 	var gradle Gradle
