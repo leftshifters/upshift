@@ -13,7 +13,7 @@ func Test_Actions_GradleWrapper(t *testing.T) {
 	currentWD, _ := os.Getwd()
 	os.Chdir(filepath.Join("..", "android-test"))
 
-	status := GradleWrapper()
+	status := SetupGradleWrapper()
 	assert.Equal(t, 0, status)
 
 	os.Chdir(currentWD)
@@ -23,7 +23,7 @@ func Test_Actions_PodInstall(t *testing.T) {
 	currentWD, _ := os.Getwd()
 	os.Chdir(filepath.Join("..", "ios-test-swift"))
 
-	status := PodInstall()
+	status := SetupPods()
 	assert.Equal(t, 0, status)
 
 	os.Chdir(currentWD)

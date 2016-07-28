@@ -7,58 +7,6 @@ import (
 	"github.com/leftshifters/upshift/utils"
 )
 
-// UpgradeScript : check if you are on the latest version of upshift
-func UpgradeScript() int {
-	var upshift Upshift
-
-	err := upshift.Upgrade("false")
-	if err != nil {
-		utils.LogError(err.Error())
-	}
-
-	return 0
-}
-
-// GradleWrapper : Action to install the gradle wrapper
-func GradleWrapper() int {
-	var gradle Gradle
-
-	// Check if gradle exists
-	err := gradle.Version()
-	if err != nil {
-		utils.LogError(err.Error())
-		return 1
-	}
-
-	// Add the wrapper
-	status, err := gradle.AddWrapper()
-	if err != nil {
-		utils.LogError(err.Error())
-	}
-	return status
-}
-
-// PodInstall : Install pods for this project, if the project uses it
-func PodInstall() int {
-	var pod Pod
-
-	// Check if this project uses cocoapods
-	if pod.AreUsed() == false {
-		fmt.Println("It looks like this project doesn't use pods")
-		return 0
-	}
-
-	// Install pod
-	status, err := pod.Install()
-	if err != nil {
-		utils.LogError("Could not install pods\n" + err.Error())
-		return status
-	}
-
-	fmt.Println("We were able to successfully setup cocoapods, moving on")
-	return 0
-}
-
 // AndroidBuild : Build an android project
 func AndroidBuild() int {
 	var gradle Gradle
@@ -103,6 +51,196 @@ func AndroidBuild() int {
 	if err != nil {
 		utils.LogError(err.Error())
 		return 1
+	}
+
+	return 0
+}
+
+// AndroidDeploy : Deploy an app to crashlytics or PlayStore
+func AndroidDeploy() int {
+	return 1
+}
+
+// AndroidLoadEmulator : Start up the android emulator
+func AndroidLoadEmulator() int {
+	return 1
+}
+
+// AndroidRun : Run an app on the android emulator or device
+func AndroidRun() int {
+	return 1
+}
+
+// AndroidTest : Test an android app
+func AndroidTest() int {
+	return 1
+}
+
+// AndroidUpgrade : Upgrade the android sdk
+func AndroidUpgrade() int {
+	return 1
+}
+
+// GitPull : Pull the current git repo
+func GitPull() int {
+	return 1
+}
+
+// GitSubmodules : Setup git modules for this project
+func GitSubmodules() int {
+	return 1
+}
+
+// IosArchive : Archive the current project
+func IosArchive() int {
+	return 1
+}
+
+// IosBuild : Build the current project
+func IosBuild() int {
+	return 1
+}
+
+// IosCertificates : Install the certificates for this project
+func IosCertificates() int {
+	return 1
+}
+
+// IosCreateApp : Create an app on iTunes
+func IosCreateApp() int {
+	return 1
+}
+
+// IosDeploy : Deploy an app to iTunes
+func IosDeploy() int {
+	return 1
+}
+
+// IosExportIPA : Export an IPA
+func IosExportIPA() int {
+	return 1
+}
+
+// IosPrepare : prepare the current project by reading xcodebuild
+func IosPrepare() int {
+	return 1
+}
+
+// IosProvisioning : Setup provisioning profile for iOS
+func IosProvisioning() int {
+	return 1
+}
+
+// IosRun : Run an app on the simulator
+func IosRun() int {
+	return 1
+}
+
+// IosSimulator : Start up the ios simulator
+func IosSimulator() int {
+	return 1
+}
+
+// IosTest : Test an iOS app
+func IosTest() int {
+	return 1
+}
+
+// PodsInstall : Install cocoapods
+func PodsInstall() int {
+	return 1
+}
+
+// SetupConfig : Setup the config.toml for this project
+func SetupConfig() int {
+	return 1
+}
+
+// SetupFastlane : setup the fastlane tools
+func SetupFastlane() int {
+	var fastlane Fastlane
+
+	err := fastlane.Install()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	return 0
+}
+
+// SetupGradleWrapper : Action to install the gradle wrapper
+func SetupGradleWrapper() int {
+	var gradle Gradle
+
+	// Check if gradle exists
+	err := gradle.Version()
+	if err != nil {
+		utils.LogError(err.Error())
+		return 1
+	}
+
+	// Add the wrapper
+	status, err := gradle.AddWrapper()
+	if err != nil {
+		utils.LogError(err.Error())
+	}
+	return status
+}
+
+// SetupPods : Install pods for this project, if the project uses it
+func SetupPods() int {
+	var pod Pod
+
+	// Check if this project uses cocoapods
+	if pod.AreUsed() == false {
+		fmt.Println("It looks like this project doesn't use pods")
+		return 0
+	}
+
+	// Install pod
+	status, err := pod.Install()
+	if err != nil {
+		utils.LogError("Could not install pods\n" + err.Error())
+		return status
+	}
+
+	fmt.Println("We were able to successfully setup cocoapods, moving on")
+	return 0
+}
+
+// SetupXcode : SetupXcode for this project
+func SetupXcode() int {
+	return 1
+}
+
+// SetupXcpretty : Setup xcpretty
+func SetupXcpretty() int {
+	return 1
+}
+
+// SetupXctool : setup xctool
+func SetupXctool() int {
+	return 1
+}
+
+// ShowHelp : show help text to the user
+func ShowHelp() int {
+	return 1
+}
+
+// ShowVersion : Show the version of the upshift binary
+func ShowVersion() int {
+	return 1
+}
+
+// UpgradeScript : check if you are on the latest version of upshift
+func UpgradeScript() int {
+	var upshift Upshift
+
+	err := upshift.Upgrade("false")
+	if err != nil {
+		utils.LogError(err.Error())
 	}
 
 	return 0

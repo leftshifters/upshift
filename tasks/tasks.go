@@ -61,13 +61,13 @@ func findTask(job string, action string) taskList {
 	case "ios", "iOS", "i":
 		switch action {
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupPods", "podsInstall", "iosPrepare", "iosBuild"}}
 		case "test":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXctool", "gitPull", "gitSubmodules", "setupPods", "installPods", "iosPrepare", "iosTest"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXctool", "gitPull", "gitSubmodules", "setupPods", "podsInstall", "iosPrepare", "iosTest"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosPrepare", "iosBuild", "iosDeploySimulator"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "podsInstall", "iosPrepare", "iosBuild", "iosRun"}}
 		case "deploy":
-			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "installPods", "iosPrepare", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
+			return taskList{actions: []string{"upgradeScript", "setupXcode", "setupXcpretty", "gitPull", "gitSubmodules", "setupFastlane", "setupPods", "podsInstall", "iosPrepare", "iosCertificates", "iosProvisioning", "iosArchive", "iosExportIPA", "iosCreateApp", "iosUploadBuild"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
@@ -75,176 +75,101 @@ func findTask(job string, action string) taskList {
 		switch action {
 		// Dont' add Android upgrade or install here. Their update is broken and it keep redownloading packaging
 		case "build":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidBuild"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleWrapper", "androidBuild"}}
+		case "test":
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleWrapper", "androidBuild"}}
 		case "run":
-			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleW", "androidEmulator", "androidRun"}}
+			return taskList{actions: []string{"upgradeScript", "gitPull", "gitSubmodules", "setupGradleWrapper", "androidEmulator", "androidRun"}}
 		case "deploy":
 			return taskList{actions: []string{"showHelp"}}
-		case "update":
-			return taskList{actions: []string{"setupAndroid"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
 	case "setup", "Setup", "s":
 		switch action {
-		// case "clone":
-		// 	return taskList{actions: []string{"gitClone"}}
 		case "config":
 			return taskList{actions: []string{"setupConfig"}}
-		case "export.plist":
-			return taskList{actions: []string{"setupExportPlist"}}
 		default:
 			return taskList{actions: []string{"showHelp"}}
 		}
-	case "install":
-		return taskList{actions: []string{"setupScript"}}
 	case "-v", "--version", "-version":
 		return taskList{actions: []string{"showVersion"}}
-	case "action", "act":
-		switch action {
-		case "setupSsh":
-			return taskList{actions: []string{"setupSsh"}}
-		case "setupScript":
-			return taskList{actions: []string{"setupScript"}}
-		case "setupGradleW":
-			return taskList{actions: []string{"setupGradleW"}}
-		case "setupPods":
-			return taskList{actions: []string{"setupPods"}}
-		case "setupFastlane":
-			return taskList{actions: []string{"setupFastlane"}}
-		case "setupXcode":
-			return taskList{actions: []string{"setupXcode"}}
-		case "setupXcpretty":
-			return taskList{actions: []string{"setupXcpretty"}}
-		case "setupXctool":
-			return taskList{actions: []string{"setupXctool"}}
-		case "setupExportPlist":
-			return taskList{actions: []string{"setupExportPlist"}}
-		case "setupProfiles":
-			return taskList{actions: []string{"setupProfiles"}}
-		case "upgradeScript":
-			return taskList{actions: []string{"upgradeScript"}}
-		case "upgradeAndroid":
-			return taskList{actions: []string{"upgradeAndroid"}}
-		case "gitPull":
-			return taskList{actions: []string{"gitPull"}}
-		// case "gitClone":
-		// 	return taskList{actions: []string{"gitClone"}}
-		case "gitSubmodules":
-			return taskList{actions: []string{"gitSubmodules"}}
-		case "installPods":
-			return taskList{actions: []string{"installPods"}}
-		case "iosSimulator":
-			return taskList{actions: []string{"iosSimulator"}}
-		case "androidEmulator":
-			return taskList{actions: []string{"androidEmulator"}}
-		case "iosBuild":
-			return taskList{actions: []string{"iosBuild"}}
-		case "iosPrepare":
-			return taskList{actions: []string{"iosPrepare"}}
-		case "iosTest":
-			return taskList{actions: []string{"iosTest"}}
-		case "iosDeploySimulator":
-			return taskList{actions: []string{"iosDeploySimulator"}}
-		case "iosProvisioning":
-			return taskList{actions: []string{"iosProvisioning"}}
-		case "iosCertificates":
-			return taskList{actions: []string{"iosCertificates"}}
-		case "iosArchive":
-			return taskList{actions: []string{"iosArchive"}}
-		case "iosExportIPA":
-			return taskList{actions: []string{"iosExportIPA"}}
-		case "iosCreateApp":
-			return taskList{actions: []string{"iosCreateApp"}}
-		case "iosUploadBuild":
-			return taskList{actions: []string{"iosUploadBuild"}}
-		case "androidBuild":
-			return taskList{actions: []string{"androidBuild"}}
-		case "iosRun":
-			return taskList{actions: []string{"iosRun"}}
-		case "androidRun":
-			return taskList{actions: []string{"androidRun"}}
-		case "iosDeploy":
-			return taskList{actions: []string{"iosDeploy"}}
-		case "androidDeploy":
-			return taskList{actions: []string{"androidDeploy"}}
+	case "action", "act", "do":
+		allActions := []string{"androidBuild", "androidDeploy", "androidLoadEmulator", "androidRun", "androidTest", "androidUpgrade", "gitPull", "gitSubmodules", "iosArchive", "iosBuild", "iosCertificates", "iosCreateApp", "iosDeploy", "iosExportIPA", "iosPrepare", "iosProvisioning", "iosRun", "iosSimulator", "iosTest", "podsInstall", "setupConfig", "setupFastlane", "setupGradleWrapper", "setupPods", "setupXcode", "setupXcpretty", "setupXctool", "showHelp", "showVersion", "upgradeScript"}
+
+		for _, item := range allActions {
+			if item == action {
+				return taskList{actions: []string{item}}
+			}
 		}
-	default:
-		return taskList{actions: []string{"showHelp"}}
 	}
 	return taskList{actions: []string{"showHelp"}}
 }
 
 func loadTask(task string) int {
 	switch task {
-	case "upgradeScript":
-		// return actions.UpgradeScript()
-	case "upgradeAndroid":
-		// return actions.UpgradeAndroid()
-	case "showVersion":
-		// return actions.ShowVersion()
-	case "showHelp":
-		// return actions.ShowHelp()
-	case "setupXcode":
-		// return actions.SetupXcode()
-	case "setupXcpretty":
-		// return actions.SetupXcpretty()
-	case "setupXctool":
-		// return actions.SetupXctool()
-	case "setupPods":
-		// return actions.SetupPods(false)
-	case "setupFastlane":
-		// return actions.SetupFastlane(false)
-	case "setupGradleW":
-		return actions.GradleWrapper()
-	case "setupConfig":
-		// return actions.SetupConfig()
-	case "setupProfiles":
-		// return actions.SetupProfiles()
-	// case "setupScript":
-	// case "setupSsh":
-	case "setupExportPlist":
-		// return actions.SetupExportPlist()
-	case "setupAndroid":
-		// return actions.SetupAndroid()
-	case "gitPull":
-		// return actions.GitPull()
-	case "gitSubmodules":
-		// return actions.GitSubmodules()
-	// SKIP case "gitClone":
-	case "installPods":
-		// return actions.InstallPods()
-	case "iosBuild":
-		// return actions.IosBuild()
-	case "iosPrepare":
-		// return actions.IosPrepare()
-	case "iosTest":
-		// return actions.IosTest()
-	case "iosDeploySimulator":
-		// return actions.IosDeploySimulator()
-	case "iosProvisioning":
-		// return actions.IosProvisioning()
-	case "iosCertificates":
-		// return actions.IosCertificates()
-	case "iosArchive":
-		// return actions.IosArchive()
-	case "iosExportIPA":
-		// return actions.IosExportIPA()
-	case "iosCreateApp":
-		// return actions.IosCreateApp()
-	case "iosUploadBuild":
-		// return actions.IosUploadBuild()
-	// case "iosRun":
-	// case "iosSimulator":
-	// case "iosDeploy":
 	case "androidBuild":
 		return actions.AndroidBuild()
-	// case "androidRun":
-	// case "androidEmulator":
-	// case "androidDeploy":
+	case "androidDeploy":
+		return actions.AndroidDeploy()
+	case "androidLoadEmulator":
+		return actions.AndroidLoadEmulator()
+	case "androidRun":
+		return actions.AndroidRun()
+	case "androidTest":
+		return actions.AndroidTest()
+	case "androidUpgrade":
+		return actions.AndroidUpgrade()
+	case "gitPull":
+		return actions.GitPull()
+	case "gitSubmodules":
+		return actions.GitSubmodules()
+	case "iosArchive":
+		return actions.IosArchive()
+	case "iosBuild":
+		return actions.IosBuild()
+	case "iosCertificates":
+		return actions.IosCertificates()
+	case "iosCreateApp":
+		return actions.IosCreateApp()
+	case "iosDeploy":
+		return actions.IosDeploy()
+	case "iosExportIPA":
+		return actions.IosExportIPA()
+	case "iosPrepare":
+		return actions.IosPrepare()
+	case "iosProvisioning":
+		return actions.IosProvisioning()
+	case "iosRun":
+		return actions.IosRun()
+	case "iosSimulator":
+		return actions.IosSimulator()
+	case "iosTest":
+		return actions.IosTest()
+	case "podsInstall":
+		return actions.PodsInstall()
+	case "setupConfig":
+		return actions.SetupConfig()
+	case "setupFastlane":
+		return actions.SetupFastlane()
+	case "setupGradleWrapper":
+		return actions.SetupGradleWrapper()
+	case "setupPods":
+		return actions.SetupPods()
+	case "setupXcode":
+		return actions.SetupXcode()
+	case "setupXcpretty":
+		return actions.SetupXcpretty()
+	case "setupXctool":
+		return actions.SetupXctool()
+	case "showHelp":
+		return actions.ShowHelp()
+	case "showVersion":
+		return actions.ShowVersion()
+	case "upgradeScript":
+		return actions.UpgradeScript()
 	default:
 		utils.LogError("It's sad, but we don't know how to " + colours.Underline + "handle this effing case" + colours.Default + "\nYou should try upshift -v to find out what do we support")
 		return 1
 	}
-	return 0
 }
