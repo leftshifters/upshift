@@ -152,5 +152,6 @@ func Test_Actions_ShowVersion(t *testing.T) {
 }
 
 func Test_Actions_UpgradeScript(t *testing.T) {
-
+	status := UpgradeScript()
+	assert.Equal(t, 0, status)
 }
